@@ -1,0 +1,129 @@
+/** CSS styles for SkaterData. */
+
+body {
+	  background: #2E385B url(peak-lake-tall.png) no-repeat;
+}
+
+.jsc-root-window {
+	width: 1000px;
+	height: 500px;
+}
+	
+/** Example rules used by the template application (remove for your app) */
+.pc-template-btn {
+  display: block;
+  font-size: 16pt;
+}
+
+#pc-template-img {
+  margin-top: 20px;
+}
+
+table.jsc-header {
+	display: block;
+	margin-left: 10px;
+	margin-top: 5px;
+}
+
+table.jsc-toolbar {
+	display: block;
+	font-size: 0.5em;
+	color: #2E385B;
+	font-weight: bold;
+
+}
+
+.jsc-toolbar-spacer {
+    width: 375px;
+}
+
+.jsc-toolbar-separator {
+    padding-right: 5px;
+    padding-left: 5px;
+}
+
+.jsc-header-title {
+	font-size: 18pt;
+	right-margin: 3pt;
+}
+
+.jsc-content {
+	display: block;
+	background: transparent;
+	margin: 8pt;
+}
+
+.jsc-screen {
+	display: block;
+	background: #cccccc;
+	border: 2pt solid #2E385B;
+	font-size: 20pt;
+	margin: 0pt;
+}
+
+.jsc-twopanel-screen {
+	display: block;
+	background: transparent;
+	/*opacity:.80;*/
+	border: none;
+	font-size: 20pt;
+	/*color: transparent;*/
+	margin: 0pt;
+	/*padding: 0pt;*/
+}
+
+.jsc-leftpanel {
+	display: block;
+	background: white;
+	opacity: .85;
+	border: 2pt solid #2E385B;
+	font-size: 20pt;
+	padding: 5pt;
+}
+
+.jsc-rightpanel {
+	display: block;
+	background: white;
+	opacity: .85;
+	border: 2pt solid #2E385B;
+	font-size: 20pt;
+	padding: 5pt;
+}
+
+.jsc-spacer {
+	display: block;
+	background: transparent;
+    margin: 5pt;
+}
+
+.jsc-screentitle {
+	font-size: 18pt;
+	margin: 3pt;
+}
+
+.jsc-fieldlabel {
+	text-align: right;
+	font-weight: bold;
+	opacity: 1.0;
+}
+
+.jsc-fieldlabel-left {
+	text-align: left;
+	font-weight: bold;
+	opacity: 1.0;
+}
+
+.jsc-field {
+	background: white;
+	opacity: 1.0;
+}
+
+.classes-ListHeader {
+  background: #c1eec8 url(gradient.gif) repeat-x 0px -1px;
+  font-weight: bold;
+}
+
+.roster-ListHeader {
+  background: #c1eec8 url(gradient.gif) repeat-x 0px -1px;
+  font-weight: bold;
+}
