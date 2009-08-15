@@ -7,6 +7,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -16,7 +17,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * A specialized extension of BaseScreen intended to handle input for logging
  * into the application.
  * 
- * @author jones
+ * @author Matt Jones
  *
  */
 public class LoginScreen extends BaseScreen {
@@ -39,7 +40,7 @@ public class LoginScreen extends BaseScreen {
      * Lay out the user interface widgets on the screen.
      */
     private void layoutScreen() {
-        this.setScreenTitle("Login");
+        this.setScreenTitle("Sign In");
         this.setStyleName("jsc-twopanel-screen");
         
         screen = new HorizontalPanel();
@@ -61,16 +62,18 @@ public class LoginScreen extends BaseScreen {
         loginPanel.addStyleName("jsc-leftpanel");
         Label signin = new Label("Sign In");
         signin.addStyleName("jsc-screentitle");
-        loginPanel.add(signin);
+        //loginPanel.add(signin);
         Label emailLabel = new Label("Email:");
         loginPanel.add(emailLabel);
         emailLabel.addStyleName("jsc-fieldlabel-left");
         username = new TextBox();
+        username.addStyleName("jsc-field");
         loginPanel.add(username);
         Label pwLabel = new Label("Password:");
         loginPanel.add(pwLabel);
         pwLabel.addStyleName("jsc-fieldlabel-left");
         password = new PasswordTextBox();
+        password.addStyleName("jsc-field");
         loginPanel.add(password);
         loginPanel.add(new Label(" "));
         signinButton = new Button("Sign In");
@@ -79,7 +82,16 @@ public class LoginScreen extends BaseScreen {
                 authenticate();
             }
         });
+        signinButton.addStyleName("jsc-button-right");
         loginPanel.add(signinButton);
+        
+        Hyperlink newAccountLink = new Hyperlink("Need a New Account?", "settings");
+        newAccountLink.addStyleName("jsc-link-right");
+        loginPanel.add(newAccountLink);
+        
+        Hyperlink forgotPasswordLink = new Hyperlink("Forgot password?", "resetpass");
+        forgotPasswordLink.addStyleName("jsc-link-right");
+        loginPanel.add(forgotPasswordLink);
     }
     
     private void authenticate() {

@@ -214,9 +214,13 @@ public class SettingsScreen extends BaseScreen {
 
             public void onSuccess(Long pid) {
                 GWT.log("Account created: " + pid.longValue(), null);
-
-                // Change our application state to the login screen
-                History.newItem("signout");
+                if (loginSession.getPerson().getPid() == pid.longValue()) {
+                    GWT.log("Settings updated.", null);
+                    // TODO: post a message to the screen saying it was saved
+                } else {
+                    // Change our application state to the login screen
+                    History.newItem("signout");
+                }
             }
         };
 
