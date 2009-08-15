@@ -33,7 +33,6 @@ public class HeaderPanel extends VerticalPanel {
         
         HorizontalPanel leftLinks = new HorizontalPanel(); 
         leftLinks.add(new Hyperlink("Register for a Class", "register"));
-        // TODO: add css style for setting width of pipe separator label
         leftLinks.add(createSeparatorLabel());
         leftLinks.add(new Hyperlink("My Classes", "myclasses"));
         leftLinks.add(createSeparatorLabel());

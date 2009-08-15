@@ -227,7 +227,6 @@ public class SettingsScreen extends BaseScreen {
         // Make the call to the registration service.
         regService.createAccount(person, callback);
 
-        // TODO: handle both insert and update operations
         GWT.log("Account created for: " + fname + " " + mname + " " + lname, null);
     }
 }

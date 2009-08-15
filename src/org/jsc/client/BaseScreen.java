@@ -13,25 +13,33 @@ import com.google.gwt.user.client.ui.Label;
 public class BaseScreen extends VerticalPanel {
     private String screenTitle;
     private Label title;
+    private static String currentMessage;
+    private Label message;
     private Panel contentPanel;
     protected LoginSession loginSession;
     
+    /**
+     * Construct the BaseScreen
+     * @param loginSession to be saved for reference by subclass screens
+     */
     public BaseScreen(LoginSession loginSession) {
         super();
         
         // Record the LoginSession for later use
         this.loginSession = loginSession;
         
-        //this.setWidth("100%");
         this.addStyleName("jsc-screen");
         this.screenTitle = "Base Screen";
         title = new Label();
         title.setText(screenTitle);
         title.addStyleName("jsc-screentitle");
         this.add(title);
+        message = new Label();
+        setMessage("Hello");
+        message.addStyleName("jsc-message");
+        clearMessage();
+        this.add(message);
         contentPanel = new HorizontalPanel();
-        //contentPanel.setHeight("20em");
-        //contentPanel.setWidth("63em");
         contentPanel.setWidth("100%");
         this.add(contentPanel);
     }
@@ -49,7 +57,6 @@ public class BaseScreen extends VerticalPanel {
     public void setScreenTitle(String screenTitle) {
         this.screenTitle = screenTitle;
         title.setText(screenTitle);
-        //this.add(new HTML("<p class=\"label\">" + screenTitle + "</p>"));
     }
 
     /**
@@ -59,6 +66,30 @@ public class BaseScreen extends VerticalPanel {
         return contentPanel;
     }
 
+    /**
+     * @return the currentMessage
+     */
+    public String getMessage() {
+        return currentMessage;
+    }
+
+    /**
+     * @param currentMessage the currentMessage to display on the screen
+     */
+    public void setMessage(String currentMessage) {
+        this.currentMessage = currentMessage;
+        message.setText(currentMessage);
+        message.removeStyleName("jsc-message-clear");
+    }
+    
+    /**
+     * Clear the current message and change the style so it does not display
+     */
+    public void clearMessage() {
+        message.setText("");
+        message.addStyleName("jsc-message-clear");
+    }
+    
     /**
      * @param contentPanel the contentPanel to set
      */

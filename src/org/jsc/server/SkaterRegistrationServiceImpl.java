@@ -19,20 +19,21 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         implements SkaterRegistrationService {
 
+    private static final String JDBC_URL = "jdbc:postgresql://localhost/jscdb";
+    private static final String JDBC_USER = "jones";
+    private static final String JDBC_PASS = "";
+    private static final String JDBC_DRIVER = "org.postgresql.Driver";
+    
     /**
      * Create a new account for the person in question
      * @return long the person identifier (pid) for the account created, or 0 on error
      */
     public long createAccount(Person person) {
 
-        // Case: Inserting a new person
-        if (person.getPid() > 0) {
-            // TODO: check if the account already exists
-            int pid = insertPerson(person);
+        // Case: Inserting or updating a person
+        if (person.getPid() == 0 || person.getPid() > 0) {
+            long pid = insertOrUpdatePerson(person);
             return pid;
-        // Case: Updating an existing account
-        } else if (person.getPid() == 0) {
-            return person.getPid();
         } else {
             return 0;
         }
@@ -143,21 +144,36 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * @param person the Person to be created in the database
      * @return the identifier of the person created
      */
-    private int insertPerson(Person person) {
-        int pid = 0;
+    private long insertOrUpdatePerson(Person person) {
+        long pid = 0;
 
         StringBuffer sql = new StringBuffer();
-        sql.append("insert into people");
-        sql.append(" (surname, givenname, middlename, email, home_phone, birthdate, password) ");
-        sql.append("values ('");
-        sql.append(person.getLname()).append("','");
-        sql.append(person.getFname()).append("','");
-        sql.append(person.getMname()).append("','");
-        sql.append(person.getEmail()).append("','");
-        sql.append(person.getHomephone()).append("','");
-        sql.append(person.getBday()).append("','");
-        sql.append(person.getPassword1()).append("'");
-        sql.append(")");
+        if (person.getPid() == 0) {
+            sql.append("insert into people");
+            sql.append(" (surname, givenname, middlename, email, home_phone, birthdate, password) ");
+            sql.append("values ('");
+            sql.append(person.getLname()).append("','");
+            sql.append(person.getFname()).append("','");
+            sql.append(person.getMname()).append("','");
+            sql.append(person.getEmail()).append("','");
+            sql.append(person.getHomephone()).append("','");
+            sql.append(person.getBday()).append("','");
+            sql.append(person.getPassword1()).append("'");
+            sql.append(")");
+        } else {
+            sql.append("update people set ");
+            sql.append("surname='").append(person.getLname()).append("',");
+            sql.append("givenname='").append(person.getFname()).append("',");
+            sql.append("middlename='").append(person.getMname()).append("',");
+            sql.append("email='").append(person.getEmail()).append("',");
+            sql.append("home_phone='").append(person.getHomephone()).append("',");
+            sql.append("birthdate='").append(person.getBday()).append("'");
+            if (person.getPassword1() != null && !person.getPassword1().equals(JDBC_PASS)) {
+                sql.append(",password='").append(person.getPassword1()).append("'");
+            }
+            sql.append(" where pid=").append(person.getPid());
+        }
+
         System.out.println(sql.toString());
 
         try {
@@ -165,14 +181,18 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             Statement stmt = con.createStatement();
             stmt.executeUpdate(sql.toString());
             stmt.close();
-            stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT max(pid) from people");
-            if (rs.next()) {
-                pid = rs.getInt(1);
+            if (person.getPid() == 0) {
+                stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery("SELECT max(pid) from people");
+                if (rs.next()) {
+                    pid = rs.getInt(1);
+                } else {
+                    pid = 0;
+                }
+                stmt.close();
             } else {
-                pid = 0;
+                pid = person.getPid();
             }
-            stmt.close();
             con.close();
 
         } catch(SQLException ex) {
@@ -186,21 +206,17 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * Open a JDBC database connection.
      */
     private static Connection getConnection() {
-        String url = "jdbc:postgresql://localhost/jscdb";
-        String dbuser = "jones";
-        String dbpass = "";
-        String dbdriver = "org.postgresql.Driver";
         Connection con = null;
         
         try {
-            Class.forName(dbdriver);
+            Class.forName(JDBC_DRIVER);
         } catch(java.lang.ClassNotFoundException e) {
             System.err.print("ClassNotFoundException: ");
             System.err.println(e.getMessage());
         }
 
         try {
-            con = DriverManager.getConnection(url, dbuser, dbpass);
+            con = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
         } catch(SQLException ex) {
             System.err.println("SQLException: " + ex.getMessage());
         }

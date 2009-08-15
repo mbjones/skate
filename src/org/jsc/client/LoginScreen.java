@@ -118,8 +118,9 @@ public class LoginScreen extends BaseScreen {
                     long pid = person.getPid();
                     GWT.log("Login succeeded: " + pid, null);
                     GWT.log(person.toString(), null);
+                    clearMessage();
 
-                    // TODO: Record the authenticated person in the LoginSession
+                    // Record the authenticated person in the LoginSession
                     loginSession.setPerson(person);
                     loginSession.setAuthenticated(true);
 
@@ -127,8 +128,7 @@ public class LoginScreen extends BaseScreen {
                     History.newItem("myclasses");
                 } else {
                     loginSession.setAuthenticated(false);
-                    // TODO: Post an error message but stay on the login screen
-
+                    setMessage("Incorrect email or password. Please try again.");
                     GWT.log("Login unsuccessful, try again.", null);
                 }
             }
@@ -141,8 +141,6 @@ public class LoginScreen extends BaseScreen {
     private void createIntroPanel() {
         introPanel = new VerticalPanel();
         introPanel.addStyleName("jsc-rightpanel");
-        //introPanel.setHeight("20em");
-        //introPanel.setWidth("27em");
         Label intro1 = new Label("Welcome!");
         intro1.setWordWrap(true);
         Label intro2 = new Label("You can register for new classes after you have Signed In.");
