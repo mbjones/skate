@@ -43,7 +43,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * Check if the user is in the database, and if the given password matches
      * @param username the username of the person who is signing in
      * @param password the password of the person who is signing in
-     * @return the id of the person if valid, otherwise 0
+     * @return the Person that was authenticated if valid, otherwise null
      */
     public Person authenticate(String username, String password) {
         Person person = null;
@@ -77,7 +77,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     private Person lookupPerson(long pid) {
 
         StringBuffer sql = new StringBuffer();
-        sql.append("select pid, surname, givenname, middlename, email, home_phone, birthdate from people where ");
+        sql.append("select pid, surname, givenname, middlename, email, home_phone, birthdate, password from people where ");
         sql.append("pid LIKE '").append(pid).append("'");
         System.out.println(sql.toString());
         
@@ -94,7 +94,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 person.setMname(rs.getString(4));
                 person.setEmail(rs.getString(5));
                 person.setHomephone(rs.getString(6));
-                person.setBday(rs.getString(7));               
+                person.setBday(rs.getString(7));
+                person.setPassword(rs.getString(8));
             }
             stmt.close();
             con.close();
@@ -149,6 +150,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
 
         StringBuffer sql = new StringBuffer();
         if (person.getPid() == 0) {
+            // Creating a new account, so no authentication needed
+            // Create the SQL INSERT statement
             sql.append("insert into people");
             sql.append(" (surname, givenname, middlename, email, home_phone, birthdate, password) ");
             sql.append("values ('");
@@ -158,9 +161,20 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             sql.append(person.getEmail()).append("','");
             sql.append(person.getHomephone()).append("','");
             sql.append(person.getBday()).append("','");
-            sql.append(person.getPassword1()).append("'");
+            sql.append(person.getNewPassword()).append("'");
             sql.append(")");
         } else {
+            // Verify that the user is valid before allowing an update
+            if (person.getEmail() != null && person.getPassword() != null) {
+                int validpid = checkPassword(person.getEmail(), person.getPassword());
+                if (validpid == 0 || validpid != person.getPid()) {
+                    // Invalid credentials, so don't allow the change
+                    return 0;
+                }
+            } else {
+                // No email and/or password provided, so no valid credentials
+                return 0;
+            }
             sql.append("update people set ");
             sql.append("surname='").append(person.getLname()).append("',");
             sql.append("givenname='").append(person.getFname()).append("',");
@@ -168,8 +182,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             sql.append("email='").append(person.getEmail()).append("',");
             sql.append("home_phone='").append(person.getHomephone()).append("',");
             sql.append("birthdate='").append(person.getBday()).append("'");
-            if (person.getPassword1() != null && !person.getPassword1().equals(JDBC_PASS)) {
-                sql.append(",password='").append(person.getPassword1()).append("'");
+            if (person.getNewPassword() != null && person.getNewPassword().length() > 0) {
+                sql.append(",password='").append(person.getNewPassword()).append("'");
             }
             sql.append(" where pid=").append(person.getPid());
         }
@@ -182,8 +196,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             stmt.executeUpdate(sql.toString());
             stmt.close();
             if (person.getPid() == 0) {
+                // This is an INSERT, so look up the new PID for the new record
                 stmt = con.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT max(pid) from people");
+                ResultSet rs = stmt.executeQuery(
+                        "SELECT max(pid) from people where email LIKE '" + 
+                        person.getEmail() + "'");
                 if (rs.next()) {
                     pid = rs.getInt(1);
                 } else {
@@ -191,6 +208,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 }
                 stmt.close();
             } else {
+                // This is an UPDATE, so use the passed in PID
                 pid = person.getPid();
             }
             con.close();
@@ -199,6 +217,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             System.err.println("SQLException: " + ex.getMessage());
         }
         
+        //Person newPerson = lookupPerson(pid);
         return pid;
     }
     

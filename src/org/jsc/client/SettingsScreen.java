@@ -118,8 +118,12 @@ public class SettingsScreen extends BaseScreen {
             populateFields();
             accountButton.setText("Create Account");
         }
+        //clearMessage();
     }
     
+    /**
+     * Initialize the fields with proper values, or clear them, as appropriate.
+     */
     private void populateFields() {
         Person person;
         if (loginSession.isAuthenticated()) {
@@ -163,27 +167,32 @@ public class SettingsScreen extends BaseScreen {
         
         // Validate necessary input, making sure required fields are included
         boolean isValid = true;
-        if (fname == null || lname == null || email == null ||
-                birthday == null || homephone == null) {
+        String[] fields = {fname, lname, email, birthday, homephone};
+        if (fieldMissing( fields )) {
             isValid = false;
-            GWT.log("A field is invalid", null);
+            setMessage("Missing required information. Please fill in all fields.");
+            return;
         }
 
         // We only need a password if its a new account or the user is
         // providing a new one; in either case, the retyped password must match
-        if (!loginSession.isAuthenticated() || pw1 != null) {
-            if (pw1 == null || pw2 == null || !pw1.equals(pw2)) {
+        if (!loginSession.isAuthenticated() || (pw1 != null && pw1.length() > 0)) {
+            String pwfields[] = {pw1, pw2};
+            if (fieldMissing(pwfields) || !pw1.equals(pw2)) {
                 isValid = false;
-                GWT.log("Password invalid", null);
+                setMessage("Password missing or passwords don't match.");
+                return;
             }
         }
         
         // create Person object
         Person person = null;
         if (isValid) {
+            //clearMessage();
             person = new Person(fname, mname, lname);
             if (loginSession.isAuthenticated()) {
                 person.setPid(loginSession.getPerson().getPid());
+                person.setPassword(loginSession.getPerson().getPassword());
             } else {
                 // Set the PID to 0 to indicate this is an update
                 person.setPid(0);
@@ -192,10 +201,9 @@ public class SettingsScreen extends BaseScreen {
             person.setBday(birthday);
             person.setHomephone(homephone);
             if (pw1 != null) {
-                person.setPassword1(pw1);
+                person.setNewPassword(pw1);
             }
         } else {
-            // TODO: Insufficient data was provided to register, so send an error
             GWT.log("Account NOT created: " + fname + " " + mname + " " + lname, null);
             return;
         }
@@ -214,11 +222,13 @@ public class SettingsScreen extends BaseScreen {
 
             public void onSuccess(Long pid) {
                 GWT.log("Account created: " + pid.longValue(), null);
-                if (loginSession.getPerson().getPid() == pid.longValue()) {
-                    GWT.log("Settings updated.", null);
-                    // TODO: post a message to the screen saying it was saved
+                if (loginSession.isAuthenticated() &&
+                        loginSession.getPerson().getPid() == pid.longValue()) {
+                    setMessage("Settings saved.");
+                    // Check if the password changed
                 } else {
                     // Change our application state to the login screen
+                    setMessage("Account created. Please sign in.");
                     History.newItem("signout");
                 }
             }
@@ -226,7 +236,21 @@ public class SettingsScreen extends BaseScreen {
 
         // Make the call to the registration service.
         regService.createAccount(person, callback);
-
-        GWT.log("Account created for: " + fname + " " + mname + " " + lname, null);
+    }
+    
+    /**
+     * Check if each String in the array is non-null and has length > 0.
+     * @param fields the array of fields to be checked
+     * @return true if any field is null or zero length, otherwise false
+     */
+    private boolean fieldMissing(String[] fields) {
+        boolean isMissing = false;
+        for (String field : fields) {
+            if (field == null || field.length() == 0) {
+                isMissing = true;
+                return isMissing;
+            }
+        }
+        return isMissing;
     }
 }

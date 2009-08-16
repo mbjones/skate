@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * into the application.
  * 
  * @author Matt Jones
- *
  */
 public class LoginScreen extends BaseScreen {
 
@@ -30,6 +29,10 @@ public class LoginScreen extends BaseScreen {
     private Button signinButton;
     private SkaterRegistrationServiceAsync regService;
     
+    /**
+     * Construct the login screen, recording the loginSession for later reference.
+     * @param loginSession to be used for user information in later steps
+     */
     public LoginScreen(LoginSession loginSession) {
         super(loginSession);
         layoutScreen();
@@ -56,7 +59,10 @@ public class LoginScreen extends BaseScreen {
         screen.add(spacer);
         screen.add(introPanel);
     }
-
+    
+    /**
+     * Fill in the GUI for the Login screen
+     */
     private void createLoginPanel() {
         loginPanel = new VerticalPanel();
         loginPanel.addStyleName("jsc-leftpanel");
@@ -94,6 +100,9 @@ public class LoginScreen extends BaseScreen {
         loginPanel.add(forgotPasswordLink);
     }
     
+    /**
+     * Check the user credentials and set up the loginSession if valid.
+     */
     private void authenticate() {
         // Initialize the service proxy.
         if (regService == null) {
@@ -138,6 +147,9 @@ public class LoginScreen extends BaseScreen {
         regService.authenticate(username.getText(), password.getText(), callback);
     }
     
+    /**
+     * Set up the Introductory dialog.
+     */
     private void createIntroPanel() {
         introPanel = new VerticalPanel();
         introPanel.addStyleName("jsc-rightpanel");

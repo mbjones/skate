@@ -10,7 +10,6 @@ import java.io.Serializable;
  */
 public class Person implements Serializable {
     private long pid;
-    private String username;
     private String fname;
     private String mname;
     private String lname;
@@ -31,8 +30,8 @@ public class Person implements Serializable {
     private String parentSurname;
     private String parentFirstName;
     private String parentEmail;
-    private String password1;
-    private String password2;
+    private String password;
+    private String newPassword;
     
     /**
      * Construct a new person object with no fields set.
@@ -237,28 +236,28 @@ public class Person implements Serializable {
         this.parentSurname = parentSurname;
     }
     /**
-     * @return the password1
+     * @return the password
      */
-    public String getPassword1() {
-        return password1;
+    public String getPassword() {
+        return password;
     }
     /**
-     * @param password1 the password1 to set
+     * @param password the password to set
      */
-    public void setPassword1(String password1) {
-        this.password1 = password1;
+    public void setPassword(String password) {
+        this.password = password;
     }
     /**
-     * @return the password2
+     * @return the new password to be set for this account
      */
-    public String getPassword2() {
-        return password2;
+    public String getNewPassword() {
+        return newPassword;
     }
     /**
-     * @param password2 the password2 to set
+     * @param password the password to set on this account when settings are saved
      */
-    public void setPassword2(String password2) {
-        this.password2 = password2;
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
     }
     /**
      * @return the pid
@@ -331,18 +330,6 @@ public class Person implements Serializable {
      */
     public void setSuffix(String suffix) {
         this.suffix = suffix;
-    }
-    /**
-     * @return the username
-     */
-    public String getUsername() {
-        return username;
-    }
-    /**
-     * @param username the username to set
-     */
-    public void setUsername(String username) {
-        this.username = username;
     }
     /**
      * @return the usfsaid
