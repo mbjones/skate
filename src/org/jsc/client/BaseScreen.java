@@ -70,14 +70,14 @@ public class BaseScreen extends VerticalPanel {
     /**
      * @return the currentMessage
      */
-    public String getMessage() {
+    protected String getMessage() {
         return currentMessage;
     }
 
     /**
      * @param currentMessage the currentMessage to display on the screen
      */
-    public void setMessage(String currentMessage) {
+    protected void setMessage(String currentMessage) {
         this.currentMessage = currentMessage;
         message.setText(currentMessage);
         message.removeStyleName("jsc-message-clear");
@@ -85,9 +85,16 @@ public class BaseScreen extends VerticalPanel {
     }
     
     /**
+     * Update the message Label when the screen has been switched from another.
+     */
+    protected void updateMessage() {
+        message.setText(currentMessage);
+    }
+    
+    /**
      * Clear the current message and change the style so it does not display
      */
-    public void clearMessage() {
+    protected void clearMessage() {
         message.setText("");
         message.addStyleName("jsc-message-clear");
     }

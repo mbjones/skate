@@ -182,7 +182,12 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             sql.append("surname='").append(person.getLname()).append("',");
             sql.append("givenname='").append(person.getFname()).append("',");
             sql.append("middlename='").append(person.getMname()).append("',");
-            sql.append("email='").append(person.getEmail()).append("',");
+            if (person.getNewEmail() != null && person.getNewEmail().length() > 0 && 
+                    !person.getEmail().equals(person.getNewEmail())) {
+                sql.append("email='").append(person.getNewEmail()).append("',");
+            } else {
+                sql.append("email='").append(person.getEmail()).append("',");
+            }
             sql.append("home_phone='").append(person.getHomephone()).append("',");
             sql.append("birthdate='").append(person.getBday()).append("'");
             if (person.getNewPassword() != null && person.getNewPassword().length() > 0) {

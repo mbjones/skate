@@ -47,8 +47,6 @@ public class LoginScreen extends BaseScreen {
         this.setStyleName("jsc-twopanel-screen");
         
         screen = new HorizontalPanel();
-        //screen.setHeight("30em");
-        //screen.setWidth("50em");
         
         createLoginPanel();
         Label spacer = new Label("");
@@ -138,7 +136,6 @@ public class LoginScreen extends BaseScreen {
                 } else {
                     loginSession.setAuthenticated(false);
                     setMessage("Incorrect email or password. Please try again.");
-                    GWT.log("Login unsuccessful, try again.", null);
                 }
             }
         };

@@ -115,10 +115,23 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         } else if (historyToken.equals("manage")) {
             content.setScreen(manage);
         }
-        
+        updateMessageFields();
         header.updateStatus();
     }
 
+    /**
+     * When the screen changes, update the message Label on each screen so they
+     * are synchronized.
+     */
+    private void updateMessageFields() {
+        settings.clearMessage();
+        settings.updateMessage();
+        login.updateMessage();
+        myclasses.updateMessage();
+        register.updateMessage();
+        manage.updateMessage();
+    }
+    
     /**
      * Create and lay out the components for the left side content
      * Currently unused; keeping code as example of table layout and manipulation

@@ -197,7 +197,13 @@ public class SettingsScreen extends BaseScreen {
                 // Set the PID to 0 to indicate this is an update
                 person.setPid(0);
             }
-            person.setEmail(email);
+            if (loginSession.isAuthenticated() && !email.equals(loginSession.getPerson().getEmail())) {
+                person.setEmail(loginSession.getPerson().getEmail());
+                person.setNewEmail(email);
+            } else {
+                person.setEmail(email);
+            }
+            
             person.setBday(birthday);
             person.setHomephone(homephone);
             if (pw1 != null) {

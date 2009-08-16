@@ -32,6 +32,7 @@ public class Person implements Serializable {
     private String parentEmail;
     private String password;
     private String newPassword;
+    private String newEmail;
     
     /**
      * Construct a new person object with no fields set.
@@ -139,6 +140,23 @@ public class Person implements Serializable {
     public void setEmail(String email) {
         this.email = email;
     }
+    /**
+     * The newEmail represent an email address to be set in case of an update. It
+     * is only used temporarily to transport a new email address to the server
+     * so that the relational store can be updated.
+     * @return the newEmail
+     */
+    public String getNewEmail() {
+        return newEmail;
+    }
+
+    /**
+     * @param newEmail the newEmail to set
+     */
+    public void setNewEmail(String newEmail) {
+        this.newEmail = newEmail;
+    }
+
     /**
      * @return the fname
      */
