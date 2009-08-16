@@ -26,16 +26,16 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     
     /**
      * Create a new account for the person in question
-     * @return long the person identifier (pid) for the account created, or 0 on error
+     * @return the person for the account created, or null on error
      */
-    public long createAccount(Person person) {
+    public Person createAccount(Person person) {
 
         // Case: Inserting or updating a person
         if (person.getPid() == 0 || person.getPid() > 0) {
-            long pid = insertOrUpdatePerson(person);
-            return pid;
+            Person newPerson = insertOrUpdatePerson(person);
+            return newPerson;
         } else {
-            return 0;
+            return null;
         }
     }
     
@@ -141,11 +141,14 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     }
     
     /**
-     * Create a new person entry in the backing relational database.
-     * @param person the Person to be created in the database
-     * @return the identifier of the person created
+     * Create a new person entry in the backing relational database, or update
+     * fields on an existing entry.  If the 'pid' field of the person is empty
+     * or 0, a new entry is created.  Otherwise, the entry with the pid is
+     * updated.
+     * @param person the Person to be created or updated in the database
+     * @return the Person that was created or updated created
      */
-    private long insertOrUpdatePerson(Person person) {
+    private Person insertOrUpdatePerson(Person person) {
         long pid = 0;
 
         StringBuffer sql = new StringBuffer();
@@ -169,11 +172,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 int validpid = checkPassword(person.getEmail(), person.getPassword());
                 if (validpid == 0 || validpid != person.getPid()) {
                     // Invalid credentials, so don't allow the change
-                    return 0;
+                    return null;
                 }
             } else {
                 // No email and/or password provided, so no valid credentials
-                return 0;
+                return null;
             }
             sql.append("update people set ");
             sql.append("surname='").append(person.getLname()).append("',");
@@ -217,8 +220,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             System.err.println("SQLException: " + ex.getMessage());
         }
         
-        //Person newPerson = lookupPerson(pid);
-        return pid;
+        Person newPerson = lookupPerson(pid);
+        return newPerson;
     }
     
     /**

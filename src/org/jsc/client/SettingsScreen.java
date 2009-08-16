@@ -214,18 +214,25 @@ public class SettingsScreen extends BaseScreen {
         }
 
         // Set up the callback object.
-        AsyncCallback<Long> callback = new AsyncCallback<Long>() {
+        AsyncCallback<Person> callback = new AsyncCallback<Person>() {
             public void onFailure(Throwable caught) {
                 // TODO: Do something with errors.
                 GWT.log("Failed to create account.", null);
             }
 
-            public void onSuccess(Long pid) {
-                GWT.log("Account created: " + pid.longValue(), null);
+            public void onSuccess(Person newPerson) {
+                if (newPerson == null) {
+                    // Failure on the remote end.
+                    setMessage("Failed to create or update account.");
+                    return;
+                }
+                
+                GWT.log("Account created: " + newPerson.getPid(), null);
                 if (loginSession.isAuthenticated() &&
-                        loginSession.getPerson().getPid() == pid.longValue()) {
+                        loginSession.getPerson().getPid() == newPerson.getPid()) {
                     setMessage("Settings saved.");
-                    // Check if the password changed
+                    // Update the loginSession with the new Person object
+                    loginSession.setPerson(newPerson);
                 } else {
                     // Change our application state to the login screen
                     setMessage("Account created. Please sign in.");
