@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -108,6 +109,30 @@ public class RegisterScreen extends BaseScreen {
         
         screen.add(accountPanel);
         
+        String testForm = 
+            "<form action=\"https://www.sandbox.paypal.com/cgi-bin/webscr\" method=\"post\">" +
+            "<input type=\"hidden\" name=\"cmd\" value=\"_s-xclick\">" +
+            "<input type=\"hidden\" name=\"hosted_button_id\" value=\"1059849\">" +
+            "<input type=\"image\" src=\"https://www.sandbox.paypal.com/en_US/i/btn/btn_paynowCC_LG.gif\" border=\"0\" name=\"submit\" alt=\"PayPal - The safer, easier way to pay online!\">" +
+            "<img alt=\"\" border=\"0\" src=\"https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif\" width=\"1\" height=\"1\">" +
+            "</form>";
+        String realForm =
+            "<form action=\"https://www.sandbox.paypal.com/cgi-bin/webscr\" method=\"post\">" +
+            "<input type=\"hidden\" name=\"cmd\" value=\"_s-xclick\"> <table>" +
+            "<tr><td><input type=\"hidden\" name=\"on0\" value=\"Registration Date\">Registration Date</td></tr><tr><td>" +
+            "<select name=\"os0\">" +
+            "    <option value=\"Early (until Aug 31)\">Early (until Aug 31) $50.00" +
+            "    <option value=\"Normal (until Sep 15)\">Normal (until Sep 15) $60.00" +
+            "    <option value=\"On-site (after Sep 15)\">On-site (after Sep 15) $75.00" +
+            "</select> </td></tr> </table>" +
+            "<input type=\"hidden\" name=\"currency_code\" value=\"USD\">" +
+            "<input type=\"hidden\" name=\"encrypted\" value=\"-----BEGIN PKCS7-----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-----END PKCS7-----\">" +
+            "<input type=\"image\" src=\"https://www.paypal.com/en_US/i/btn/btn_paynowCC_LG.gif\" border=\"0\" name=\"submit\" alt=\"PayPal - The safer, easier way to pay online!\">" +
+            "<img alt=\"\" border=\"0\" src=\"https://www.paypal.com/en_US/i/scr/pixel.gif\" width=\"1\" height=\"1\">" +
+            "</form>";
+        
+        HTMLPanel paymentPanel = new HTMLPanel(testForm);
+        screen.add(paymentPanel);
     }
 
     /**
