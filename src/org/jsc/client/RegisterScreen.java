@@ -108,11 +108,25 @@ public class RegisterScreen extends BaseScreen {
         accountPanel.add(g);
         
         screen.add(accountPanel);
+        // This is the format of the return field, which is needed to get return data back 
+        // about transactions.  The URL should include transaction information
+        // "<input type=\"hidden\" name=\"cmd\" value=\"_s-xclick\">" +
+        // "<input type=\"hidden\" name=\"hosted_button_id\" value=\"1059849\">" +
+        // "<input type=\"hidden\" name=\"cpp_header_image\" value=\"http://juneauskatingclub.org/sites/all/themes/jsc/images/salamander1/jsc-header-bkg-paypal.png\">" +
+        String paymentDataIdentity = "U7fGZVYSiD6KerUAg_PhVMlmWIkK1MM2WazdncZQz_v4Dx4HIpre8iyz92e";
         
         String testForm = 
             "<form action=\"https://www.sandbox.paypal.com/cgi-bin/webscr\" method=\"post\">" +
-            "<input type=\"hidden\" name=\"cmd\" value=\"_s-xclick\">" +
-            "<input type=\"hidden\" name=\"hosted_button_id\" value=\"1059849\">" +
+            "<input type=\"hidden\" name=\"cmd\" value=\"_xclick\">" +
+            "<input type=\"hidden\" name=\"business\" value=\"james_1202254981_biz@gmail.com\">" +
+            "<input type=\"hidden\" name=\"item_name\" value=\"JSC Skating class registration\">" +
+            "<input type=\"hidden\" name=\"currency_code\" value=\"USD\">" +
+            "<input type=\"hidden\" name=\"item_number\" value=\"987654\">" +
+            "<input type=\"hidden\" name=\"amount\" value=\"60\">" +
+            "<input type=\"hidden\" name=\"no_note\" value=\"1\">" +
+            "<input type=\"hidden\" name=\"no_shipping\" value=\"1\">" +
+            "<input type=\"hidden\" name=\"return\" value=\"http://juneauskatingclub.org/home\">" +
+            "<input type=\"hidden\" name=\"cancel_return\" value=\"http://juneauskatingclub.org/registration\">" +
             "<input type=\"image\" src=\"https://www.sandbox.paypal.com/en_US/i/btn/btn_paynowCC_LG.gif\" border=\"0\" name=\"submit\" alt=\"PayPal - The safer, easier way to pay online!\">" +
             "<img alt=\"\" border=\"0\" src=\"https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif\" width=\"1\" height=\"1\">" +
             "</form>";
