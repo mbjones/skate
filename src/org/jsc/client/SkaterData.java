@@ -111,6 +111,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         } else if (historyToken.equals("myclasses")) {
             content.setScreen(myclasses);
         } else if (historyToken.equals("register")) {
+            register.getClassList();
             content.setScreen(register);
         } else if (historyToken.equals("manage")) {
             content.setScreen(manage);

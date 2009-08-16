@@ -20,7 +20,20 @@ table.jsc-toolbar {
 	font-size: 0.5em;
 	color: #2E385B;
 	font-weight: bold;
+}
 
+.jsc-toolbar-spacer {
+    width: 275px;
+}
+
+.jsc-toolbar-separator {
+    padding-right: 5px;
+    padding-left: 5px;
+}
+
+.jsc-header-title {
+	font-size: 18pt;
+	right-margin: 3pt;
 }
 
 .jsc-message {
@@ -38,20 +51,6 @@ table.jsc-toolbar {
 	color: transparent;
 	background-color: transparent;
 	border: none;
-}
-
-.jsc-toolbar-spacer {
-    width: 375px;
-}
-
-.jsc-toolbar-separator {
-    padding-right: 5px;
-    padding-left: 5px;
-}
-
-.jsc-header-title {
-	font-size: 18pt;
-	right-margin: 3pt;
 }
 
 .jsc-content {
