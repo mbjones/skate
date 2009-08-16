@@ -12,6 +12,7 @@ DROP TABLE skatingclass;
 DROP TABLE sessions;
 DROP TABLE classtypes;
 DROP TABLE people;
+DROP SEQUENCE roster_id_seq;
 DROP SEQUENCE person_id_seq;
 DROP SEQUENCE class_id_seq;
 DROP SEQUENCE session_id_seq;

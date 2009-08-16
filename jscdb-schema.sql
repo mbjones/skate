@@ -28,7 +28,7 @@ CREATE TABLE people (
     parentSurname VARCHAR(250), -- Last name of the parent
     parentFirstname VARCHAR(250), -- First name of the parent
     parentEmail VARCHAR(250), -- email of the parent
-	date_updated DATE,       -- the date the record was last updated
+	date_updated TIMESTAMP default CURRENT_DATE, -- the date the record was last updated
    CONSTRAINT people_pk PRIMARY KEY (pid)
 );
 
@@ -43,7 +43,6 @@ CREATE TABLE sessions (
     season VARCHAR(20),       -- the name of the season (e.g., 'Fall 2008')
 	startdate DATE,           -- the date the session starts
 	enddate DATE,             -- the date the session ends
-	date_updated DATE,        -- the date the record was last updated
    CONSTRAINT session_pk PRIMARY KEY (sid)
 );
 
@@ -69,7 +68,7 @@ CREATE TABLE skatingclass (
     timeslot VARCHAR(40),   -- the time slot during which the class is held
     instructorid INT8,       -- the id of the instructor for this class
     otherinstructors VARCHAR(40),   -- list of surnames of other instructors
-	date_updated DATE,       -- the date the record was last updated
+	date_updated TIMESTAMP default CURRENT_DATE,       -- the date the record was last updated
    CONSTRAINT class_pk PRIMARY KEY (classid),
    CONSTRAINT class_session_fk FOREIGN KEY (sid) REFERENCES sessions,
    CONSTRAINT class_instructor_fk FOREIGN KEY (instructorid) REFERENCES people
@@ -77,7 +76,7 @@ CREATE TABLE skatingclass (
 
 -- Sessionclasses -- a view over the session and skatingclass tables joined
 CREATE OR REPLACE VIEW sessionclasses AS 
- SELECT s.sid, s.sessionname, s.season, s.startdate, s.enddate, s.date_updated, c.classid, c.classtype, c.day, c.timeslot, c.instructorid
+ SELECT s.sid, s.sessionname, s.season, s.startdate, s.enddate, c.classid, c.classtype, c.day, c.timeslot, c.instructorid
    FROM sessions s, skatingclass c
   WHERE c.sid = s.sid;
   
@@ -89,15 +88,21 @@ CREATE TABLE levels (
 );
 
 -- Rosters -- table to store the list of students enrolled in a class
+CREATE SEQUENCE roster_id_seq;
 CREATE TABLE roster (
+	rosterid INT8 default nextval('roster_id_seq'), -- the identifier of this entry in the roster
 	classid INT8,            -- the id of the class for this roster
-    pid INT8,                -- the id of the sesperson enrolled
+    pid INT8,                -- the id of the person enrolled
     levelPassed VARCHAR(20), -- the ASFS Level passed during testing
-	paymentdate DATE,       -- the date the payment was made
-    paypalconfid VARCHAR(20), -- the confirmation id from paypal
-    paymentamount FLOAT8, -- the amount paid at paypal
-	date_updated DATE,       -- the date the record was last updated
-   CONSTRAINT roster_pk PRIMARY KEY (classid,pid),
+    payment_amount FLOAT8,   -- the amount to be paid
+	payment_date DATE,       -- the date the payment was made
+    paypal_tx_id VARCHAR(20), -- the transaction id from paypal
+    paypal_gross FLOAT8,     -- the gross amount actually paid at paypal
+    paypal_fee FLOAT8,       -- the amount of the fee at paypal (gross-fee=net amount to JSC)
+    paypal_status VARCHAR(20), -- the status of the payment at PayPal
+	date_updated TIMESTAMP default CURRENT_DATE, -- the date the record was last updated
+   CONSTRAINT roster_pk PRIMARY KEY (rosterid),
+   CONSTRAINT roster_uk UNIQUE (classid,pid),
    CONSTRAINT roster_class_fk FOREIGN KEY (classid) REFERENCES skatingclass,
    CONSTRAINT roster_student_fk FOREIGN KEY (pid) REFERENCES people
 );

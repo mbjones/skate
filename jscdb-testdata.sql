@@ -28,25 +28,36 @@ INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS 
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Artistry','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Synchro','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('Hockey','TBD','SS1');
+    
+--INSERT INTO people (surname, givenname, middlename, birthdate, password, role,)
+--     email, home_phone, cell_phone, work_phone, street1, street2, city, state,
+--     zipcode, usafsaid, parentSurname, parentFirstname, parentEmail) VALUES
+      
+INSERT INTO people (surname, givenname, birthdate, password, role,
+     email, home_phone) VALUES ('Anderson','Lauren', '1988-10-08', 'foo', 
+     1, 'lauren@jsc.org', '907-789-0000');
+INSERT INTO people (surname, givenname, birthdate, password, role,
+     email, home_phone) VALUES ('Jones','Matt', '1988-10-08', 'foo', 
+     3, 'mbjones.89@gmail.com', '907-789-0000');
+     
+INSERT INTO sessions (sessionname, season, startdate, enddate)
+     VALUES ('1', '2009-2010', '2009-09-15', '2009-10-31');
+INSERT INTO sessions (sessionname, season, startdate, enddate)
+     VALUES ('2', '2009-2010', '2009-09-15', '2009-10-31');
+INSERT INTO sessions (sessionname, season, startdate, enddate)
+     VALUES ('3', '2009-2010', '2009-09-15', '2009-10-31');
+INSERT INTO sessions (sessionname, season, startdate, enddate)
+     VALUES ('4', '2009-2010', '2009-09-15', '2009-10-31');
 
-INSERT INTO sessions (sessionname, season, startdate, enddate, date_updated)
-     VALUES ('1', '2009-2010', '2009-09-15', '2009-10-31', '2009-08-20');
-INSERT INTO sessions (sessionname, season, startdate, enddate, date_updated)
-     VALUES ('2', '2009-2010', '2009-09-15', '2009-10-31', '2009-08-20');
-INSERT INTO sessions (sessionname, season, startdate, enddate, date_updated)
-     VALUES ('3', '2009-2010', '2009-09-15', '2009-10-31', '2009-08-20');
-INSERT INTO sessions (sessionname, season, startdate, enddate, date_updated)
-     VALUES ('4', '2009-2010', '2009-09-15', '2009-10-31', '2009-08-20');
-
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, 
-    otherinstructors, date_updated) VALUES
-    (1, 'Beginner Youth', 'Friday', '6-9pm', 1, 'Katie, Pam', '2009-08-20');
+    otherinstructors) VALUES
+    (1, 'Beginner Youth', 'Friday', '6-9pm', 1, 'Katie, Pam');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, 
-    otherinstructors, date_updated) VALUES
-    (1, 'Advanced Youth', 'Friday', '6-9pm', 1, 'Katie, Pam', '2009-08-20');
+    otherinstructors) VALUES
+    (1, 'Advanced Youth', 'Friday', '6-9pm', 1, 'Katie, Pam');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, 
-    otherinstructors, date_updated) VALUES
-    (1, 'Beginner Adult', 'Friday', '6-9pm', 1, 'Katie, Pam', '2009-08-20');
+    otherinstructors) VALUES
+    (1, 'Beginner Adult', 'Friday', '6-9pm', 1, 'Katie, Pam');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, 
-    otherinstructors, date_updated) VALUES
-    (1, 'Advanced Adult', 'Friday', '6-9pm', 1, 'Katie, Pam', '2009-08-20');
+    otherinstructors) VALUES
+    (1, 'Advanced Adult', 'Friday', '6-9pm', 1, 'Katie, Pam');
