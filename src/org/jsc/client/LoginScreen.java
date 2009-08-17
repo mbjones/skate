@@ -6,6 +6,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
@@ -150,14 +151,15 @@ public class LoginScreen extends BaseScreen {
     private void createIntroPanel() {
         introPanel = new VerticalPanel();
         introPanel.addStyleName("jsc-rightpanel");
-        Label intro1 = new Label("Welcome!");
-        intro1.setWordWrap(true);
-        Label intro2 = new Label("You can register for new classes after you have Signed In.");
-        intro2.setWordWrap(true);
-        Label intro3 = new Label("If you do not have an account, you can create a New Account.");
-        intro3.setWordWrap(true);
-        introPanel.add(intro1);
-        introPanel.add(intro2);
-        introPanel.add(intro3);
+        StringBuffer intro = new StringBuffer();
+        intro.append("<p class=\"jsc-step\">Welcome to the <a href=\"http://juneauskatingclub.org\">Juneau Skating Club</a>!</p>");
+        intro.append("<p class=\"jsc-text\">This is our new web-based site for class registration and management. Using this site, you can register for new classes after you have created an account and signed in. Some of the functions available from this site include:</p>");
+        intro.append("<p class=\"jsc-text\"><ul><li>Register for classes</li><li>Pay registration fees</li><li>View past classes (feature coming later)</li></ul></p>");
+        
+        intro.append("<p class=\"jsc-text\">If you do not have an account, you can create a <a href=\"/SkaterData.html#settings\">New Account</a>.</p>");
+        intro.append("<p class=\"jsc-text\">You can register for new classes after you have <a href=\"/SkaterData.html#signout\">Signed In</a>.</p>");
+
+        HTMLPanel introHTML = new HTMLPanel(intro.toString());
+        introPanel.add(introHTML);
     }
 }

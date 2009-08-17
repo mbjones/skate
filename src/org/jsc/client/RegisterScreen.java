@@ -29,8 +29,8 @@ public class RegisterScreen extends BaseScreen {
     private static final String PRICE = "77";
     
     private static final String HTML_STRUCTURE = "<div id=\"explainstep\"></div><div id=\"wizard\"></div>";
-    private static final String STEP_2 = "<p id=\"explainstep\">Step 2: Process payment</p>";
-    private static final String STEP_1 = "<p id=\"explainstep\">Step 1: Choose a class</p>";
+    private static final String STEP_1 = "<div id=\"explainstep\"><p class=\"jsc-step\">Step 1: Choose a class</p><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p><p class=\"jsc-text\">Registrion fee: <b>$77.00</b></p></div>";
+    private static final String STEP_2 = "<div id=\"explainstep\"><p class=\"jsc-step\">Step 2: Process payment</p><p class=\"jsc-text\">Registrion fee: <b>$77.00</b></p><p class=\"jsc-text\">Please make your payment using PayPal by clicking on the button below.  Your registration is <em>not complete</em> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
     
     // classList stores the classes keyed on the name string for name-based sorting
     private TreeMap<String, String> classList;
@@ -113,7 +113,7 @@ public class RegisterScreen extends BaseScreen {
         password2Field = new PasswordTextBox();
         g.setWidget(7, 1, password2Field);
         */
-        registerButton = new Button("Register");
+        registerButton = new Button("Go to Step 2");
         registerButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 register();
@@ -221,6 +221,7 @@ public class RegisterScreen extends BaseScreen {
                         setMessage("Error registering for the class.");
                         return;
                     } else {
+                        clearMessage();
                         String testForm = 
                             "<form id=\"wizard\" action=\""+ PAYPAL_URL + "\" method=\"post\">" +
                             "<input type=\"hidden\" name=\"cmd\" value=\"_xclick\">" +
@@ -234,7 +235,7 @@ public class RegisterScreen extends BaseScreen {
                             "<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ PAYPAL_HEADER_IMAGE + "\">" +
                             "<input type=\"hidden\" name=\"return\" value=\"" + PAYPAL_RETURN_URL + "\">" +
                             "<input type=\"hidden\" name=\"cancel_return\" value=\"" + PAYPAL_CANCEL_URL + "\">" +
-                            "<input type=\"image\" src=\"https://www.sandbox.paypal.com/en_US/i/btn/btn_paynowCC_LG.gif\" border=\"0\" name=\"submit\" alt=\"PayPal - The safer, easier way to pay online!\">" +
+                            "<input type=\"image\" src=\"https://www.sandbox.paypal.com/en_US/i/btn/btn_paynow_LG.gif\" border=\"0\" name=\"submit\" alt=\"PayPal - The safer, easier way to pay online!\">" +
                             "<img alt=\"\" border=\"0\" src=\"https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif\" width=\"1\" height=\"1\">" +
                             "</form>";
                         
