@@ -6,6 +6,7 @@ import java.util.TreeMap;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
@@ -19,24 +20,45 @@ import com.google.gwt.user.client.ui.TextBox;
 
 public class RegisterScreen extends BaseScreen {
 
+    private static final String MERCHANT_ID = "339U3JVK2X4E6";
+    private static final String PAYPAL_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr";
+    private static final String PAYPAL_HEADER_IMAGE = "http://juneauskatingclub.org/sites/all/themes/jsc/images/salamander1/jsc-header-bkg-paypal.png";
+    private static final String PAYPAL_RETURN_URL = "http://juneauskatingclub.org/home";
+    private static final String PAYPAL_CANCEL_URL = "http://juneauskatingclub.org/registration";
+    private static final String PAYMENT_DATA_ID = "U7fGZVYSiD6KerUAg_PhVMlmWIkK1MM2WazdncZQz_v4Dx4HIpre8iyz92e";
+    private static final String PRICE = "77";
+    
+    private static final String HTML_STRUCTURE = "<div id=\"explainstep\"></div><div id=\"wizard\"></div>";
+    private static final String STEP_2 = "<p id=\"explainstep\">Step 2: Process payment</p>";
+    private static final String STEP_1 = "<p id=\"explainstep\">Step 1: Choose a class</p>";
+    
+    // classList stores the classes keyed on the name string for name-based sorting
     private TreeMap<String, String> classList;
+    // classKeyList has the same data as classList but is keyed on the classid for ease of lookup
+    private TreeMap<String, String> classKeyList;
+    
     private HorizontalPanel screen;
+    private HorizontalPanel outerRegPanel;
+    private HTMLPanel regPanel;
+    private Grid reggrid;
     private ListBox classField;
-    private TextBox fnameField;
-    private TextBox mnameField;
-    private TextBox lnameField;
-    private TextBox emailField;
-    private TextBox birthdayField;
-    private TextBox homephoneField;
-    private PasswordTextBox password1Field;
-    private PasswordTextBox password2Field;
+//    private TextBox fnameField;
+//    private TextBox mnameField;
+//    private TextBox lnameField;
+//    private TextBox emailField;
+//    private TextBox birthdayField;
+//    private TextBox homephoneField;
+//    private PasswordTextBox password1Field;
+//    private PasswordTextBox password2Field;
     private Button registerButton;
     
     private SkaterRegistrationServiceAsync regService;
 
+
     public RegisterScreen(LoginSession loginSession) {
         super(loginSession);
         classList = new TreeMap<String, String>();
+        classKeyList = new TreeMap<String, String>();
         layoutScreen();
         this.setContentPanel(screen);
         regService = GWT.create(SkaterRegistrationService.class);
@@ -51,19 +73,19 @@ public class RegisterScreen extends BaseScreen {
         
         screen = new HorizontalPanel();
         
-        HorizontalPanel accountPanel = new HorizontalPanel();
-        accountPanel.addStyleName("jsc-rightpanel");
+        outerRegPanel = new HorizontalPanel();
+        outerRegPanel.addStyleName("jsc-rightpanel");
         
         int numrows = 9;
         
-        Grid g = new Grid(numrows, 2);
+        reggrid = new Grid(numrows, 2);
 
-        HTMLTable.CellFormatter fmt = g.getCellFormatter();
-        g.setWidget(0, 0, new Label("Class:"));
+        HTMLTable.CellFormatter fmt = reggrid.getCellFormatter();
+        reggrid.setWidget(0, 0, new Label("Class:"));
         classField = new ListBox();
         updateClassListBox();
         classField.setVisibleItemCount(1);
-        g.setWidget(0, 1, classField);
+        reggrid.setWidget(0, 1, classField);
         
         /*
         g.setWidget(0, 0, new Label("First Name:"));
@@ -97,7 +119,7 @@ public class RegisterScreen extends BaseScreen {
                 register();
             }
         });
-        g.setWidget(8, 1, registerButton);
+        reggrid.setWidget(8, 1, registerButton);
 
         // Set the css style for each row
         for (int row=0; row < numrows; row++) {
@@ -105,34 +127,15 @@ public class RegisterScreen extends BaseScreen {
             fmt.addStyleName(row, 1,  "jsc-field");
         }
         
-        accountPanel.add(g);
-        
-        screen.add(accountPanel);
-        // This is the format of the return field, which is needed to get return data back 
-        // about transactions.  The URL should include transaction information
-        // "<input type=\"hidden\" name=\"cmd\" value=\"_s-xclick\">" +
-        // "<input type=\"hidden\" name=\"hosted_button_id\" value=\"1059849\">" +
-        // "<input type=\"hidden\" name=\"cpp_header_image\" value=\"http://juneauskatingclub.org/sites/all/themes/jsc/images/salamander1/jsc-header-bkg-paypal.png\">" +
-        String paymentDataIdentity = "U7fGZVYSiD6KerUAg_PhVMlmWIkK1MM2WazdncZQz_v4Dx4HIpre8iyz92e";
-        
-        String testForm = 
-            "<form action=\"https://www.sandbox.paypal.com/cgi-bin/webscr\" method=\"post\">" +
-            "<input type=\"hidden\" name=\"cmd\" value=\"_xclick\">" +
-            "<input type=\"hidden\" name=\"business\" value=\"james_1202254981_biz@gmail.com\">" +
-            "<input type=\"hidden\" name=\"item_name\" value=\"JSC Skating class registration\">" +
-            "<input type=\"hidden\" name=\"currency_code\" value=\"USD\">" +
-            "<input type=\"hidden\" name=\"item_number\" value=\"987654\">" +
-            "<input type=\"hidden\" name=\"amount\" value=\"60\">" +
-            "<input type=\"hidden\" name=\"no_note\" value=\"1\">" +
-            "<input type=\"hidden\" name=\"no_shipping\" value=\"1\">" +
-            "<input type=\"hidden\" name=\"return\" value=\"http://juneauskatingclub.org/home\">" +
-            "<input type=\"hidden\" name=\"cancel_return\" value=\"http://juneauskatingclub.org/registration\">" +
-            "<input type=\"image\" src=\"https://www.sandbox.paypal.com/en_US/i/btn/btn_paynowCC_LG.gif\" border=\"0\" name=\"submit\" alt=\"PayPal - The safer, easier way to pay online!\">" +
-            "<img alt=\"\" border=\"0\" src=\"https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif\" width=\"1\" height=\"1\">" +
-            "</form>";
-        
-        HTMLPanel paymentPanel = new HTMLPanel(testForm);
-        screen.add(paymentPanel);
+        regPanel = new HTMLPanel(HTML_STRUCTURE);
+        regPanel.addAndReplaceElement(new HTMLPanel(STEP_1), "explainstep");
+        // TODO: the 'wizard" id is getting replaced -- need to keep it active to allow new replacements
+        HTMLPanel foo = new HTMLPanel("<div id=\"wizard\"></div>");
+        foo.add(reggrid, "wizard");
+        regPanel.addAndReplaceElement(foo, "wizard");
+        Element el = regPanel.getElementById("wizard");
+        outerRegPanel.add(regPanel);
+        screen.add(outerRegPanel);
     }
 
     /**
@@ -169,7 +172,12 @@ public class RegisterScreen extends BaseScreen {
                     setMessage("Error finding the list of classes.");
                     return;
                 } else {
+                    // Assign the classList, and populate the classKeyList by iterating
+                    // over all keys and reversing the keys and values in the new Map
                     classList = list;
+                    for (Map.Entry<String, String> curClass : classList.entrySet()) {
+                        classKeyList.put(curClass.getValue(), curClass.getKey());
+                    }
                     updateClassListBox();
                 }
             }
@@ -213,8 +221,25 @@ public class RegisterScreen extends BaseScreen {
                         setMessage("Error registering for the class.");
                         return;
                     } else {
-                        setMessage("Success. Thank you for registering. ("
-                                + newEntry.getRosterid() + ")");
+                        String testForm = 
+                            "<form id=\"wizard\" action=\""+ PAYPAL_URL + "\" method=\"post\">" +
+                            "<input type=\"hidden\" name=\"cmd\" value=\"_xclick\">" +
+                            "<input type=\"hidden\" name=\"business\" value=\"" + MERCHANT_ID + "\">" +
+                            "<input type=\"hidden\" name=\"item_name\" value=\"" + classKeyList.get(new Long(newEntry.getClassid()).toString()) + "\">" +
+                            "<input type=\"hidden\" name=\"currency_code\" value=\"USD\">" +
+                            "<input type=\"hidden\" name=\"item_number\" value=\""+ newEntry.getRosterid() +"\">" +
+                            "<input type=\"hidden\" name=\"amount\" value=\"" + PRICE + "\">" +
+                            "<input type=\"hidden\" name=\"no_note\" value=\"1\">" +
+                            "<input type=\"hidden\" name=\"no_shipping\" value=\"1\">" +
+                            "<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ PAYPAL_HEADER_IMAGE + "\">" +
+                            "<input type=\"hidden\" name=\"return\" value=\"" + PAYPAL_RETURN_URL + "\">" +
+                            "<input type=\"hidden\" name=\"cancel_return\" value=\"" + PAYPAL_CANCEL_URL + "\">" +
+                            "<input type=\"image\" src=\"https://www.sandbox.paypal.com/en_US/i/btn/btn_paynowCC_LG.gif\" border=\"0\" name=\"submit\" alt=\"PayPal - The safer, easier way to pay online!\">" +
+                            "<img alt=\"\" border=\"0\" src=\"https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif\" width=\"1\" height=\"1\">" +
+                            "</form>";
+                        
+                        regPanel.addAndReplaceElement(new HTMLPanel(STEP_2), "explainstep");
+                        regPanel.addAndReplaceElement(new HTMLPanel(testForm), "wizard");
                     }
                 }
             };
