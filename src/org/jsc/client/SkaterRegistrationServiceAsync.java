@@ -10,4 +10,5 @@ public interface SkaterRegistrationServiceAsync {
   void authenticate(String username, String password, AsyncCallback<Person> callback);
   void getPerson(long pid, AsyncCallback<Person> callback);
   void getClassList(Person person, AsyncCallback<TreeMap<String,String>> callback);
+  void register(Person person, RosterEntry newEntry, AsyncCallback<RosterEntry> callback);
 }

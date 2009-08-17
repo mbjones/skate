@@ -12,4 +12,5 @@ public interface SkaterRegistrationService extends RemoteService {
     Person authenticate(String username, String password);
     Person getPerson(long pid);
     TreeMap<String,String> getClassList(Person person);
+    RosterEntry register(Person person, RosterEntry newEntry);
 }
