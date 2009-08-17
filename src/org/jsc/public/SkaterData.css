@@ -1,7 +1,7 @@
 /** CSS styles for SkaterData. */
 
 body {
-	  background: #2E385B url(peak-lake-tall.png) no-repeat;
+	  background: white url(peak-lake-tall-30.png) no-repeat;
 }
 
 .jsc-root-window {
@@ -136,6 +136,16 @@ table.jsc-toolbar {
 
 .jsc-link-right {
 	text-align: right;
+}
+
+.jsc-step {
+	font-size: 18pt;
+	font-weight: bold;
+	margin: 3pt;
+}
+
+.jsc-text {
+	margin: 3pt;
 }
 
 .classes-ListHeader {
