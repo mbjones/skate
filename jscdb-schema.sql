@@ -6,7 +6,7 @@
 -- '$Revision: 4080 $'
 
 -- People -- table to store data about each person in JSC
-CREATE SEQUENCE person_id_seq;
+CREATE SEQUENCE person_id_seq START 1000;
 CREATE TABLE people (
 	pid INT8 default nextval('person_id_seq'), -- the unique node id (pk)
 	surname VARCHAR(250),	 -- the surname of this person
@@ -36,7 +36,7 @@ CREATE TABLE people (
 CREATE INDEX people_idx1 ON people (surname);
 
 -- Sessions -- table to store the list of sessions held each year
-CREATE SEQUENCE session_id_seq;
+CREATE SEQUENCE session_id_seq START 5000;
 CREATE TABLE sessions (
 	sid INT8 default nextval('session_id_seq'), -- the unique node id (pk)
     sessionname VARCHAR(20),  -- the label for this session (e.g., 'Session 2')
@@ -59,7 +59,7 @@ CREATE TABLE classtypes (
 );
 
 -- Classes -- table to store the list of Classes in each session
-CREATE SEQUENCE class_id_seq;
+CREATE SEQUENCE class_id_seq START 7000;
 CREATE TABLE skatingclass (
 	classid INT8 default nextval('class_id_seq'), -- the unique node id (pk)
     sid INT8,                -- the id of the session for this class
@@ -89,7 +89,7 @@ CREATE TABLE levels (
 );
 
 -- Rosters -- table to store the list of students enrolled in a class
-CREATE SEQUENCE roster_id_seq;
+CREATE SEQUENCE roster_id_seq START 10000;
 CREATE TABLE roster (
 	rosterid INT8 default nextval('roster_id_seq'), -- the identifier of this entry in the roster
 	classid INT8,            -- the id of the class for this roster
