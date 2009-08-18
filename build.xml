@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<project name="jscdb" basedir="." default="">
+
+	<property file="build.properties" />
+	<property environment="env" />
+
+	<property name="release.dir" value="${dist.dir}/${name}-${release}" />
+
+	<target name="dist" depends="">
+		<!-- make the dist directories -->
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${release.dir}" />
+		<mkdir dir="${release.dir}/skaterdata" />
+
+		<!-- copy the supporting files to a staging area -->
+		<copy todir="${release.dir}">
+			<fileset file="./war/SkaterData.html"/>
+		</copy>
+		<copy todir="${release.dir}/skaterdata">
+			<fileset dir="./war/skaterdata"/>
+		</copy>
+		
+	    <war destfile="${dist.dir}/${name}-${release}.war"
+	            webxml="war/WEB-INF/web.xml">
+	         <fileset dir="${release.dir}"/>
+	         <lib dir="war/WEB-INF/lib"/>
+	    	 <classes dir="bin"/>
+	         <webinf dir="war/WEB-INF"/>
+	    </war>
+		
+		<!-- remove the staged files -->
+		<delete dir="${release.dir}" />
+	</target>
+
+	<target name="clean">
+		<echo message="Deleting generated distribution directory"/>
+		<delete dir="${dist.dir}" />
+	</target>
+
+</project>
