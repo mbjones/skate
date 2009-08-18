@@ -23,8 +23,8 @@ public class RegisterScreen extends BaseScreen {
     private static final String MERCHANT_ID = "339U3JVK2X4E6";
     private static final String PAYPAL_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr";
     private static final String PAYPAL_HEADER_IMAGE = "http://juneauskatingclub.org/sites/all/themes/jsc/images/salamander1/jsc-header-bkg-paypal.png";
-    private static final String PAYPAL_RETURN_URL = "http://juneauskatingclub.org/home";
-    private static final String PAYPAL_CANCEL_URL = "http://juneauskatingclub.org/registration";
+    private static final String PAYPAL_RETURN_URL = "http://reg.juneauskatingclub.org";
+    private static final String PAYPAL_CANCEL_URL = "http://reg.juneauskatingclub.org";
     private static final String PAYMENT_DATA_ID = "U7fGZVYSiD6KerUAg_PhVMlmWIkK1MM2WazdncZQz_v4Dx4HIpre8iyz92e";
     private static final String PRICE = "77";
     

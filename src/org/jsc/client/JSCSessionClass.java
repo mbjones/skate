@@ -1,7 +1,7 @@
 package org.jsc.client;
 
 /**
- * A model of a JSC Session and Class combination, with propoerties from both
+ * A model of a JSC Session and Class combination, with properties from both
  * the class and session merged in a single object.
  * .
  * @author Matthew Jones
@@ -16,6 +16,7 @@ public class JSCSessionClass {
     private long classId;
     private String className;
     private long instructorId;
+    private double cost;
     private String instructorFullName;
     
     /**
@@ -95,6 +96,19 @@ public class JSCSessionClass {
      */
     public void setInstructorId(long instructorId) {
         this.instructorId = instructorId;
+    }
+    /**
+     * @return the cost
+     */
+    public double getCost() {
+        return cost;
+    }
+
+    /**
+     * @param cost the cost to set
+     */
+    public void setCost(double cost) {
+        this.cost = cost;
     }
     /**
      * @return the season

@@ -38,6 +38,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
     private MyClassesScreen myclasses;
     private RegisterScreen register;
     private ManageScreen manage;
+    private ConfirmScreen confirm;
 
     private ClassListModel classList = new ClassListModel();
     private TextBox searchText = new TextBox();
@@ -69,6 +70,8 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         myclasses = new MyClassesScreen(loginSession);
         register = new RegisterScreen(loginSession);
         manage = new ManageScreen(loginSession);
+        confirm = new ConfirmScreen(loginSession);
+        
         //leftPanel = createLeftPanel();
         //rightPanel = createRightPanel();
 
@@ -99,7 +102,8 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
      */
     public void onValueChange(ValueChangeEvent event) {
         Object historyToken = event.getValue();
-        if (!loginSession.isAuthenticated() &! historyToken.equals("settings")) {
+        if (!loginSession.isAuthenticated() &! historyToken.equals("settings")
+                &! historyToken.equals("confirm") &! historyToken.equals("cancel")) {
             historyToken = "signout";
         }
         if (historyToken.equals("settings")) {
@@ -114,6 +118,10 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
             register.getClassList();
             content.setScreen(register);
         } else if (historyToken.equals("manage")) {
+            content.setScreen(manage);
+        } else if (historyToken.equals("confirm")) {
+            content.setScreen(confirm);
+        } else if (historyToken.equals("cancel")) {
             content.setScreen(manage);
         }
         updateMessageFields();
@@ -131,6 +139,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         myclasses.updateMessage();
         register.updateMessage();
         manage.updateMessage();
+        confirm.updateMessage();
     }
     
     /**

@@ -152,7 +152,7 @@ public class LoginScreen extends BaseScreen {
         introPanel = new VerticalPanel();
         introPanel.addStyleName("jsc-rightpanel");
         StringBuffer intro = new StringBuffer();
-        intro.append("<p class=\"jsc-step\">Welcome to the <a href=\"http://juneauskatingclub.org\">Juneau Skating Club</a>!</p>");
+        intro.append("<p class=\"jsc-step\">Register for the <a href=\"http://juneauskatingclub.org\">Juneau Skating Club</a>!</p>");
         intro.append("<p class=\"jsc-text\">This is our new web-based site for class registration and management. Using this site, you can register for new classes after you have created an account and signed in. Some of the functions available from this site include:</p>");
         intro.append("<p class=\"jsc-text\"><ul><li>Register for classes</li><li>Pay registration fees</li><li>View past classes (feature coming later)</li></ul></p>");
         

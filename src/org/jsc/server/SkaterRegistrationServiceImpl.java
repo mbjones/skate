@@ -23,8 +23,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         implements SkaterRegistrationService {
 
     private static final String JDBC_URL = "jdbc:postgresql://localhost/jscdb";
-    private static final String JDBC_USER = "jones";
-    private static final String JDBC_PASS = "";
+    private static final String JDBC_USER = "jscdb";
+    private static final String JDBC_PASS = "1skate2";
     private static final String JDBC_DRIVER = "org.postgresql.Driver";
     
     /**
@@ -233,9 +233,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             rsql.append("SELECT rosterid,classid,pid,levelpassed,payment_amount,");
             rsql.append("payment_date,paypal_tx_id,paypal_gross,paypal_fee,");
             rsql.append("paypal_status from roster where ");
-            rsql.append("classid LIKE '").append(entry.getClassid()).append("'");
+            rsql.append("classid = '").append(entry.getClassid()).append("'");
             rsql.append(" AND ");
-            rsql.append("pid LIKE '").append(entry.getPid()).append("'");
+            rsql.append("pid = '").append(entry.getPid()).append("'");
             System.out.println(rsql.toString());
             
             ResultSet rs = stmt.executeQuery(rsql.toString());
@@ -285,7 +285,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
 
         StringBuffer sql = new StringBuffer();
         sql.append("select pid, surname, givenname, middlename, email, home_phone, birthdate, password from people where ");
-        sql.append("pid LIKE '").append(pid).append("'");
+        sql.append("pid = '").append(pid).append("'");
         System.out.println(sql.toString());
         
         Person person = null;
