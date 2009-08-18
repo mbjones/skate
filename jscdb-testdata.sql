@@ -49,15 +49,15 @@ INSERT INTO sessions (sessionname, season, startdate, enddate)
 INSERT INTO sessions (sessionname, season, startdate, enddate)
      VALUES ('4', '2009-2010', '2009-09-15', '2009-10-31');
 
-INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, 
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (1, 'Beginner Youth', 'Friday', '6-9pm', 1, 'Katie, Pam');
-INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, 
+    (1, 'Beginner Youth', 'Friday', '6-9pm', 1, 77.00, 'Katie, Pam');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (1, 'Advanced Youth', 'Friday', '6-9pm', 1, 'Katie, Pam');
-INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, 
+    (1, 'Advanced Youth', 'Friday', '6-9pm', 1, 77.00, 'Katie, Pam');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost,
     otherinstructors) VALUES
-    (1, 'Beginner Adult', 'Friday', '6-9pm', 1, 'Katie, Pam');
-INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, 
+    (1, 'Beginner Adult', 'Friday', '6-9pm', 1, 87.00, 'Katie, Pam');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (1, 'Advanced Adult', 'Friday', '6-9pm', 1, 'Katie, Pam');
+    (1, 'Advanced Adult', 'Friday', '6-9pm', 1, 90.00, 'Katie, Pam');

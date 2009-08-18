@@ -67,6 +67,7 @@ CREATE TABLE skatingclass (
     day VARCHAR(40),   -- the day on which the class is held
     timeslot VARCHAR(40),   -- the time slot during which the class is held
     instructorid INT8,       -- the id of the instructor for this class
+    cost FLOAT8,             -- the cost of registering for this class
     otherinstructors VARCHAR(40),   -- list of surnames of other instructors
 	date_updated TIMESTAMP default CURRENT_TIMESTAMP,       -- the date the record was last updated
    CONSTRAINT class_pk PRIMARY KEY (classid),
