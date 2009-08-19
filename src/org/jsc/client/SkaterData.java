@@ -2,8 +2,11 @@ package org.jsc.client;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -15,6 +18,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SourcesTableEvents;
@@ -30,7 +34,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class SkaterData implements EntryPoint, ValueChangeHandler {
 
     private LoginSession loginSession;
-    
+    private Map<java.lang.String,java.util.List<java.lang.String>> params;
     private HeaderPanel header;
     private ContentPanel content;
     private LoginScreen login;
@@ -60,10 +64,16 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         // Create our header with internal toolbar
         header = new HeaderPanel(loginSession);
         header.setTitle("Juneau Skating Club");
-
+   
         // Create the screens to be used in the application
         content = new ContentPanel();
         content.setStyleName("jsc-content");
+        
+        // Store the parameters passed into the page
+        params = Window.Location.getParameterMap();
+        for (Map.Entry<String, List<String>> param : params.entrySet()) {
+            GWT.log(param.getKey() + " " + param.getValue().toString(), null);
+        }
         
         login = new LoginScreen(loginSession);
         settings = new SettingsScreen(loginSession);
@@ -102,10 +112,23 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
      */
     public void onValueChange(ValueChangeEvent event) {
         Object historyToken = event.getValue();
+        
         if (!loginSession.isAuthenticated() &! historyToken.equals("settings")
                 &! historyToken.equals("confirm") &! historyToken.equals("cancel")) {
             historyToken = "signout";
         }
+        
+        //Check if this is an IPT response from PayPal, and if so redirect to the confirm page
+        List<String> txList = params.get("tx");
+        if (txList != null && txList.size() > 0) {
+            GWT.log("Transaction id: " + txList.get(0), null);
+            confirm.setTransactionId(params.get("tx").get(0));
+            confirm.setStatus(params.get("st").get(0));
+            confirm.setAmountPaid(params.get("amt").get(0));
+            confirm.setRosterId(params.get("item_number").get(0));
+            historyToken = "confirm";
+        }
+        
         if (historyToken.equals("settings")) {
             settings.updateScreen();
             content.setScreen(settings);

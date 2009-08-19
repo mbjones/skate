@@ -28,13 +28,17 @@ public class ConfirmScreen extends BaseScreen {
 
     
     // ?tx=89009871KK074674R&st=Completed&amt=77.00&cc=USD&cm=&item_number=7
-    private HorizontalPanel screen;
-    private Label rosterId;
-    private Label transactionId;
-    private Label amountPaid;
-    private Label status;
-
+    private String rosterId;
+    private String transactionId;
+    private String amountPaid;
+    private String status;
+    private Label rosterIdField;
+    private Label transactionIdField;
+    private Label amountPaidField;
+    private Label statusField;
     private Button accountButton;
+    private HorizontalPanel screen;
+
     
     // TODO: move regService to a separate class, one instance for the client
     private SkaterRegistrationServiceAsync regService;
@@ -71,17 +75,17 @@ public class ConfirmScreen extends BaseScreen {
         Grid g = new Grid(numrows, 2);
         HTMLTable.CellFormatter fmt = g.getCellFormatter();
         g.setWidget(0, 0, new Label("Registration #:"));
-        rosterId = new Label("1234");
-        g.setWidget(0, 1, rosterId);
+        rosterIdField = new Label("1234");
+        g.setWidget(0, 1, rosterIdField);
         g.setWidget(1, 0, new Label("Transaction #:"));
-        transactionId = new Label("8TE412ER4091Q12EC72MMN");
-        g.setWidget(1, 1, transactionId);
+        transactionIdField = new Label("8TE412ER4091Q12EC72MMN");
+        g.setWidget(1, 1, transactionIdField);
         g.setWidget(2, 0, new Label("Amount paid:"));
-        amountPaid = new Label("$77.00");
-        g.setWidget(2, 1, amountPaid);
+        amountPaidField = new Label("$77.00");
+        g.setWidget(2, 1, amountPaidField);
         g.setWidget(3, 0, new Label("Payment status:"));
-        status = new Label("Completed");
-        g.setWidget(3, 1, status);
+        statusField = new Label("Completed");
+        g.setWidget(3, 1, statusField);
         
 //        accountButton = new Button("Create Account");
 //        accountButton.addClickHandler(new ClickHandler() {
@@ -110,9 +114,9 @@ public class ConfirmScreen extends BaseScreen {
         GWT.log("Creating account...", null);
     
         // Gather information from the form
-        String fname = rosterId.getText();
-        String mname = transactionId.getText();
-        String lname = amountPaid.getText();
+        String fname = rosterIdField.getText();
+        String mname = transactionIdField.getText();
+        String lname = amountPaidField.getText();
         
         // Validate necessary input, making sure required fields are included
 //        boolean isValid = true;
@@ -212,5 +216,65 @@ public class ConfirmScreen extends BaseScreen {
             }
         }
         return isMissing;
+    }
+
+    /**
+     * @return the rosterId
+     */
+    public String getRosterId() {
+        return rosterId;
+    }
+
+    /**
+     * @param rosterId the rosterId to set
+     */
+    public void setRosterId(String rosterId) {
+        this.rosterId = rosterId;
+        rosterIdField.setText(rosterId);
+    }
+
+    /**
+     * @return the transactionId
+     */
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    /**
+     * @param transactionId the transactionId to set
+     */
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+        transactionIdField.setText(transactionId);
+    }
+
+    /**
+     * @return the amountPaid
+     */
+    public String getAmountPaid() {
+        return amountPaid;
+    }
+
+    /**
+     * @param amountPaid the amountPaid to set
+     */
+    public void setAmountPaid(String amountPaid) {
+        this.amountPaid = amountPaid;
+        amountPaidField.setText(amountPaid);
+    }
+
+    /**
+     * @return the status
+     */
+    public String getStatus() {
+        return status;
+    }
+
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(String status) {
+        this.status = status;
+        statusField.setText(status);
     }
 }

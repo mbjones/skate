@@ -133,7 +133,7 @@ public class LoginScreen extends BaseScreen {
                     loginSession.setAuthenticated(true);
 
                     // Change our application state to the classes screen
-                    History.newItem("myclasses");
+                    History.newItem("register");
                 } else {
                     loginSession.setAuthenticated(false);
                     setMessage("Incorrect email or password. Please try again.");

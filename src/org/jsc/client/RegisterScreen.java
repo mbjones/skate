@@ -41,6 +41,7 @@ public class RegisterScreen extends BaseScreen {
     private HorizontalPanel outerRegPanel;
     private HTMLPanel regPanel;
     private Grid reggrid;
+    private HTMLPanel gridWrapper;
     private ListBox classField;
 //    private TextBox fnameField;
 //    private TextBox mnameField;
@@ -53,7 +54,6 @@ public class RegisterScreen extends BaseScreen {
     private Button registerButton;
     
     private SkaterRegistrationServiceAsync regService;
-
 
     public RegisterScreen(LoginSession loginSession) {
         super(loginSession);
@@ -129,11 +129,9 @@ public class RegisterScreen extends BaseScreen {
         
         regPanel = new HTMLPanel(HTML_STRUCTURE);
         regPanel.addAndReplaceElement(new HTMLPanel(STEP_1), "explainstep");
-        // TODO: the 'wizard" id is getting replaced -- need to keep it active to allow new replacements
-        HTMLPanel foo = new HTMLPanel("<div id=\"wizard\"></div>");
-        foo.add(reggrid, "wizard");
-        regPanel.addAndReplaceElement(foo, "wizard");
-        Element el = regPanel.getElementById("wizard");
+        gridWrapper = new HTMLPanel("<div id=\"wizard\"></div>");
+        gridWrapper.add(reggrid, "wizard");
+        regPanel.addAndReplaceElement(gridWrapper, "wizard");
         outerRegPanel.add(regPanel);
         screen.add(outerRegPanel);
     }
@@ -179,6 +177,7 @@ public class RegisterScreen extends BaseScreen {
                         classKeyList.put(curClass.getValue(), curClass.getKey());
                     }
                     updateClassListBox();
+                    //regPanel.addAndReplaceElement(gridWrapper, "wizard");
                 }
             }
         };
