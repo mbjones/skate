@@ -111,5 +111,11 @@ CREATE TABLE roster (
    CONSTRAINT roster_student_fk FOREIGN KEY (pid) REFERENCES people
 );
 
--- Query to select the people in a class
--- SELECT p.*, r.levelpassed, c.classname from roster r, people p, skatingclass c WHERE r.pid = p.pid AND r.classid = c.classid;
+-- rosterpeople -- a view over the roster and person tables joined showing selected fields
+CREATE OR REPLACE VIEW rosterpeople AS 
+ SELECT r.rosterid, r.classid, r.pid, r.levelPassed, r.payment_amount, 
+        r.payment_date, r.paypal_tx_id, r.paypal_gross, r.paypal_fee, 
+        r.paypal_status, r.date_updated, p.surname, p.givenname
+   FROM roster r, people p
+  WHERE r.pid = p.pid;
+
