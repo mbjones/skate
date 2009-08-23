@@ -5,11 +5,13 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.TreeMap;
 
 import org.jsc.client.Person;
 import org.jsc.client.RosterEntry;
+import org.jsc.client.SessionSkatingClass;
 import org.jsc.client.SkaterRegistrationService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -186,6 +188,50 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         } catch(SQLException ex) {
             System.err.println("SQLException: " + ex.getMessage());
         }
+        return classList;
+    }
+    
+    /**
+     * Look up the list of current classes that are available in the database,
+     * and return them as an ArrayList of SessionSkatingClass objects.
+     * @param person the person used for authentication credentials
+     * @return the ArrayList of SessionSkatingClass instances
+     */
+    public ArrayList<SessionSkatingClass> getSessionClassList(Person person) {
+        ArrayList<SessionSkatingClass> classList = new ArrayList<SessionSkatingClass>();
+        
+        // Check authentication credentials
+        boolean isAuthentic = checkCredentials(person);
+        if (!isAuthentic) {
+            return null;
+        }
+        
+        // Query the database to get the list of classes
+        StringBuffer sql = new StringBuffer();
+        sql.append("select season, sessionname, classtype, day, timeslot, classid from sessionclasses");
+        System.out.println(sql.toString());
+        
+        try {
+            Connection con = getConnection();
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql.toString());
+            while (rs.next()) {
+                SessionSkatingClass sc = new SessionSkatingClass();
+                sc.setSeason(rs.getString(1));
+                sc.setSessionNum(rs.getInt(2));
+                sc.setClassType(rs.getString(3));
+                sc.setDay(rs.getString(4));
+                sc.setTimeslot(rs.getString(5));
+                sc.setClassId(rs.getLong(6));
+                classList.add(sc);
+            }
+            stmt.close();
+            con.close();
+
+        } catch(SQLException ex) {
+            System.err.println("SQLException: " + ex.getMessage());
+        }
+        // START HERE: com.google.gwt.user.client.rpc.SerializationException: java.lang.reflect.InvocationTargetException
         return classList;
     }
     

@@ -12,6 +12,11 @@ public class HeaderPanel extends VerticalPanel {
     private Label title;
     private Label statusLabel;
     private LoginSession loginSession;
+    private Hyperlink regLink;
+    private Hyperlink classesLink;
+    private Hyperlink manageLink;
+    private Hyperlink settingsLink;
+    private Hyperlink signoutLink;
     
     /**
      * Construct the header, passing it the login session to be used in tracking
@@ -32,11 +37,14 @@ public class HeaderPanel extends VerticalPanel {
         this.addStyleName("jsc-header");
         
         HorizontalPanel leftLinks = new HorizontalPanel(); 
-        leftLinks.add(new Hyperlink("Register for a Class", "register"));
+        regLink = new Hyperlink("Register for a Class", "register");
+        leftLinks.add(regLink);
         leftLinks.add(createSeparatorLabel());
-        leftLinks.add(new Hyperlink("My Classes", "myclasses"));
+        classesLink = new Hyperlink("My Classes", "myclasses");
+        leftLinks.add(classesLink);
         leftLinks.add(createSeparatorLabel());
-        leftLinks.add(new Hyperlink("Manage Classes", "manage"));
+        manageLink = new Hyperlink("Manage Classes", "manage");
+        leftLinks.add(manageLink);
         leftLinks.addStyleName("jsc-toolbar");
         
         HorizontalPanel rightLinks = new HorizontalPanel();
@@ -45,11 +53,11 @@ public class HeaderPanel extends VerticalPanel {
         rightLinks.add(statusLabel);
         updateStatus();
         rightLinks.add(createSeparatorLabel());
-        Hyperlink link0 = new Hyperlink("Settings", "settings");
-        rightLinks.add(link0);
+        settingsLink = new Hyperlink("Settings", "settings");
+        rightLinks.add(settingsLink);
         rightLinks.add(createSeparatorLabel());
-        Hyperlink link1 = new Hyperlink("Sign Out", "signout");
-        rightLinks.add(link1); 
+        signoutLink = new Hyperlink("Sign Out", "signout");
+        rightLinks.add(signoutLink); 
         rightLinks.addStyleName("jsc-toolbar");
         
         toolbar = new HorizontalPanel();
@@ -84,8 +92,12 @@ public class HeaderPanel extends VerticalPanel {
         if (loginSession.isAuthenticated()) {
             statusLabel.setText(loginSession.getPerson().getFname() + " " + 
                     loginSession.getPerson().getLname());
+            //signoutLink.setText("Sign Out");
+            //regLink.setVisible(false);
         } else {
             statusLabel.setText(" ");
+            //signoutLink.setText("Sign In");
+            //regLink.setVisible(true);
         }
     }
     

@@ -1,5 +1,6 @@
 package org.jsc.client;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -26,16 +27,18 @@ public class RegisterScreen extends BaseScreen {
     private static final String PAYPAL_RETURN_URL = "http://reg.juneauskatingclub.org";
     private static final String PAYPAL_CANCEL_URL = "http://reg.juneauskatingclub.org";
     private static final String PAYMENT_DATA_ID = "U7fGZVYSiD6KerUAg_PhVMlmWIkK1MM2WazdncZQz_v4Dx4HIpre8iyz92e";
-    private static final String PRICE = "77";
+    private static final int EARLY_PRICE_GRACE_DAYS = 2;
+    private static final String EARLY_PRICE = "70";
+    private static final String STANDARD_PRICE = "80";
     
     private static final String HTML_STRUCTURE = "<div id=\"explainstep\"></div><div id=\"wizard\"></div>";
     private static final String STEP_1 = "<div id=\"explainstep\"><p class=\"jsc-step\">Step 1: Choose a class</p><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p><p class=\"jsc-text\">Registrion fee: <b>$77.00</b></p></div>";
     private static final String STEP_2 = "<div id=\"explainstep\"><p class=\"jsc-step\">Step 2: Process payment</p><p class=\"jsc-text\">Registrion fee: <b>$77.00</b></p><p class=\"jsc-text\">Please make your payment using PayPal by clicking on the button below.  Your registration is <em>not complete</em> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
     
-    // classList stores the classes keyed on the name string for name-based sorting
-    private TreeMap<String, String> classList;
-    // classKeyList has the same data as classList but is keyed on the classid for ease of lookup
-    private TreeMap<String, String> classKeyList;
+    private ClassListModel sessionClassList;
+    // sessionClassLabels has the same data as sessionClassList but is keyed on 
+    // the classid for ease of lookup of the label associated with a class
+    private TreeMap<String, String> sessionClassLabels;
     
     private HorizontalPanel screen;
     private HorizontalPanel outerRegPanel;
@@ -55,10 +58,11 @@ public class RegisterScreen extends BaseScreen {
     
     private SkaterRegistrationServiceAsync regService;
 
-    public RegisterScreen(LoginSession loginSession) {
+    public RegisterScreen(LoginSession loginSession, ClassListModel sessionClassList) {
         super(loginSession);
-        classList = new TreeMap<String, String>();
-        classKeyList = new TreeMap<String, String>();
+        //sessionClassList = new ClassListModel(loginSession);
+        this.sessionClassList = sessionClassList;
+        sessionClassLabels = new TreeMap<String, String>();
         layoutScreen();
         this.setContentPanel(screen);
         regService = GWT.create(SkaterRegistrationService.class);
@@ -83,7 +87,6 @@ public class RegisterScreen extends BaseScreen {
         HTMLTable.CellFormatter fmt = reggrid.getCellFormatter();
         reggrid.setWidget(0, 0, new Label("Class:"));
         classField = new ListBox();
-        updateClassListBox();
         classField.setVisibleItemCount(1);
         reggrid.setWidget(0, 1, classField);
         
@@ -135,55 +138,28 @@ public class RegisterScreen extends BaseScreen {
         outerRegPanel.add(regPanel);
         screen.add(outerRegPanel);
     }
-
-    /**
-     * Remove the current list of classes from the box and replace with the 
-     * classes that are currently present in classList.
-     */
-    private void updateClassListBox() {
-        classField.clear();
-        for (Map.Entry<String, String> curClass : classList.entrySet()) {
-            classField.addItem(curClass.getKey(), curClass.getValue());
-        }
-    }
     
     /**
-     * Look up the current list of classes from the registration servlet and
-     * store it for use in the UI later.
+     * Remove the current list of classes from the box and replace with the 
+     * classes that are currently present in sessionClassList.
      */
-    protected void getClassList() {
-        // Initialize the service proxy.
-        if (regService == null) {
-            regService = GWT.create(SkaterRegistrationService.class);
+    protected void updateClassListBox() {
+        classField.clear();
+        sessionClassLabels = new TreeMap<String, String>();
+        //sessionClassList.refreshClassList();
+        ArrayList<SessionSkatingClass> list = sessionClassList.getClassList();
+        if (list != null) {
+            for (SessionSkatingClass curClass : list) {
+                GWT.log("SessionClass: " + (new Long(curClass.getClassId()).toString()) + " " + curClass.getClassType(), null);
+                StringBuffer classLabel = new StringBuffer(curClass.getSeason());
+                classLabel.append(" Session ").append(curClass.getSessionNum());
+                classLabel.append(" ").append(curClass.getClassType());
+                classLabel.append(" (").append(curClass.getDay());
+                classLabel.append(" ").append(curClass.getTimeslot()).append(")");
+                classField.addItem(classLabel.toString(), new Long(curClass.getClassId()).toString());
+                sessionClassLabels.put(new Long(curClass.getClassId()).toString(), classLabel.toString());
+            }
         }
-
-        // Set up the callback object.
-        AsyncCallback<TreeMap<String,String>> callback = new AsyncCallback<TreeMap<String,String>>() {
-            public void onFailure(Throwable caught) {
-                // TODO: Do something with errors.
-                GWT.log("Failed to get list of classes.", null);
-            }
-
-            public void onSuccess(TreeMap<String,String> list) {
-                if (list == null) {
-                    // Failure on the remote end.
-                    setMessage("Error finding the list of classes.");
-                    return;
-                } else {
-                    // Assign the classList, and populate the classKeyList by iterating
-                    // over all keys and reversing the keys and values in the new Map
-                    classList = list;
-                    for (Map.Entry<String, String> curClass : classList.entrySet()) {
-                        classKeyList.put(curClass.getValue(), curClass.getKey());
-                    }
-                    updateClassListBox();
-                    //regPanel.addAndReplaceElement(gridWrapper, "wizard");
-                }
-            }
-        };
-
-        // Make the call to the registration service.
-        regService.getClassList(loginSession.getPerson(), callback);
     }
 
     /**
@@ -218,6 +194,7 @@ public class RegisterScreen extends BaseScreen {
                     if (newEntry == null) {
                         // Failure on the remote end.
                         setMessage("Error registering for the class.");
+                        // TODO: Need to reset the form and return to the main menu
                         return;
                     } else {
                         clearMessage();
@@ -225,10 +202,10 @@ public class RegisterScreen extends BaseScreen {
                             "<form id=\"wizard\" action=\""+ PAYPAL_URL + "\" method=\"post\">" +
                             "<input type=\"hidden\" name=\"cmd\" value=\"_xclick\">" +
                             "<input type=\"hidden\" name=\"business\" value=\"" + MERCHANT_ID + "\">" +
-                            "<input type=\"hidden\" name=\"item_name\" value=\"" + classKeyList.get(new Long(newEntry.getClassid()).toString()) + "\">" +
+                            "<input type=\"hidden\" name=\"item_name\" value=\"" + sessionClassLabels.get(new Long(newEntry.getClassid()).toString()) + "\">" +
                             "<input type=\"hidden\" name=\"currency_code\" value=\"USD\">" +
                             "<input type=\"hidden\" name=\"item_number\" value=\""+ newEntry.getRosterid() +"\">" +
-                            "<input type=\"hidden\" name=\"amount\" value=\"" + PRICE + "\">" +
+                            "<input type=\"hidden\" name=\"amount\" value=\"" + STANDARD_PRICE + "\">" +
                             "<input type=\"hidden\" name=\"no_note\" value=\"1\">" +
                             "<input type=\"hidden\" name=\"no_shipping\" value=\"1\">" +
                             "<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ PAYPAL_HEADER_IMAGE + "\">" +

@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 
 public class JSCSessionClassTest extends TestCase {
     
-    JSCSessionClass c;
+    SessionSkatingClass c;
     long sid;
     long session;
     long classid;
@@ -14,12 +14,12 @@ public class JSCSessionClassTest extends TestCase {
         sid = 1;
         session = 3;
         classid = 1;
-        c = new JSCSessionClass(sid, session, "2008-2009", 
+        c = new SessionSkatingClass(sid, session, "2008-2009", 
                 classid, "BS-"+classid);
     }
 
     public void testJSCSessionClass() {
-        JSCSessionClass c1 = new JSCSessionClass(sid, session, "2008-2009", 
+        SessionSkatingClass c1 = new SessionSkatingClass(sid, session, "2008-2009", 
                 classid, "BS-"+classid);
         assertTrue("JSCSessionClass constructor failed.", c1 != null);
     }

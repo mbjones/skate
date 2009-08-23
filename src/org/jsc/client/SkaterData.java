@@ -5,12 +5,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.jsc.client.event.SkatingClassChangeEvent;
+import org.jsc.client.event.SkatingClassChangeHandler;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
@@ -44,7 +48,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
     private ManageScreen manage;
     private ConfirmScreen confirm;
 
-    private ClassListModel classList = new ClassListModel();
+    private ClassListModel sessionClassList;
     private TextBox searchText = new TextBox();
     private Button searchButton = new Button("Search");
     private FlexTable classesTable = new FlexTable();
@@ -52,15 +56,21 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
     private ArrayList<String> rosterList = new ArrayList<String>();
     //private Panel leftPanel;
     //private Panel rightPanel;
+    private HandlerManager eventBus;
 
     /**
      * This is the entry point method.
      */
     public void onModuleLoad() {
 
+        // Create our event bus for handling application events
+        eventBus = new HandlerManager(null);
+        
         // Create a login session, which initially is not logged in
         loginSession = new LoginSession();
         
+        sessionClassList = new ClassListModel(eventBus, loginSession);
+
         // Create our header with internal toolbar
         header = new HeaderPanel(loginSession);
         header.setTitle("Juneau Skating Club");
@@ -78,7 +88,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         login = new LoginScreen(loginSession);
         settings = new SettingsScreen(loginSession);
         myclasses = new MyClassesScreen(loginSession);
-        register = new RegisterScreen(loginSession);
+        register = new RegisterScreen(loginSession, sessionClassList);
         manage = new ManageScreen(loginSession);
         confirm = new ConfirmScreen(loginSession);
         
@@ -98,14 +108,21 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         root.add(header);
         root.add(content);
         root.setStylePrimaryName("jsc-root-window");
-
+        
+        // Register as a handler for Skating class changes, and handle those changes
+        eventBus.addHandler(SkatingClassChangeEvent.TYPE, new SkatingClassChangeHandler(){
+            public void onClassChange(SkatingClassChangeEvent event) {
+                register.updateClassListBox();
+            }
+        });
+        
         // Add history listener
         History.addValueChangeHandler(this);
 
         // Now that we've setup our listener, fire the initial history state.
         History.fireCurrentHistoryState();
     }
-
+    
     /**
      * This method is called whenever the application's history changes, and 
      * we use it to track application state. 
@@ -138,7 +155,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         } else if (historyToken.equals("myclasses")) {
             content.setScreen(myclasses);
         } else if (historyToken.equals("register")) {
-            register.getClassList();
+            sessionClassList.refreshClassList();
             content.setScreen(register);
         } else if (historyToken.equals("manage")) {
             content.setScreen(manage);
@@ -169,6 +186,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
      * Create and lay out the components for the left side content
      * Currently unused; keeping code as example of table layout and manipulation
      */
+/*
     private Panel createLeftPanel() {
         VerticalPanel leftPanel = new VerticalPanel();
 
@@ -200,10 +218,11 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
 
         return leftPanel;
     }
-
+*/
     /**
      * Create an alert dialog to display
      */
+/*
     private DialogBox createDialog() {
         // Create the dialog box
         final DialogBox dialogBox = new DialogBox();
@@ -229,11 +248,12 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
 
         return dialogBox;
     }
-
+*/
     /**
      * Create and lay out the widgets for the right side content
      * Currently unused; keeping code as example of table layout and manipulation
      */
+/*
     private Panel createRightPanel() {
         VerticalPanel rightPanel = new VerticalPanel();
         // Add the class details to the right panel
@@ -258,9 +278,9 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         Iterator it = classList.iterator();
         while (it.hasNext()) {
             int row = classesTable.getRowCount();
-            JSCSessionClass sc = (JSCSessionClass)it.next();
+            SessionSkatingClass sc = (SessionSkatingClass)it.next();
             long classid = sc.getClassId();
-            classesTable.setText(row, 0, sc.getClassName());
+            classesTable.setText(row, 0, sc.getClassType());
             classesTable.setText(row, 1, sc.getInstructorFullName());
             // add button to remove this class from the list
             Button removeButton = new Button(new Long(classid).toString());
@@ -307,4 +327,5 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
             rosterTable.setWidget(row, 3, removeClass);
         }   
     }
+*/
 }

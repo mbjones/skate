@@ -2,25 +2,32 @@ package org.jsc.client;
 
 import java.util.Iterator;
 
+import com.google.gwt.event.shared.HandlerManager;
+
 import junit.framework.TestCase;
 
 public class ClassListModelTest extends TestCase {
 
     ClassListModel cm;
-    JSCSessionClass c;
+    SessionSkatingClass c;
     
     protected void setUp() throws Exception {
         super.setUp();
-        cm = new ClassListModel();
+        LoginSession loginSession = null;
+        HandlerManager eventBus = null;
+        
+        cm = new ClassListModel(eventBus, loginSession);
         long sid = 1;
         long session = 3;
         long classid = 1;
-        c = new JSCSessionClass(sid, session, "2008-2009", 
+        c = new SessionSkatingClass(sid, session, "2008-2009", 
                 classid, "BS-"+classid);
     }
 
     public void testClassListModel() {
-        ClassListModel lcm = new ClassListModel();
+        LoginSession loginSession = null;
+        HandlerManager eventBus = null;
+        ClassListModel lcm = new ClassListModel(eventBus, loginSession);
         assertTrue(lcm != null);
         assertTrue(lcm.size() == 0);
     }
@@ -41,7 +48,7 @@ public class ClassListModelTest extends TestCase {
         assertTrue(it != null);
         while (it.hasNext()) {
             Object o = it.next();
-            assertTrue(o instanceof JSCSessionClass);
+            assertTrue(o instanceof SessionSkatingClass);
         }        
     }
 }

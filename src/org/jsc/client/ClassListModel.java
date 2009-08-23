@@ -1,56 +1,77 @@
 package org.jsc.client;
 
-//import java.sql.Connection;
-//import java.sql.DriverManager;
-//import java.sql.PreparedStatement;
-//import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
 
+import org.jsc.client.event.SkatingClassChangeEvent;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+
+/**
+ * A Model that stores the list of classes for local access, and can synchronize
+ * the list with the remote database as changes are made.
+ * @author Matt Jones
+ */
 public class ClassListModel {
-    private Vector<JSCSessionClass> classList;
+    private ArrayList<SessionSkatingClass> classList;
+    private SkaterRegistrationServiceAsync regService;
+    private LoginSession loginSession;
+    private HandlerManager eventBus;
     
     /**
-     * Construct the list of classes before the list is populated.
+     * Construct the class list model by registering the event bus to be used and the 
+     * login session to be used in contacting the database.
+     * @param eventBus the bus to publish change events
+     * @param loginSession that contains credentials for logging into the remote RPC service
      */
-    public ClassListModel() {
-        classList = new Vector<JSCSessionClass>();
+    public ClassListModel(HandlerManager eventBus, LoginSession loginSession) {
+        this.loginSession = loginSession;
+        this.eventBus = eventBus;
     }
     
     /**
-     * Read the list of classes from the sessionclass view in the database.
-     *
+     * Look up the current list of classes from the registration servlet and
+     * store it for use in the UI later.
      */
-    public void refreshClassList() {
-        String dbDriver = "pgsql";
-        String connString = "somehost";
-        String user = "jones";
-        String password = "";
-        String sql = "SELECT * from classes;";
-        /*
-        try {
-            Connection conn = openConnection(dbDriver, connString, user, password);
-            PreparedStatement stmt = conn.prepareStatement(sql);
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
+    protected void refreshClassList() {
+        // Initialize the service proxy.
+        if (regService == null) {
+            regService = GWT.create(SkaterRegistrationService.class);
         }
-        */
-        
-        for (long classid = 1; classid <= 8; classid++) {
-            long sid = 1;
-            long session = 3;
-            JSCSessionClass c1 = new JSCSessionClass(sid, session, "2008-2009", 
-                    classid, "BS-"+classid);
-            c1.setInstructorFullName("L. Anderson");
-            addClass(c1);
-        }
+
+        // Set up the callback object.
+        AsyncCallback<ArrayList<SessionSkatingClass>> callback = new AsyncCallback<ArrayList<SessionSkatingClass>>() {
+            public void onFailure(Throwable caught) {
+                // TODO: Do something with errors.
+                GWT.log("Failed to get list of classes.", caught);
+            }
+
+            public void onSuccess(ArrayList<SessionSkatingClass> list) {
+                if (list == null) {
+                    // Failure on the remote end.
+                    GWT.log("Error finding the list of classes.", null);
+                    return;
+                } else {
+                    // Assign the classList
+                    classList = list;
+                    SkatingClassChangeEvent event = new SkatingClassChangeEvent(classList);
+                    eventBus.fireEvent(event);
+                }
+            }
+        };
+
+        // Make the call to the registration service.
+        regService.getSessionClassList(loginSession.getPerson(), callback);
     }
-    
+
     /**
      * Add a new JSC class to the list, and synchronize it with the database
      * @param jscClass
      */
-    public void addClass(JSCSessionClass jscClass) {
+    public void addClass(SessionSkatingClass jscClass) {
         classList.add(jscClass);
     }
     
@@ -69,33 +90,19 @@ public class ClassListModel {
     public Iterator iterator() {
         return classList.iterator();
     }
-    
-    /** 
-     * Method to establish a JDBC database connection 
-     *
-     * @param dbDriver the string representing the database driver
-     * @param connection the string representing the database connection parameters
-     * @param user name of the user to use for database connection
-     * @param password password for the user to use for database connection
+
+    /**
+     * @return the classList
      */
-    /*
-    private static Connection openConnection(String dbDriver, String connection,
-                  String user, String password)
-                  throws SQLException
-   {
-       // Load the JDBC driver
-       try {
-         Class.forName(dbDriver);
-       } catch (ClassNotFoundException e) {
-         System.err.println("Error opening database connection: "+e.getMessage());
-         return null;
-       }
-       
-       // Connect to the database
-       Connection connLocal = null;
-       connLocal = DriverManager.getConnection( connection, user, password);
-       return connLocal;
+    public ArrayList<SessionSkatingClass> getClassList() {
+        return classList;
     }
-    */
+
+    /**
+     * @param classList the classList to set
+     */
+    public void setClassList(ArrayList<SessionSkatingClass> classList) {
+        this.classList = classList;
+    }
 
 }
