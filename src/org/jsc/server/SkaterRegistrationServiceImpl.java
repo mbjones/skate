@@ -160,7 +160,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         
         // Query the database to get the list of classes
         StringBuffer sql = new StringBuffer();
-        sql.append("select season, sessionname, classtype, day, timeslot, classid from sessionclasses");
+        sql.append("select sid, sessionname, season, startdate, enddate, ");
+        sql.append("classid, classtype, day, timeslot, instructorid, ");
+        sql.append("otherinstructors, surname, givenname from sessionclasses");
         System.out.println(sql.toString());
         
         try {
@@ -169,12 +171,19 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             ResultSet rs = stmt.executeQuery(sql.toString());
             while (rs.next()) {
                 SessionSkatingClass sc = new SessionSkatingClass();
-                sc.setSeason(rs.getString(1));
+                sc.setSid(rs.getLong(1));
                 sc.setSessionNum(rs.getInt(2));
-                sc.setClassType(rs.getString(3));
-                sc.setDay(rs.getString(4));
-                sc.setTimeslot(rs.getString(5));
+                sc.setSeason(rs.getString(3));
+                sc.setStartDate(rs.getString(4));
+                sc.setEndDate(rs.getString(5));
                 sc.setClassId(rs.getLong(6));
+                sc.setClassType(rs.getString(7));
+                sc.setDay(rs.getString(8));
+                sc.setTimeslot(rs.getString(9));
+                sc.setInstructorId(rs.getLong(10));
+                sc.setOtherinstructors(rs.getString(11));
+                sc.setInstructorSurName(rs.getString(12));
+                sc.setInstructorGivenName(rs.getString(13));
                 classList.add(sc);
             }
             stmt.close();

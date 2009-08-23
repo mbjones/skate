@@ -19,7 +19,8 @@ public class SessionSkatingClass implements Serializable {
     private String day;
     private String timeslot;
     private long instructorId;
-    private String instructorFullName;
+    private String instructorSurName;
+    private String instructorGivenName;
     private double cost;
     private String otherinstructors;
     
@@ -189,17 +190,31 @@ public class SessionSkatingClass implements Serializable {
     }
 
     /**
-     * @return the instructorFullName
+     * @return the instructorSurName
      */
-    public String getInstructorFullName() {
-        return instructorFullName;
+    public String getInstructorSurName() {
+        return instructorSurName;
     }
 
     /**
-     * @param instructorFullName the instructorFullName to set
+     * @param instructorSurName the instructorSurName to set
      */
-    public void setInstructorFullName(String instructorFullName) {
-        this.instructorFullName = instructorFullName;
+    public void setInstructorSurName(String instructorSurName) {
+        this.instructorSurName = instructorSurName;
+    }
+
+    /**
+     * @return the instructorGivenName
+     */
+    public String getInstructorGivenName() {
+        return instructorGivenName;
+    }
+
+    /**
+     * @param instructorGivenName the instructorGivenName to set
+     */
+    public void setInstructorGivenName(String instructorGivenName) {
+        this.instructorGivenName = instructorGivenName;
     }
 
     /**

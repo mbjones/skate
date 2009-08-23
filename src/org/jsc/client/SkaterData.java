@@ -115,7 +115,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         // Register as a handler for Skating class changes, and handle those changes
         eventBus.addHandler(SkatingClassChangeEvent.TYPE, new SkatingClassChangeHandler(){
             public void onClassChange(SkatingClassChangeEvent event) {
-                register.updateClassListBox();
+                register.updateRegistrationScreenDetails();
             }
         });
         
