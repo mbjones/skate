@@ -21,6 +21,9 @@ public class RosterEntry implements Serializable {
     private double paypal_gross;
     private double paypal_fee;
     private String paypal_status;
+    private Date date_updated;
+    private String surname;
+    private String givenname;
     
     /**
      * Default constructor takes no parameters.
@@ -149,4 +152,47 @@ public class RosterEntry implements Serializable {
     public void setPaypal_status(String paypalStatus) {
         paypal_status = paypalStatus;
     }
+
+    /**
+     * @return the date_updated
+     */
+    public Date getDate_updated() {
+        return date_updated;
+    }
+
+    /**
+     * @param dateUpdated the date_updated to set
+     */
+    public void setDate_updated(Date dateUpdated) {
+        date_updated = dateUpdated;
+    }
+
+    /**
+     * @return the surname
+     */
+    public String getSurname() {
+        return surname;
+    }
+
+    /**
+     * @param surname the surname to set
+     */
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    /**
+     * @return the givenname
+     */
+    public String getGivenname() {
+        return givenname;
+    }
+
+    /**
+     * @param givenName the givenName to set
+     */
+    public void setGivenname(String givenname) {
+        this.givenname = givenname;
+    }
+    
 }

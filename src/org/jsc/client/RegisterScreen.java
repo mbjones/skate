@@ -12,12 +12,14 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * A set of panels to allow users to register for a class.  Collects the information
@@ -40,7 +42,7 @@ public class RegisterScreen extends BaseScreen {
     private static final String HTML_STRUCTURE = "<div id=\"explainstep\"></div><div id=\"wizard\"></div>";
     private static final String DISCOUNT_EXPLANATION = "<p class=\"jsc-text\">Because it helps with planning our class sizes, <b>we offer a discount for those who register early</b> (more than " + EARLY_PRICE_GRACE_DAYS + " days before the session starts).</p>";
     private static final String STEP_1 = "<div id=\"explainstep\"><p class=\"jsc-step\">Step 1: Choose a class</p><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p>" + DISCOUNT_EXPLANATION + "</div>";
-    private static final String STEP_2 = "<div id=\"explainstep\"><p class=\"jsc-step\">Step 2: Process payment</p><p class=\"jsc-text\">Please make your payment using PayPal by clicking on the button below.  Your registration is <em>not complete</em> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
+    private static final String STEP_2 = "<div id=\"explainstep\"><p class=\"jsc-step\">Step 2: Process payment</p><p class=\"jsc-text\">You must make your payment using PayPal by clicking on the button below.  <b>Your registration is <em>not complete</em></b> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
     
     private ClassListModel sessionClassList;
     // sessionClassLabels has the same data as sessionClassList but is keyed on 
@@ -66,6 +68,7 @@ public class RegisterScreen extends BaseScreen {
     private double cost;    
     private SkaterRegistrationServiceAsync regService;
     private String costFormatted;
+    private int numGridRows;
 
     public RegisterScreen(LoginSession loginSession, ClassListModel sessionClassList) {
         super(loginSession);
@@ -88,22 +91,44 @@ public class RegisterScreen extends BaseScreen {
         outerRegPanel = new HorizontalPanel();
         outerRegPanel.addStyleName("jsc-rightpanel");
         
-        int numrows = 9;
+        numGridRows = 0;
         
-        reggrid = new Grid(numrows, 2);
+        reggrid = new Grid(11, 2);
 
         HTMLTable.CellFormatter fmt = reggrid.getCellFormatter();
-        reggrid.setWidget(0, 0, new Label("Registration fee:"));
+        
         feeLabel = new Label("");
-        reggrid.setWidget(0, 1, feeLabel);
+        addToGrid("Registration fee:", feeLabel);
+
+        addToGrid(" ", new Label(" "));
         
-        reggrid.setWidget(1, 0, new Label(""));
-        reggrid.setWidget(1, 1, new Label(""));
-        
-        reggrid.setWidget(2, 0, new Label("Class:"));
         classField = new ListBox();
         classField.setVisibleItemCount(1);
-        reggrid.setWidget(2, 1, classField);
+        addToGrid("Class:", classField);
+        
+        addToGrid(" ", new Label(" "));
+        
+        CheckBox fsArtistry = new CheckBox();
+        fsArtistry.setValue(false, false);
+        addToGrid("Figure Skating Artistry:", fsArtistry);
+
+        CheckBox fsMitf = new CheckBox();
+        fsMitf.setValue(false, false);
+        addToGrid("Figure Skating Moves in the Field:", fsMitf);
+        
+        CheckBox fsSynchro = new CheckBox();
+        fsSynchro.setValue(false, false);
+        addToGrid("Figure Skating Synchro:", fsSynchro);
+        
+        CheckBox fsClubIce = new CheckBox();
+        fsClubIce.setValue(false, false);
+        addToGrid("Figure Skating Club Ice:", fsClubIce);
+        
+        addToGrid(" ", new Label(" "));
+        
+        CheckBox membership = new CheckBox();
+        membership.setValue(false, false);
+        addToGrid("JSC Club Membership:", membership);
         
         /*
         g.setWidget(0, 0, new Label("First Name:"));
@@ -137,10 +162,10 @@ public class RegisterScreen extends BaseScreen {
                 register();
             }
         });
-        reggrid.setWidget(8, 1, registerButton);
+        addToGrid(" ", registerButton);
 
         // Set the css style for each row
-        for (int row=0; row < numrows; row++) {
+        for (int row=0; row < numGridRows; row++) {
             fmt.addStyleName(row, 0,  "jsc-fieldlabel");
             fmt.addStyleName(row, 1,  "jsc-field");
         }
@@ -152,6 +177,18 @@ public class RegisterScreen extends BaseScreen {
         regPanel.addAndReplaceElement(gridWrapper, "wizard");
         outerRegPanel.add(regPanel);
         screen.add(outerRegPanel);
+    }
+    
+    /**
+     * Add the given widget to the grid table along with a label.  the Label is
+     * placed in column 1 of the grid, and the widget in column 2.
+     * @param label the label to display in column 1
+     * @param widget the widget to display in column 2
+     */
+    private void addToGrid(String label, Widget widget) {
+        reggrid.setWidget(numGridRows, 0, new Label(label));
+        reggrid.setWidget(numGridRows, 1, widget);
+        numGridRows++;
     }
     
     /**

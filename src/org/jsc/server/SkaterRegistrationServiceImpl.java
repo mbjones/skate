@@ -28,6 +28,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     private static final String JDBC_USER = "jscdb";
     private static final String JDBC_PASS = "1skate2";
     private static final String JDBC_DRIVER = "org.postgresql.Driver";
+    private static final String ROSTER_QUERY = "SELECT rosterid, classid, pid, levelPassed, payment_amount, payment_date, paypal_tx_id, paypal_gross, paypal_fee, paypal_status, date_updated, surname, givenname FROM rosterpeople";
     
     /**
      * Create a new person entry in the backing relational database, or update
@@ -192,7 +193,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         } catch(SQLException ex) {
             System.err.println("SQLException: " + ex.getMessage());
         }
-        // START HERE: com.google.gwt.user.client.rpc.SerializationException: java.lang.reflect.InvocationTargetException
+
         return classList;
     }
     
@@ -235,18 +236,23 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             stmt.executeUpdate(sql.toString());
             stmt.close();
             
+            // query the roster table to find the rosterid that was created
             stmt = con.createStatement();
             StringBuffer rsql = new StringBuffer();
-            rsql.append("SELECT rosterid,classid,pid,levelpassed,payment_amount,");
-            rsql.append("payment_date,paypal_tx_id,paypal_gross,paypal_fee,");
-            rsql.append("paypal_status from roster where ");
-            rsql.append("classid = '").append(entry.getClassid()).append("'");
+            rsql.append(ROSTER_QUERY);
+
+            //rsql.append("SELECT rosterid,classid,pid,levelpassed,payment_amount,");
+            //rsql.append("payment_date,paypal_tx_id,paypal_gross,paypal_fee,");
+            //rsql.append("paypal_status from roster ");
+            rsql.append(" WHERE classid = '").append(entry.getClassid()).append("'");
             rsql.append(" AND ");
             rsql.append("pid = '").append(entry.getPid()).append("'");
             System.out.println(rsql.toString());
             
             ResultSet rs = stmt.executeQuery(rsql.toString());
-            newEntry = createRosterEntry(rs);
+            if (rs.next()) {
+                newEntry = createRosterEntry(rs);
+            }
             stmt.close();
             con.close();
 
@@ -258,7 +264,75 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     }
 
     /**
-     * Helper method to create a RosterEntry object from the results fo a JDBC
+     * Look up the roster of classes for which this student has registered and
+     * return it as an ArrayList.
+     * @param person the person for whom the roster is compiled
+     * @return an ArrayList of RosterEntry objects 
+     */
+    public ArrayList<RosterEntry> getStudentRoster(Person person) {
+        // Create the query string to find the roster membership
+        StringBuffer sql = new StringBuffer();
+        sql.append(ROSTER_QUERY);
+        sql.append(" WHERE pid = ").append(person.getPid());
+        System.out.println(sql.toString());
+        
+        return getRoster(person, sql.toString());
+    }
+    
+    /**
+     * Look up the roster of classes for which this student has registered and
+     * return it as an ArrayList.
+     * @param person the person for whom the roster is compiled
+     * @return an ArrayList of RosterEntry objects 
+     */
+    public ArrayList<RosterEntry> getClassRoster(Person person, long classId) {
+        // Create the query string to find the roster membership
+        StringBuffer sql = new StringBuffer();
+        sql.append(ROSTER_QUERY);
+        sql.append(" WHERE classid = ").append(classId);
+        System.out.println(sql.toString());
+        
+        return getRoster(person, sql.toString());
+    }
+    
+    /**
+     * Look up a roster of classes.  The exact roster looked up depends on the sql
+     * that is passed into the class, sometimes for a particular student, sometimes
+     * for a particular class.
+     * @param person the person used to authenticate the connection
+     * @param rosterQuery the SQL query used to find the roster
+     * @return and ArrayList of RosterEntry objects matching the query
+     */
+    private ArrayList<RosterEntry> getRoster(Person person, String rosterQuery) {
+
+        ArrayList<RosterEntry> roster = new ArrayList<RosterEntry>();
+        
+        // Check authentication credentials
+        boolean isAuthentic = checkCredentials(person);
+        if (!isAuthentic) {
+            return null;
+        }
+        
+        try {
+            Connection con = getConnection();
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(rosterQuery.toString());
+            while (rs.next()) {
+                RosterEntry newEntry = createRosterEntry(rs);
+                roster.add(newEntry);
+            }
+            stmt.close();
+            con.close();
+
+        } catch(SQLException ex) {
+            System.err.println("SQLException: " + ex.getMessage());
+        }
+
+        return roster;
+    }
+    
+    /**
+     * Helper method to create a RosterEntry object from the results of a JDBC
      * query that contains the appropriate fields.
      * @param rs the result set containing the roster fields
      * @return an instance of RosterEntry
@@ -266,19 +340,20 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      */
     private RosterEntry createRosterEntry(ResultSet rs) throws SQLException {
         RosterEntry entry = null;
-        if (rs.next()) {
-            entry = new RosterEntry();
-            entry.setRosterid(rs.getLong(1));
-            entry.setClassid(rs.getLong(2));
-            entry.setPid(rs.getLong(3));
-            entry.setLevelpassed(rs.getString(4));
-            entry.setPayment_amount(rs.getDouble(5));
-            entry.setPayment_date(rs.getDate(6));
-            entry.setPaypal_tx_id(rs.getString(7));
-            entry.setPaypal_gross(rs.getDouble(8));
-            entry.setPaypal_fee(rs.getDouble(9));
-            entry.setPaypal_status(rs.getString(10));
-        }
+        entry = new RosterEntry();
+        entry.setRosterid(rs.getLong(1));
+        entry.setClassid(rs.getLong(2));
+        entry.setPid(rs.getLong(3));
+        entry.setLevelpassed(rs.getString(4));
+        entry.setPayment_amount(rs.getDouble(5));
+        entry.setPayment_date(rs.getDate(6));
+        entry.setPaypal_tx_id(rs.getString(7));
+        entry.setPaypal_gross(rs.getDouble(8));
+        entry.setPaypal_fee(rs.getDouble(9));
+        entry.setPaypal_status(rs.getString(10));
+        entry.setDate_updated(rs.getDate(11));
+        entry.setSurname(rs.getString(12));
+        entry.setGivenname(rs.getString(13));
         return entry;
     }
     

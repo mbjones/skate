@@ -18,4 +18,6 @@ public interface SkaterRegistrationServiceAsync {
   void getPerson(long pid, AsyncCallback<Person> callback);
   void getSessionClassList(Person person, AsyncCallback<ArrayList<SessionSkatingClass>> callback);
   void register(Person person, RosterEntry newEntry, AsyncCallback<RosterEntry> callback);
+  void getStudentRoster(Person person, AsyncCallback<ArrayList<RosterEntry>> callback);
+  void getClassRoster(Person person, long classid, AsyncCallback<ArrayList<RosterEntry>> callback);
 }

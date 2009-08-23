@@ -52,6 +52,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
     private ConfirmScreen confirm;
 
     private ClassListModel sessionClassList;
+    private RosterModel rosterModel;
     private TextBox searchText = new TextBox();
     private Button searchButton = new Button("Search");
     private FlexTable classesTable = new FlexTable();
@@ -73,6 +74,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         loginSession = new LoginSession();
         
         sessionClassList = new ClassListModel(eventBus, loginSession);
+        rosterModel = new RosterModel(eventBus, loginSession);
 
         // Create our header with internal toolbar
         header = new HeaderPanel(loginSession);
@@ -90,7 +92,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         
         login = new LoginScreen(loginSession);
         settings = new SettingsScreen(loginSession);
-        myclasses = new MyClassesScreen(loginSession);
+        myclasses = new MyClassesScreen(loginSession, eventBus, sessionClassList, rosterModel);
         register = new RegisterScreen(loginSession, sessionClassList);
         manage = new ManageScreen(loginSession);
         confirm = new ConfirmScreen(loginSession);
@@ -156,6 +158,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
             loginSession.setAuthenticated(false);
             content.setScreen(login);
         } else if (historyToken.equals("myclasses")) {
+            rosterModel.refreshRoster();
             content.setScreen(myclasses);
         } else if (historyToken.equals("register")) {
             sessionClassList.refreshClassList();
