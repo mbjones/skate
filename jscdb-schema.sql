@@ -77,7 +77,8 @@ CREATE TABLE skatingclass (
 
 -- Sessionclasses -- a view over the session and skatingclass tables joined
 CREATE OR REPLACE VIEW sessionclasses AS 
- SELECT s.sid, s.sessionname, s.season, s.startdate, s.enddate, c.classid, c.classtype, c.day, c.timeslot, c.instructorid
+ SELECT s.sid, s.sessionname, s.season, s.startdate, s.enddate, c.classid, 
+        c.classtype, c.day, c.timeslot, c.instructorid, c.cost, c.otherinstructors
    FROM sessions s, skatingclass c
   WHERE c.sid = s.sid;
   
