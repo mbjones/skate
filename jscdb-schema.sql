@@ -78,9 +78,11 @@ CREATE TABLE skatingclass (
 -- Sessionclasses -- a view over the session and skatingclass tables joined
 CREATE OR REPLACE VIEW sessionclasses AS 
  SELECT s.sid, s.sessionname, s.season, s.startdate, s.enddate, c.classid, 
-        c.classtype, c.day, c.timeslot, c.instructorid, c.cost, c.otherinstructors
-   FROM sessions s, skatingclass c
-  WHERE c.sid = s.sid;
+        c.classtype, c.day, c.timeslot, c.instructorid, c.cost, 
+        c.otherinstructors, p.surname, p.givenname
+   FROM sessions s, skatingclass c, people p
+  WHERE c.sid = s.sid
+    AND p.pid = c.instructorid;
   
 -- Levels -- the ASFS levels that can be passed
 CREATE TABLE levels (
