@@ -6,7 +6,7 @@ import java.io.Serializable;
  * A model of a JSC Session and Class combination, with properties from both
  * the class and session merged in a single object.
  * .
- * @author Matthew Jones
+ * @author Matt Jones
  */
 public class SessionSkatingClass implements Serializable {
     private long sid;

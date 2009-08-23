@@ -73,6 +73,7 @@ public class ClassListModel {
      */
     public void addClass(SessionSkatingClass jscClass) {
         classList.add(jscClass);
+        // TODO: send this to the remote DB too
     }
     
     /**

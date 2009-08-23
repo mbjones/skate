@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * called when PayPal sends back confirmation information with the PayPal
  * transaction id.
  * 
- * @author Matthew Jones
+ * @author Matt Jones
  */
 public class ConfirmScreen extends BaseScreen {
 
@@ -86,14 +86,6 @@ public class ConfirmScreen extends BaseScreen {
         g.setWidget(3, 0, new Label("Payment status:"));
         statusField = new Label("Completed");
         g.setWidget(3, 1, statusField);
-        
-//        accountButton = new Button("Create Account");
-//        accountButton.addClickHandler(new ClickHandler() {
-//            public void onClick(ClickEvent event) {
-//                createAccount();
-//            }
-//        });
-//        g.setWidget(8, 0, accountButton);
 
         // Set the css style for each row
         for (int row=0; row < numrows; row++) {
@@ -117,15 +109,6 @@ public class ConfirmScreen extends BaseScreen {
         String fname = rosterIdField.getText();
         String mname = transactionIdField.getText();
         String lname = amountPaidField.getText();
-        
-        // Validate necessary input, making sure required fields are included
-//        boolean isValid = true;
-//        String[] fields = {fname, lname, email, birthday, homephone};
-//        if (fieldMissing( fields )) {
-//            isValid = false;
-//            setMessage("Missing required information. Please fill in all fields.");
-//            return;
-//        }
 
         // We only need a password if its a new account or the user is
         // providing a new one; in either case, the retyped password must match

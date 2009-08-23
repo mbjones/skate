@@ -19,7 +19,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 /**
  * An implementation of a registration service that handles the creation of 
  * new accounts as well as registration of people into classes.
- * @author Matthew Jones
+ * @author Matt Jones
  */
 public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         implements SkaterRegistrationService {
@@ -141,54 +141,6 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         Person person = null;
         person = lookupPerson(pid);
         return person;
-    }
-    
-    /**
-     * Look up the list of current classes that are available in the database,
-     * and return them as a Hash where the key is the classId and the value is
-     * a descriptive label for the class.
-     * @param person the person used for authentication credentials
-     * @return the TreeMap of the classes, keyed on classId
-     */
-    public TreeMap<String,String> getClassList(Person person) {
-        TreeMap<String,String> classList = new TreeMap<String,String>();
-        
-        // Check authentication credentials
-        boolean isAuthentic = checkCredentials(person);
-        if (!isAuthentic) {
-            return null;
-        }
-        
-        // Query the database to get the list of classes
-        StringBuffer sql = new StringBuffer();
-        sql.append("select season, sessionname, classtype, day, timeslot, classid from sessionclasses");
-        System.out.println(sql.toString());
-        
-        try {
-            Connection con = getConnection();
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(sql.toString());
-            while (rs.next()) {
-                String season = rs.getString(1);
-                String sessionName = rs.getString(2);
-                String classType = rs.getString(3);
-                String day = rs.getString(4);
-                String timeslot = rs.getString(5);
-                String classId = rs.getString(6);
-                StringBuffer classLabel = new StringBuffer(season);
-                classLabel.append(" Session ").append(sessionName);
-                classLabel.append(" ").append(classType);
-                classLabel.append(" (").append(day);
-                classLabel.append(" ").append(timeslot).append(")");
-                classList.put(classLabel.toString(), classId);
-            }
-            stmt.close();
-            con.close();
-
-        } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage());
-        }
-        return classList;
     }
     
     /**

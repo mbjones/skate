@@ -16,6 +16,10 @@ import com.google.gwt.event.shared.GwtEvent;
 public class SkatingClassChangeEvent extends GwtEvent<SkatingClassChangeHandler> {
     private final List<SessionSkatingClass> sessionClassList;
 
+    /**
+     * Create a new event that indicates that the list of skating classes has changed.
+     * @param sessionClassList the list of classes that has been changed
+     */
     public SkatingClassChangeEvent(List<SessionSkatingClass> sessionClassList) {
         super();
         this.sessionClassList = sessionClassList;
@@ -34,6 +38,10 @@ public class SkatingClassChangeEvent extends GwtEvent<SkatingClassChangeHandler>
         return TYPE;
     }
 
+    /**
+     * Retrieve the list of classes that was changed in this change event
+     * @return SessionSkatingClass list that was changed
+     */
     public List<SessionSkatingClass> getClassList(){
         return sessionClassList;
     }

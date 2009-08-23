@@ -19,6 +19,11 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 
+/**
+ * A set of panels to allow users to register for a class.  Collects the information
+ * needed for registration, and then redirects the user to PayPal for payment.
+ * @author Matt Jones
+ */
 public class RegisterScreen extends BaseScreen {
 
     private static final String MERCHANT_ID = "339U3JVK2X4E6";
@@ -146,7 +151,6 @@ public class RegisterScreen extends BaseScreen {
     protected void updateClassListBox() {
         classField.clear();
         sessionClassLabels = new TreeMap<String, String>();
-        //sessionClassList.refreshClassList();
         ArrayList<SessionSkatingClass> list = sessionClassList.getClassList();
         if (list != null) {
             for (SessionSkatingClass curClass : list) {
@@ -163,8 +167,8 @@ public class RegisterScreen extends BaseScreen {
     }
 
     /**
-     * Register for a class by setting a RosterEntry object from the form and
-     * pass it to the remote registration service.
+     * Register for a class by creating a RosterEntry object from the form input
+     * and pass it to the remote registration service.
      */
     private void register() {
         GWT.log("Registering for a class...", null);

@@ -32,8 +32,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * The SkaterData web application supports registration and payment for 
- * JSC skating classes.
+ * figure skating classes.  Developed for the Juneau Skating Club, but made
+ * open source in the hope that it is useful to other non-profit skating clubs.
+ * 
  * Entry point classes define <code>onModuleLoad()</code>.
+ * @author Matt Jones
  */
 public class SkaterData implements EntryPoint, ValueChangeHandler {
 
