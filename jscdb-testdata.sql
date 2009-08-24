@@ -24,8 +24,8 @@ INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('Adv
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('Beginner Adult','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('Advanced Adult','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Club Ice','TBD','SS1');
-INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS MITF','TBD','SS1');
-INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Artistry','TBD','SS1');
+INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Moves in the Field','TBD','SS1');
+INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Power and Artistry','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Synchro','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('Hockey','TBD','SS1');
     
