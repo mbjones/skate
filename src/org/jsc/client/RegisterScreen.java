@@ -203,12 +203,8 @@ public class RegisterScreen extends BaseScreen {
         if (list != null) {
             for (SessionSkatingClass curClass : list) {
                 GWT.log("SessionClass: " + (new Long(curClass.getClassId()).toString()) + " " + curClass.getClassType(), null);
-                StringBuffer classLabel = new StringBuffer(curClass.getSeason());
-                classLabel.append(" Session ").append(curClass.getSessionNum());
-                classLabel.append(" ").append(curClass.getClassType());
-                classLabel.append(" (").append(curClass.getDay());
-                classLabel.append(" ").append(curClass.getTimeslot()).append(")");
-                classField.addItem(classLabel.toString(), new Long(curClass.getClassId()).toString());
+                String classLabel = curClass.formatClassLabel();
+                classField.addItem(classLabel, new Long(curClass.getClassId()).toString());
                 sessionClassLabels.put(new Long(curClass.getClassId()).toString(), classLabel.toString());
             }
         }

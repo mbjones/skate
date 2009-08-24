@@ -92,7 +92,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         
         login = new LoginScreen(loginSession);
         settings = new SettingsScreen(loginSession);
-        myclasses = new MyClassesScreen(loginSession, eventBus, sessionClassList, rosterModel);
+        myclasses = new MyClassesScreen(loginSession, eventBus, sessionClassList);
         register = new RegisterScreen(loginSession, sessionClassList);
         manage = new ManageScreen(loginSession);
         confirm = new ConfirmScreen(loginSession);

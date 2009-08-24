@@ -244,4 +244,18 @@ public class SessionSkatingClass implements Serializable {
     public void setOtherinstructors(String otherinstructors) {
         this.otherinstructors = otherinstructors;
     }
+
+    /**
+     * Create a string that can be used to represent this class, including session
+     * information and schedule information.
+     * @return the String label representing the class
+     */
+    public String formatClassLabel() {
+        StringBuffer classLabel = new StringBuffer(getSeason());
+        classLabel.append(" Session ").append(getSessionNum());
+        classLabel.append(" ").append(getClassType());
+        classLabel.append(" (").append(getDay());
+        classLabel.append(" ").append(getTimeslot()).append(")");
+        return classLabel.toString();
+    }
 }

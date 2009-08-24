@@ -38,7 +38,7 @@ public class ClassListModelTest extends TestCase {
     }
 
     public void testAddClass() {
-        cm.addClass(c);
+        cm.addSkatingClass(c);
         assertTrue(cm.size() == 1);
     }
 

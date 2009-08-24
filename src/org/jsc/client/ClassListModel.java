@@ -70,9 +70,23 @@ public class ClassListModel {
      * Add a new JSC class to the list, and synchronize it with the database
      * @param jscClass
      */
-    public void addClass(SessionSkatingClass jscClass) {
+    public void addSkatingClass(SessionSkatingClass jscClass) {
         classList.add(jscClass);
         // TODO: send this to the remote DB too
+    }
+    
+    /**
+     * @param classId the identifier of the class to look up
+     * @return the skating class for the provided classId
+     */
+    public SessionSkatingClass getSkatingClass(long classId) {
+        SessionSkatingClass foundSkatingClass = null;
+        for (SessionSkatingClass curClass : classList) {
+            if (curClass.getClassId() == classId) {
+                foundSkatingClass = curClass;
+            }
+        }
+        return foundSkatingClass;
     }
     
     /**
