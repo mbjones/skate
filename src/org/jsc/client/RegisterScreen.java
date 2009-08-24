@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -41,8 +42,10 @@ public class RegisterScreen extends BaseScreen {
     
     private static final String HTML_STRUCTURE = "<div id=\"explainstep\"></div><div id=\"wizard\"></div>";
     private static final String DISCOUNT_EXPLANATION = "<p class=\"jsc-text\">Because it helps with planning our class sizes, <b>we offer a discount for those who register early</b> (more than " + EARLY_PRICE_GRACE_DAYS + " days before the session starts).</p>";
-    private static final String STEP_1 = "<div id=\"explainstep\"><p class=\"jsc-step\">Step 1: Choose a class</p><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p>" + DISCOUNT_EXPLANATION + "</div>";
-    private static final String STEP_2 = "<div id=\"explainstep\"><p class=\"jsc-step\">Step 2: Process payment</p><p class=\"jsc-text\">You must make your payment using PayPal by clicking on the button below.  <b>Your registration is <em>not complete</em></b> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
+    private static final String PRICE_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p>" + DISCOUNT_EXPLANATION + "</div>";
+    private static final String PAYPAL_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">You must make your payment using PayPal by clicking on the button below.  <b>Your registration is <em>not complete</em></b> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
+    private static final String STEP_1 = "Step 1: Choose a class";
+    private static final String STEP_2 = "Step 2: Process payment";
     
     private ClassListModel sessionClassList;
     // sessionClassLabels has the same data as sessionClassList but is keyed on 
@@ -50,26 +53,30 @@ public class RegisterScreen extends BaseScreen {
     private TreeMap<String, String> sessionClassLabels;
     
     private HorizontalPanel screen;
-    private HorizontalPanel outerRegPanel;
-    private HTMLPanel regPanel;
-    private Grid reggrid;
+    private VerticalPanel outerVerticalPanel;
+    private HorizontalPanel outerHorizPanel;
+    private HTMLPanel bsHTMLPanel;
+    private VerticalPanel bsClassChoicePanel;
+    private VerticalPanel bsPaymentPanel;
+    private VerticalPanel bsLeftPanel;
+    private VerticalPanel fsRightPanel;
+    private Label stepLabel;
+    private Grid basicSkillsGrid;
+    private Grid figureSkatingGrid;
     private HTMLPanel gridWrapper;
     private Label feeLabel;
     private ListBox classField;
-//    private TextBox fnameField;
-//    private TextBox mnameField;
-//    private TextBox lnameField;
-//    private TextBox emailField;
-//    private TextBox birthdayField;
-//    private TextBox homephoneField;
-//    private PasswordTextBox password1Field;
-//    private PasswordTextBox password2Field;
     private Button registerButton;
     private double cost;    
     private SkaterRegistrationServiceAsync regService;
     private String costFormatted;
-    private int numGridRows;
 
+    /**
+     * Construct the Registration view and controller used to display a form for
+     * registering for skating classes.
+     * @param loginSession the authenticated login session for submissions to the remote service
+     * @param sessionClassList the model of skating classes
+     */
     public RegisterScreen(LoginSession loginSession, ClassListModel sessionClassList) {
         super(loginSession);
         this.sessionClassList = sessionClassList;
@@ -87,128 +94,143 @@ public class RegisterScreen extends BaseScreen {
         this.setStyleName("jsc-onepanel-screen");
         
         screen = new HorizontalPanel();
-        
-        outerRegPanel = new HorizontalPanel();
-        outerRegPanel.addStyleName("jsc-rightpanel");
-        
-        numGridRows = 0;
-        
-        reggrid = new Grid(11, 2);
-
-        HTMLTable.CellFormatter fmt = reggrid.getCellFormatter();
+                        
+        basicSkillsGrid = new Grid(0, 2);
         
         feeLabel = new Label("");
-        addToGrid("Registration fee:", feeLabel);
+        addToBSGrid("Registration fee:", feeLabel);
 
-        addToGrid(" ", new Label(" "));
+        addToBSGrid(" ", new Label(" "));
         
         classField = new ListBox();
         classField.setVisibleItemCount(1);
-        addToGrid("Class:", classField);
+        addToBSGrid("Class:", classField);
         
-        addToGrid(" ", new Label(" "));
+        bsClassChoicePanel = new VerticalPanel();
+        bsClassChoicePanel.add(new HTMLPanel(PRICE_EXPLANATION));
+        bsClassChoicePanel.add(basicSkillsGrid);
         
-        CheckBox fsArtistry = new CheckBox();
-        fsArtistry.setValue(false, false);
-        addToGrid("Figure Skating Artistry:", fsArtistry);
-
-        CheckBox fsMitf = new CheckBox();
-        fsMitf.setValue(false, false);
-        addToGrid("Figure Skating Moves in the Field:", fsMitf);
+        bsPaymentPanel = new VerticalPanel();
+        bsPaymentPanel.setVisible(false);
         
-        CheckBox fsSynchro = new CheckBox();
-        fsSynchro.setValue(false, false);
-        addToGrid("Figure Skating Synchro:", fsSynchro);
+        bsHTMLPanel = new HTMLPanel(HTML_STRUCTURE);
+//        bsHTMLPanel.addAndReplaceElement(new HTMLPanel(PRICE_EXPLANATION), "explainstep");
+//        gridWrapper = new HTMLPanel("<div id=\"wizard\"></div>");
+//        gridWrapper.add(basicSkillsGrid, "wizard");
+//        bsHTMLPanel.addAndReplaceElement(gridWrapper, "wizard");
+        bsLeftPanel = new VerticalPanel();
+        Label bscTitle = new Label("Basic Skills Classes");
+        bscTitle.addStyleName("jsc-fieldlabel-left");
+        bsLeftPanel.add(bscTitle);
+//        bsLeftPanel.add(bsHTMLPanel);
+        bsLeftPanel.add(bsClassChoicePanel);
+        bsLeftPanel.add(bsPaymentPanel);
         
-        CheckBox fsClubIce = new CheckBox();
-        fsClubIce.setValue(false, false);
-        addToGrid("Figure Skating Club Ice:", fsClubIce);
+        fsRightPanel = new VerticalPanel();
+        Label fscTitle = new Label("Figure Skating Classes");
+        fscTitle.addStyleName("jsc-fieldlabel-left");
+        fsRightPanel.add(fscTitle);
+        figureSkatingGrid = new Grid(0, 2);
+        fsRightPanel.add(figureSkatingGrid);
+        fsRightPanel.setVisible(false);
         
-        addToGrid(" ", new Label(" "));
-        
-        CheckBox membership = new CheckBox();
-        membership.setValue(false, false);
-        addToGrid("JSC Club Membership:", membership);
-        
-        /*
-        g.setWidget(0, 0, new Label("First Name:"));
-        fnameField = new TextBox();
-        g.setWidget(0, 1, fnameField);
-        g.setWidget(1, 0, new Label("Middle Name:"));
-        mnameField = new TextBox();
-        g.setWidget(1, 1, mnameField);
-        g.setWidget(2, 0, new Label("Last Name:"));
-        lnameField = new TextBox();
-        g.setWidget(2, 1, lnameField);
-        g.setWidget(3, 0, new Label("Email:"));
-        emailField = new TextBox();
-        g.setWidget(3, 1, emailField);
-        g.setWidget(4, 0, new Label("Birth date:"));
-        birthdayField = new TextBox();
-        g.setWidget(4, 1, birthdayField);
-        g.setWidget(5, 0, new Label("Phone:"));
-        homephoneField = new TextBox();
-        g.setWidget(5, 1, homephoneField);
-        g.setWidget(6, 0, new Label("Password:"));
-        password1Field = new PasswordTextBox();
-        g.setWidget(6, 1, password1Field);
-        g.setWidget(7, 0, new Label("Re-type password:"));
-        password2Field = new PasswordTextBox();
-        g.setWidget(7, 1, password2Field);
-        */
         registerButton = new Button("Go to Step 2");
         registerButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 register();
             }
         });
-        addToGrid(" ", registerButton);
-
-        // Set the css style for each row
-        for (int row=0; row < numGridRows; row++) {
-            fmt.addStyleName(row, 0,  "jsc-fieldlabel");
-            fmt.addStyleName(row, 1,  "jsc-field");
-        }
+        registerButton.addStyleName("jsc-button-right");
         
-        regPanel = new HTMLPanel(HTML_STRUCTURE);
-        regPanel.addAndReplaceElement(new HTMLPanel(STEP_1), "explainstep");
-        gridWrapper = new HTMLPanel("<div id=\"wizard\"></div>");
-        gridWrapper.add(reggrid, "wizard");
-        regPanel.addAndReplaceElement(gridWrapper, "wizard");
-        outerRegPanel.add(regPanel);
-        screen.add(outerRegPanel);
+        outerVerticalPanel = new VerticalPanel();
+        stepLabel = new Label(STEP_1);
+        stepLabel.addStyleName("jsc-step");
+        outerVerticalPanel.add(stepLabel);
+        outerHorizPanel = new HorizontalPanel();
+        outerHorizPanel.add(bsLeftPanel);
+        outerHorizPanel.add(fsRightPanel);
+        outerVerticalPanel.add(outerHorizPanel);
+        outerVerticalPanel.add(registerButton);
+        outerVerticalPanel.addStyleName("jsc-rightpanel");
+        screen.add(outerVerticalPanel);
     }
     
     /**
-     * Add the given widget to the grid table along with a label.  the Label is
+     * Add the given widget to the grid table along with a label.  The Label is
      * placed in column 1 of the grid, and the widget in column 2.
      * @param label the label to display in column 1
      * @param widget the widget to display in column 2
      */
-    private void addToGrid(String label, Widget widget) {
-        reggrid.setWidget(numGridRows, 0, new Label(label));
-        reggrid.setWidget(numGridRows, 1, widget);
-        numGridRows++;
+    private void addToBSGrid(String label, Widget widget) {
+        int newRow = basicSkillsGrid.insertRow(basicSkillsGrid.getRowCount());
+        basicSkillsGrid.setWidget(newRow, 0, new Label(label));
+        basicSkillsGrid.setWidget(newRow, 1, widget);
+        HTMLTable.CellFormatter fmt = basicSkillsGrid.getCellFormatter();
+        fmt.addStyleName(newRow, 0,  "jsc-fieldlabel");
+        fmt.addStyleName(newRow, 1,  "jsc-field");
+    }
+    
+    /**
+     * Add the given widget to the Figure Skating grid table along with a label.  
+     * The Label is placed in column 2 of the grid, and the widget in column 1.
+     * @param label the label to display in column 2
+     * @param widget the widget to display in column 1
+     */
+    private void addToFSGrid(String label, Widget widget) {
+        int newRow = figureSkatingGrid.insertRow(figureSkatingGrid.getRowCount());
+        figureSkatingGrid.setWidget(newRow, 0, widget);
+        figureSkatingGrid.setWidget(newRow, 1, new Label(label));
+        HTMLTable.CellFormatter fmt = figureSkatingGrid.getCellFormatter();
+        fmt.addStyleName(newRow, 0,  "jsc-fieldlabel");
+        fmt.addStyleName(newRow, 1,  "jsc-field");
     }
     
     /**
      * Remove the current list of classes from the box and replace with the 
-     * classes that are currently present in sessionClassList.
+     * classes that are currently present in sessionClassList. Reset the 
+     * registration form to the initial state of the application.
      */
     protected void updateRegistrationScreenDetails() {
-        // Change the list of classes to reflect the new data
+        // Reset the form fields to begin registration
+        bsPaymentPanel.setVisible(false);
+        stepLabel.setText(STEP_1);
+        bsClassChoicePanel.setVisible(true);
+        registerButton.setVisible(true);
+        
+        // Clear the list of basic skills classes to reflect the new data
         classField.clear();
         sessionClassLabels = new TreeMap<String, String>();
+        
+        // Remove all of the rows from the table, except the header row
+        int rows = figureSkatingGrid.getRowCount();
+        for (int i = rows-1; i >= 0; i--) {
+            GWT.log("Removing FS table row: " + i, null);
+            figureSkatingGrid.removeRow(i);
+        }
+
+        // Iterate over the new list of classes, populating the right widgets
         ArrayList<SessionSkatingClass> list = sessionClassList.getClassList();
         if (list != null) {
             for (SessionSkatingClass curClass : list) {
                 GWT.log("SessionClass: " + (new Long(curClass.getClassId()).toString()) + " " + curClass.getClassType(), null);
                 String classLabel = curClass.formatClassLabel();
-                classField.addItem(classLabel, new Long(curClass.getClassId()).toString());
-                sessionClassLabels.put(new Long(curClass.getClassId()).toString(), classLabel.toString());
+                
+                // If it starts with "FS " it is a figure skating class
+                if (curClass.getClassType().startsWith("FS ")) {
+                    CheckBox checkbox = new CheckBox();
+                    checkbox.setValue(false, false);
+                    addToFSGrid(classLabel, checkbox);
+                    
+                // Otherwise it is a Basic Skills class
+                } else {
+                    classField.addItem(classLabel, new Long(curClass.getClassId()).toString());
+                    sessionClassLabels.put(new Long(curClass.getClassId()).toString(), classLabel.toString());    
+                }
             }
         }
         
+        
+        // Update the cost and paypal forms
         cost = STANDARD_PRICE;
         String costExplanation = "";
         String sessionStart = list.get(0).getStartDate();
@@ -256,6 +278,7 @@ public class RegisterScreen extends BaseScreen {
 
             // Set up the callback object.
             AsyncCallback<RosterEntry> callback = new AsyncCallback<RosterEntry>() {
+
                 public void onFailure(Throwable caught) {
                     // TODO: Do something with errors.
                     GWT.log("Failed to register the RosterEntry.", null);
@@ -285,9 +308,15 @@ public class RegisterScreen extends BaseScreen {
                             "<input type=\"image\" src=\"https://www.sandbox.paypal.com/en_US/i/btn/btn_paynow_LG.gif\" border=\"0\" name=\"submit\" alt=\"PayPal - The safer, easier way to pay online!\">" +
                             "<img alt=\"\" border=\"0\" src=\"https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif\" width=\"1\" height=\"1\">" +
                             "</form>";
-                        
-                        regPanel.addAndReplaceElement(new HTMLPanel(STEP_2), "explainstep");
-                        regPanel.addAndReplaceElement(new HTMLPanel(testForm), "wizard");
+                        registerButton.setVisible(false);
+                        stepLabel.setText(STEP_2);
+                        bsClassChoicePanel.setVisible(false);
+                        bsPaymentPanel.clear();
+                        bsPaymentPanel.setVisible(true);
+                        bsPaymentPanel.add(new HTMLPanel(PAYPAL_EXPLANATION));
+                        bsPaymentPanel.add(new HTMLPanel(testForm));
+//                        bsHTMLPanel.addAndReplaceElement(new HTMLPanel(PAYPAL_EXPLANATION), "explainstep");
+//                        bsHTMLPanel.addAndReplaceElement(new HTMLPanel(testForm), "wizard");
                     }
                 }
             };
