@@ -43,7 +43,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
     private static final double EARLY_PRICE = 70.00;
     private static final double STANDARD_PRICE = 80.00;
     
-    private static final String HTML_STRUCTURE = "<div id=\"explainstep\"></div><div id=\"wizard\"></div>";
     private static final String DISCOUNT_EXPLANATION = "<p class=\"jsc-text\">Because it helps with planning our class sizes, <b>we offer a discount for those who register early</b> (more than " + EARLY_PRICE_GRACE_DAYS + " days before the session starts).</p>";
     private static final String PRICE_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p>" + DISCOUNT_EXPLANATION + "</div>";
     private static final String PAYPAL_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">You must make your payment using PayPal by clicking on the button below.  <b>Your registration is <em>not complete</em></b> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
@@ -63,7 +62,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
     private HorizontalPanel outerHorizPanel;
     private RadioButton bsRadio;
     private RadioButton fsRadio;
-    private HTMLPanel bsHTMLPanel;
     private VerticalPanel bsClassChoicePanel;
     private VerticalPanel bsPaymentPanel;
     private VerticalPanel bsLeftPanel;
@@ -71,7 +69,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
     private Label stepLabel;
     private Grid basicSkillsGrid;
     private Grid figureSkatingGrid;
-    private HTMLPanel gridWrapper;
     private Label feeLabel;
     private ListBox classField;
     private Button registerButton;
@@ -121,11 +118,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         bsPaymentPanel = new VerticalPanel();
         bsPaymentPanel.setVisible(false);
         
-        bsHTMLPanel = new HTMLPanel(HTML_STRUCTURE);
-//        bsHTMLPanel.addAndReplaceElement(new HTMLPanel(PRICE_EXPLANATION), "explainstep");
-//        gridWrapper = new HTMLPanel("<div id=\"wizard\"></div>");
-//        gridWrapper.add(basicSkillsGrid, "wizard");
-//        bsHTMLPanel.addAndReplaceElement(gridWrapper, "wizard");
         bsLeftPanel = new VerticalPanel();
         Label bscTitle = new Label("Basic Skills Classes");
         bscTitle.addStyleName("jsc-fieldlabel-left");
@@ -133,7 +125,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         Label bscDescription = new Label(BS_EXPLANATION);
         bscDescription.addStyleName("jsc-text");
         bsLeftPanel.add(bscDescription);
-//        bsLeftPanel.add(bsHTMLPanel);
         bsLeftPanel.add(bsClassChoicePanel);
         bsLeftPanel.add(bsPaymentPanel);
         
@@ -342,8 +333,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                         bsPaymentPanel.setVisible(true);
                         bsPaymentPanel.add(new HTMLPanel(PAYPAL_EXPLANATION));
                         bsPaymentPanel.add(new HTMLPanel(testForm));
-//                        bsHTMLPanel.addAndReplaceElement(new HTMLPanel(PAYPAL_EXPLANATION), "explainstep");
-//                        bsHTMLPanel.addAndReplaceElement(new HTMLPanel(testForm), "wizard");
                     }
                 }
             };
@@ -356,6 +345,10 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         }
     }
 
+    /**
+     * Listen for change events when the radio buttons on the registration form
+     * are selected and deselected.
+     */
     public void onValueChange(ValueChangeEvent event) {
         Widget sender = (Widget) event.getSource();
 
