@@ -7,6 +7,8 @@ import java.util.TreeMap;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
@@ -19,6 +21,7 @@ import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -27,7 +30,7 @@ import com.google.gwt.user.client.ui.Widget;
  * needed for registration, and then redirects the user to PayPal for payment.
  * @author Matt Jones
  */
-public class RegisterScreen extends BaseScreen {
+public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
 
     private static final String MERCHANT_ID = "339U3JVK2X4E6";
     private static final String PAYPAL_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr";
@@ -44,6 +47,9 @@ public class RegisterScreen extends BaseScreen {
     private static final String DISCOUNT_EXPLANATION = "<p class=\"jsc-text\">Because it helps with planning our class sizes, <b>we offer a discount for those who register early</b> (more than " + EARLY_PRICE_GRACE_DAYS + " days before the session starts).</p>";
     private static final String PRICE_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p>" + DISCOUNT_EXPLANATION + "</div>";
     private static final String PAYPAL_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">You must make your payment using PayPal by clicking on the button below.  <b>Your registration is <em>not complete</em></b> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
+    private static final String BS_EXPLANATION = "Basic Skills is our Learn to Skate program. These group lessons are based on the United States Figure Skating's (USFSA) Basic Skills Program. This is a nationwide, skills-based, graduated series of instruction for youth and adult skaters. This program is designed to teach all skaters the fundamentals of skating.";
+    private static final String FS_EXPLANATION = "Figure Skating is a one- to five-day-a-week program for skaters that have completed all of the Basic Skills Levels (8) or Adult Levels (4). Students work individually with their coach to develop their skills. Please only sign up for Figure Skating Classes if you have graduated from the Basic Skills program.";
+
     private static final String STEP_1 = "Step 1: Choose a class";
     private static final String STEP_2 = "Step 2: Process payment";
     
@@ -55,6 +61,8 @@ public class RegisterScreen extends BaseScreen {
     private HorizontalPanel screen;
     private VerticalPanel outerVerticalPanel;
     private HorizontalPanel outerHorizPanel;
+    private RadioButton bsRadio;
+    private RadioButton fsRadio;
     private HTMLPanel bsHTMLPanel;
     private VerticalPanel bsClassChoicePanel;
     private VerticalPanel bsPaymentPanel;
@@ -122,6 +130,9 @@ public class RegisterScreen extends BaseScreen {
         Label bscTitle = new Label("Basic Skills Classes");
         bscTitle.addStyleName("jsc-fieldlabel-left");
         bsLeftPanel.add(bscTitle);
+        Label bscDescription = new Label(BS_EXPLANATION);
+        bscDescription.addStyleName("jsc-text");
+        bsLeftPanel.add(bscDescription);
 //        bsLeftPanel.add(bsHTMLPanel);
         bsLeftPanel.add(bsClassChoicePanel);
         bsLeftPanel.add(bsPaymentPanel);
@@ -130,6 +141,9 @@ public class RegisterScreen extends BaseScreen {
         Label fscTitle = new Label("Figure Skating Classes");
         fscTitle.addStyleName("jsc-fieldlabel-left");
         fsRightPanel.add(fscTitle);
+        Label fscDescription = new Label(FS_EXPLANATION);
+        fscDescription.addStyleName("jsc-text");
+        fsRightPanel.add(fscDescription);
         figureSkatingGrid = new Grid(0, 2);
         fsRightPanel.add(figureSkatingGrid);
         fsRightPanel.setVisible(false);
@@ -146,6 +160,15 @@ public class RegisterScreen extends BaseScreen {
         stepLabel = new Label(STEP_1);
         stepLabel.addStyleName("jsc-step");
         outerVerticalPanel.add(stepLabel);
+        
+        bsRadio = new RadioButton("BSorFSGroup", "Basic Skills Classes");
+        bsRadio.addValueChangeHandler(this);
+        bsRadio.setValue(true);
+        fsRadio = new RadioButton("BSorFSGroup", "Figure Skating Classes");
+        fsRadio.addValueChangeHandler(this);
+        outerVerticalPanel.add(bsRadio);
+        outerVerticalPanel.add(fsRadio);
+        
         outerHorizPanel = new HorizontalPanel();
         outerHorizPanel.add(bsLeftPanel);
         outerHorizPanel.add(fsRightPanel);
@@ -194,6 +217,8 @@ public class RegisterScreen extends BaseScreen {
         // Reset the form fields to begin registration
         bsPaymentPanel.setVisible(false);
         stepLabel.setText(STEP_1);
+        bsRadio.setVisible(true);
+        fsRadio.setVisible(true);
         bsClassChoicePanel.setVisible(true);
         registerButton.setVisible(true);
         
@@ -310,6 +335,8 @@ public class RegisterScreen extends BaseScreen {
                             "</form>";
                         registerButton.setVisible(false);
                         stepLabel.setText(STEP_2);
+                        bsRadio.setVisible(false);
+                        fsRadio.setVisible(false);
                         bsClassChoicePanel.setVisible(false);
                         bsPaymentPanel.clear();
                         bsPaymentPanel.setVisible(true);
@@ -327,5 +354,20 @@ public class RegisterScreen extends BaseScreen {
         } else {
             GWT.log("Error: Can not register without first signing in.", null);
         }
+    }
+
+    public void onValueChange(ValueChangeEvent event) {
+        Widget sender = (Widget) event.getSource();
+
+        if (sender == bsRadio) {
+            GWT.log("bsRadio clicked", null);
+            bsLeftPanel.setVisible(true);
+            fsRightPanel.setVisible(false);
+        } else if (sender == fsRadio) {
+            GWT.log("fsRadio clicked", null);
+            bsLeftPanel.setVisible(false);
+            fsRightPanel.setVisible(true);
+        }
+
     }
 }
