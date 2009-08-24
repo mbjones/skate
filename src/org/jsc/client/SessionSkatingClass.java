@@ -3,7 +3,7 @@ package org.jsc.client;
 import java.io.Serializable;
 
 /**
- * A model of a JSC Session and Class combination, with properties from both
+ * A model of a Session and SkatingClass combination, with properties from both
  * the class and session merged in a single object.
  * .
  * @author Matt Jones
