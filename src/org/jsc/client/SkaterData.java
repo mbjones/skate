@@ -61,6 +61,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
     //private Panel leftPanel;
     //private Panel rightPanel;
     private HandlerManager eventBus;
+    private AboutDialog about;
 
     /**
      * This is the entry point method.
@@ -70,6 +71,9 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         // Create our event bus for handling application events
         eventBus = new HandlerManager(null);
         
+        // Initialize our About dialog
+        about = new AboutDialog();
+
         // Create a login session, which initially is not logged in
         loginSession = new LoginSession();
         
@@ -134,6 +138,10 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
      */
     public void onValueChange(ValueChangeEvent event) {
         Object historyToken = event.getValue();
+        if (historyToken.equals("about")) {
+            about.center();
+            about.show();
+        }
         
         if (!loginSession.isAuthenticated() &! historyToken.equals("settings")
                 &! historyToken.equals("confirm") &! historyToken.equals("cancel")) {
@@ -170,6 +178,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         } else if (historyToken.equals("cancel")) {
             content.setScreen(manage);
         }
+
         updateMessageFields();
         header.updateStatus();
     }

@@ -245,7 +245,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             }
         }
         
-        
         // Update the cost and paypal forms
         cost = STANDARD_PRICE;
         String costExplanation = "";
@@ -304,7 +303,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                     if (newEntry == null) {
                         // Failure on the remote end.
                         setMessage("Error registering for the class.");
-                        // TODO: Need to reset the form and return to the main menu
                         return;
                     } else {
                         clearMessage();

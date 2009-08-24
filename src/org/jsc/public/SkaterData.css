@@ -166,6 +166,12 @@ table.jsc-toolbar {
 	margin: 3pt;
 }
 
+.jsc-dialog {
+	margin: 3pt;
+	font-size: 12pt;
+	text-align: center;
+}
+
 .classes-ListHeader {
   background: #c1eec8 url(gradient.gif) repeat-x 0px -1px;
   font-weight: bold;
