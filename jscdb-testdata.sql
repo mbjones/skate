@@ -43,21 +43,46 @@ INSERT INTO people (surname, givenname, birthdate, password, role,
 INSERT INTO sessions (sessionname, season, startdate, enddate)
      VALUES ('1', '2009-2010', '2009-09-15', '2009-10-31');
 INSERT INTO sessions (sessionname, season, startdate, enddate)
-     VALUES ('2', '2009-2010', '2009-09-15', '2009-10-31');
+     VALUES ('2', '2009-2010', '2009-11-01', '2009-12-31');
 INSERT INTO sessions (sessionname, season, startdate, enddate)
-     VALUES ('3', '2009-2010', '2009-09-15', '2009-10-31');
+     VALUES ('3', '2009-2010', '2010-01-07', '2010-02-15');
 INSERT INTO sessions (sessionname, season, startdate, enddate)
-     VALUES ('4', '2009-2010', '2009-09-15', '2009-10-31');
+     VALUES ('4', '2009-2010', '2010-02-16', '2010-04-15');
 
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'Beginner Youth', 'Friday', '6-9pm', 1000, 77.00, 'Katie, Pam');
+    (5000, 'Beginner Youth', 'Friday', '6-9pm', 1000, 80.00, 'Katie, Pam');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'Advanced Youth', 'Friday', '6-9pm', 1000, 77.00, 'Katie, Pam');
+    (5000, 'Intermediate Youth', 'Friday', '6-9pm', 1000, 80.00, 'Katie, Pam');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5000, 'Advanced Youth', 'Friday', '6-9pm', 1000, 80.00, 'Katie, Pam');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost,
     otherinstructors) VALUES
-    (5000, 'Beginner Adult', 'Friday', '6-9pm', 1000, 87.00, 'Katie, Pam');
+    (5000, 'Beginner Adult', 'Friday', '6-9pm', 1000, 80.00, 'Katie, Pam');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'Advanced Adult', 'Friday', '6-9pm', 1000, 90.00, 'Katie, Pam');
+    (5000, 'Advanced Adult', 'Friday', '6-9pm', 1000, 80.00, 'Katie, Pam');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5000, 'Hockey Skating Skills', 'Sunday', '10am-12pm', 1000, 80.00, 'Chris');
+
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5000, 'FS Moves in the Field', 'Monday', '5-7pm', 1000, 75.00, 'Ebett');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5000, 'FS Artistry', 'Tuesday', '5-7pm', 1000, 75.00, 'Ebett');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5000, 'FS Synchro', 'Sunday', '3-5pm', 1000, 75.00, 'Ebett');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5000, 'FS Club Ice', 'Wednesday', '5-7pm', 1000, 75.00, 'Ebett');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5000, 'FS Club Ice', 'Friday', '5-7pm', 1000, 75.00, 'Ebett');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5000, 'FS Club Ice', 'Sunday', '5-7pm', 1000, 75.00, 'Ebett');

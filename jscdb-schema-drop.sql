@@ -5,6 +5,7 @@
 --     '$Date: 2008-07-06 20:25:34 -0800 (Sun, 06 Jul 2008) $'
 -- '$Revision: 4080 $'
 
+DROP VIEW rosterpeople;
 DROP TABLE roster;
 DROP VIEW sessionclasses;
 DROP TABLE levels;
