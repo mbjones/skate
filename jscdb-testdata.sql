@@ -51,6 +51,9 @@ INSERT INTO sessions (sessionname, season, startdate, enddate)
 
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
+    (5000, 'Snowplow Sam', 'Friday', '6-9pm', 1000, 80.00, 'Sigrid');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
     (5000, 'Beginner Youth', 'Friday', '6-9pm', 1000, 80.00, 'Katie, Pam');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
