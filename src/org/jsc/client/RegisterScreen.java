@@ -42,7 +42,10 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
     private static final double MILLISECS_PER_DAY = 24*60*60*1000;
     private static final double EARLY_PRICE = 70.00;
     private static final double STANDARD_PRICE = 80.00;
-    
+    private static final double FS_PRICE = 80.00;
+    private static final double MEMBERSHIP_PRICE = 60.00;
+    private static final double MEMBERSHIP_DISCOUNT = 5.00;
+
     private static final String DISCOUNT_EXPLANATION = "<p class=\"jsc-text\">Because it helps with planning our class sizes, <b>we offer a discount for those who register early</b> (more than " + EARLY_PRICE_GRACE_DAYS + " days before the session starts).</p>";
     private static final String PRICE_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p>" + DISCOUNT_EXPLANATION + "</div>";
     private static final String PAYPAL_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">You must make your payment using PayPal by clicking on the button below.  <b>Your registration is <em>not complete</em></b> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
@@ -64,8 +67,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
     private RadioButton fsRadio;
     private VerticalPanel bsClassChoicePanel;
     private VerticalPanel bsPaymentPanel;
-    private VerticalPanel bsLeftPanel;
-    private VerticalPanel fsRightPanel;
+    private VerticalPanel bsPanel;
+    private VerticalPanel fsPanel;
     private Label stepLabel;
     private Grid basicSkillsGrid;
     private Grid figureSkatingGrid;
@@ -75,6 +78,11 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
     private double cost;    
     private SkaterRegistrationServiceAsync regService;
     private String costFormatted;
+    private CheckBox memberCheckbox;
+    private Label memberDues;
+    private double totalFSCost;
+    private Label totalCostLabel;
+    private int fsClassCount;
 
     /**
      * Construct the Registration view and controller used to display a form for
@@ -105,6 +113,9 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         feeLabel = new Label("");
         addToBSGrid("Registration fee:", feeLabel);
 
+        fsClassCount = 0;
+        totalFSCost = 0;
+        
         addToBSGrid(" ", new Label(" "));
         
         classField = new ListBox();
@@ -118,26 +129,17 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         bsPaymentPanel = new VerticalPanel();
         bsPaymentPanel.setVisible(false);
         
-        bsLeftPanel = new VerticalPanel();
+        bsPanel = new VerticalPanel();
         Label bscTitle = new Label("Basic Skills Classes");
         bscTitle.addStyleName("jsc-fieldlabel-left");
-        bsLeftPanel.add(bscTitle);
+        bsPanel.add(bscTitle);
         Label bscDescription = new Label(BS_EXPLANATION);
         bscDescription.addStyleName("jsc-text");
-        bsLeftPanel.add(bscDescription);
-        bsLeftPanel.add(bsClassChoicePanel);
-        bsLeftPanel.add(bsPaymentPanel);
+        bsPanel.add(bscDescription);
+        bsPanel.add(bsClassChoicePanel);
+        bsPanel.add(bsPaymentPanel);
         
-        fsRightPanel = new VerticalPanel();
-        Label fscTitle = new Label("Figure Skating Classes");
-        fscTitle.addStyleName("jsc-fieldlabel-left");
-        fsRightPanel.add(fscTitle);
-        Label fscDescription = new Label(FS_EXPLANATION);
-        fscDescription.addStyleName("jsc-text");
-        fsRightPanel.add(fscDescription);
-        figureSkatingGrid = new Grid(0, 2);
-        fsRightPanel.add(figureSkatingGrid);
-        fsRightPanel.setVisible(false);
+        layoutFsPanel();
         
         registerButton = new Button("Go to Step 2");
         registerButton.addClickHandler(new ClickHandler() {
@@ -161,12 +163,57 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         outerVerticalPanel.add(fsRadio);
         
         outerHorizPanel = new HorizontalPanel();
-        outerHorizPanel.add(bsLeftPanel);
-        outerHorizPanel.add(fsRightPanel);
+        outerHorizPanel.add(bsPanel);
+        outerHorizPanel.add(fsPanel);
         outerVerticalPanel.add(outerHorizPanel);
         outerVerticalPanel.add(registerButton);
         outerVerticalPanel.addStyleName("jsc-rightpanel");
         screen.add(outerVerticalPanel);
+    }
+
+    private void layoutFsPanel() {
+        
+        // Create the panel, its labels, and the contained grid for layout
+        fsPanel = new VerticalPanel();
+        Label fscTitle = new Label("Figure Skating Classes");
+        fscTitle.addStyleName("jsc-fieldlabel-left");
+        fsPanel.add(fscTitle);
+        Label fscDescription = new Label(FS_EXPLANATION);
+        fscDescription.addStyleName("jsc-text");
+        fsPanel.add(fscDescription);
+        figureSkatingGrid = new Grid(0, 6);
+        
+        // Insert the first row containing the membership fields
+        int newRow = figureSkatingGrid.insertRow(figureSkatingGrid.getRowCount());
+        memberCheckbox = new CheckBox();
+        Label memberCheckboxLabel = new Label("Pay membership dues");
+        memberDues = new Label();
+        double zero = 0;
+        NumberFormat numfmt = NumberFormat.getCurrencyFormat();
+        memberDues.setText(numfmt.format(zero));
+        memberCheckbox.setValue(false, false);
+        memberCheckbox.addValueChangeHandler(this);
+        figureSkatingGrid.setWidget(newRow, 2, memberCheckbox);
+        figureSkatingGrid.setWidget(newRow, 3, memberCheckboxLabel);
+        figureSkatingGrid.setWidget(newRow, 4, new Label("Dues"));
+        figureSkatingGrid.setWidget(newRow, 5, memberDues);
+        HTMLTable.CellFormatter fmt = figureSkatingGrid.getCellFormatter();
+        fmt.addStyleName(newRow, 2,  "jsc-fieldlabel");
+        fmt.addStyleName(newRow, 3,  "jsc-field");
+        fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
+        fmt.addStyleName(newRow, 5,  "jsc-field");
+        
+        // Insert the last row containing the payment total
+        newRow = figureSkatingGrid.insertRow(figureSkatingGrid.getRowCount());
+        totalCostLabel = new Label();
+        totalCostLabel.setText(numfmt.format(zero));
+        figureSkatingGrid.setWidget(newRow, 4, new Label("Total"));
+        figureSkatingGrid.setWidget(newRow, 5, totalCostLabel);
+        fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
+        fmt.addStyleName(newRow, 5,  "jsc-field");
+        
+        fsPanel.add(figureSkatingGrid);
+        fsPanel.setVisible(false);
     }
     
     /**
@@ -191,7 +238,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
      * @param widget the widget to display in column 1
      */
     private void addToFSGrid(String label, Widget widget) {
-        int newRow = figureSkatingGrid.insertRow(figureSkatingGrid.getRowCount());
+        int newRow = figureSkatingGrid.insertRow(figureSkatingGrid.getRowCount()-1);
         figureSkatingGrid.setWidget(newRow, 0, widget);
         figureSkatingGrid.setWidget(newRow, 1, new Label(label));
         HTMLTable.CellFormatter fmt = figureSkatingGrid.getCellFormatter();
@@ -217,9 +264,9 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         classField.clear();
         sessionClassLabels = new TreeMap<String, String>();
         
-        // Remove all of the rows from the table, except the header row
+        // Remove all of the rows from the FS grid table except the first and last
         int rows = figureSkatingGrid.getRowCount();
-        for (int i = rows-1; i >= 0; i--) {
+        for (int i = rows-2; i > 0; i--) {
             GWT.log("Removing FS table row: " + i, null);
             figureSkatingGrid.removeRow(i);
         }
@@ -233,8 +280,10 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                 
                 // If it starts with "FS " it is a figure skating class
                 if (curClass.getClassType().startsWith("FS ")) {
-                    CheckBox checkbox = new CheckBox();
+                    FSClassCheckBox checkbox = new FSClassCheckBox();
                     checkbox.setValue(false, false);
+                    checkbox.setName(Long.toString(curClass.getClassId()));
+                    checkbox.addValueChangeHandler(this);
                     addToFSGrid(classLabel, checkbox);
                     
                 // Otherwise it is a Basic Skills class
@@ -331,6 +380,19 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                         bsPaymentPanel.setVisible(true);
                         bsPaymentPanel.add(new HTMLPanel(PAYPAL_EXPLANATION));
                         bsPaymentPanel.add(new HTMLPanel(testForm));
+                        
+                        /*
+                        <form action="https://www.paypal.com/cgi-bin/webscr" method="post"> 
+                        <input type="hidden" name="cmd" value="_cart"> 
+                        <input type="hidden" name="upload" value="1"> 
+                        <input type="hidden" name="business" value="seller@designerfotos.com"> 
+                        <input type="hidden" name="item_name_1" value="Item Name 1"> 
+                        <input type="hidden" name="amount_1" value="1.00"> 
+                        <input type="hidden" name="item_name_2" value="Item Name 2"> 
+                        <input type="hidden" name="amount_2" value="2.00"> 
+                        <input type="submit" value="PayPal"> 
+                        </form>
+                        */
                     }
                 }
             };
@@ -352,13 +414,65 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
 
         if (sender == bsRadio) {
             GWT.log("bsRadio clicked", null);
-            bsLeftPanel.setVisible(true);
-            fsRightPanel.setVisible(false);
+            bsPanel.setVisible(true);
+            fsPanel.setVisible(false);
         } else if (sender == fsRadio) {
             GWT.log("fsRadio clicked", null);
-            bsLeftPanel.setVisible(false);
-            fsRightPanel.setVisible(true);
+            bsPanel.setVisible(false);
+            fsPanel.setVisible(true);
+        } else if (sender == memberCheckbox) {
+            GWT.log("memberCheckbox clicked", null);
+            double dues = 0;
+            if (memberCheckbox.getValue() == true) {
+                dues = MEMBERSHIP_PRICE;
+                totalFSCost += MEMBERSHIP_PRICE;
+            } else {
+                dues = 0;
+                totalFSCost -= MEMBERSHIP_PRICE;
+            }
+            NumberFormat numfmt = NumberFormat.getCurrencyFormat();
+            String duesString = numfmt.format(dues);
+            memberDues.setText(duesString);
+            totalCostLabel.setText(numfmt.format(totalFSCost));
+        } else if (sender instanceof FSClassCheckBox) {
+            FSClassCheckBox sendercb = (FSClassCheckBox)sender;
+            GWT.log( "Checked class: " + sendercb.getName(), null);
+            if (sendercb.getValue() == true) {
+                totalFSCost += FS_PRICE;
+                fsClassCount++;
+            } else {
+                totalFSCost -= FS_PRICE;
+                fsClassCount--;
+            }
+            double total = recalculateTotal();
+            NumberFormat numfmt = NumberFormat.getCurrencyFormat();
+            totalCostLabel.setText(numfmt.format(total));
         }
+    }
 
+    private double recalculateTotal() {
+        double total = totalFSCost - calculateDiscount();
+        return total;
+    }
+    
+    private double calculateDiscount() {
+        // TODO: calculate discount correctly! THIS IS WRONG NOW.
+        double multiclassDiscount = 0;        
+        if (fsClassCount == 3) {
+            multiclassDiscount = 10;
+        } else if (fsClassCount == 4) {
+            multiclassDiscount = 25;
+        } else if (fsClassCount >= 5) {
+            multiclassDiscount = 50;
+        }
+        
+        // TODO: store membership status, and look it up in the DB
+        //double membershipDiscount = fsClassCount*MEMBERSHIP_DISCOUNT;
+        
+        return multiclassDiscount;
+    }
+    
+    private class FSClassCheckBox extends CheckBox {
+        
     }
 }
