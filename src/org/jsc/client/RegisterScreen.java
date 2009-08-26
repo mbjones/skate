@@ -364,19 +364,30 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             // This is the array of roster entries that should be created in the db
             ArrayList<RosterEntry> entryList = new ArrayList<RosterEntry>();
             
-            RosterEntry entry = null;
             // Gather information from the Basic Skills form if it is selected
             if (bsRadio.getValue()) {
                 String selectedClassId = classField.getValue(classField.getSelectedIndex());
                 Person registrant = loginSession.getPerson();
-                entry = new RosterEntry();
+                RosterEntry entry = new RosterEntry();
                 entry.setClassid(new Long(selectedClassId).longValue());
                 entry.setPid(registrant.getPid());
                 entry.setPayment_amount(cost);
                 entryList.add(entry);
+                
             // Otherwise gather information from the Figure Skating form if it is selected
+            } else if (fsRadio.getValue()) {
+                // Loop through the checked classes, creating a RosterEntry for each
+                for (String selectedClassId : fsClassesToRegister) {
+                    GWT.log("Need to register class: " + selectedClassId, null);
+                    Person registrant = loginSession.getPerson();
+                    RosterEntry entry = new RosterEntry();
+                    entry.setClassid(new Long(selectedClassId).longValue());
+                    entry.setPid(registrant.getPid());
+                    entry.setPayment_amount(FS_PRICE);
+                    entryList.add(entry);
+                }
             } else {
-                // TODO: Get the FS class date
+                GWT.log("Neither BS nor FS form is active. This shouldn't happen!", null);
                 return;
             }
                         
@@ -394,6 +405,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                 }
 
                 public void onSuccess(ArrayList<RosterEntry> newEntryList) {
+                    
+                    // TODO: handle all of the entries in the list, not just the first
                     RosterEntry newEntry = newEntryList.get(0);
                     
                     if (newEntry == null) {
