@@ -2,6 +2,7 @@ package org.jsc.client;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.TreeMap;
 
 import com.google.gwt.core.client.GWT;
@@ -11,7 +12,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -82,10 +82,12 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
     private Label memberDues;
     private double totalFSCost;
     private Label totalCostLabel;
-    private int fsClassCount;
     private double total;
     private Label memberCheckboxLabel;
-
+    private HashSet<String> fsClassesToRegister;
+    private Label discountLabel;
+    private NumberFormat numfmt;
+    
     /**
      * Construct the Registration view and controller used to display a form for
      * registering for skating classes.
@@ -96,6 +98,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         super(loginSession);
         this.sessionClassList = sessionClassList;
         sessionClassLabels = new TreeMap<String, String>();
+        numfmt = NumberFormat.getFormat("$#,##0.00");
         layoutScreen();
         this.setContentPanel(screen);
         regService = GWT.create(SkaterRegistrationService.class);
@@ -115,7 +118,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         feeLabel = new Label("");
         addToBSGrid("Registration fee:", feeLabel);
 
-        fsClassCount = 0;
+        fsClassesToRegister = new HashSet<String>();
         totalFSCost = 0;
         
         addToBSGrid(" ", new Label(" "));
@@ -173,6 +176,9 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         screen.add(outerVerticalPanel);
     }
 
+    /**
+     * Create the widgets needed to populate the figure skating registration panel.
+     */
     private void layoutFsPanel() {
         
         // Create the panel, its labels, and the contained grid for layout
@@ -191,7 +197,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         memberCheckboxLabel = new Label("Pay membership dues");
         memberDues = new Label();
         double zero = 0;
-        NumberFormat numfmt = NumberFormat.getCurrencyFormat();
         memberDues.setText(numfmt.format(zero));
         memberCheckbox.setValue(false, false);
         memberCheckbox.addValueChangeHandler(this);
@@ -203,7 +208,16 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         fmt.addStyleName(newRow, 2,  "jsc-fieldlabel");
         fmt.addStyleName(newRow, 3,  "jsc-field");
         fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
-        fmt.addStyleName(newRow, 5,  "jsc-field");
+        fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
+        
+        // Insert the next to last row containing the discount amount
+        newRow = figureSkatingGrid.insertRow(figureSkatingGrid.getRowCount());
+        discountLabel = new Label();
+        discountLabel.setText(numfmt.format(zero));
+        figureSkatingGrid.setWidget(newRow, 4, new Label("Discount"));
+        figureSkatingGrid.setWidget(newRow, 5, discountLabel);
+        fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
+        fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
         
         // Insert the last row containing the payment total
         newRow = figureSkatingGrid.insertRow(figureSkatingGrid.getRowCount());
@@ -212,7 +226,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         figureSkatingGrid.setWidget(newRow, 4, new Label("Total"));
         figureSkatingGrid.setWidget(newRow, 5, totalCostLabel);
         fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
-        fmt.addStyleName(newRow, 5,  "jsc-field");
+        fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
         
         fsPanel.add(figureSkatingGrid);
         fsPanel.setVisible(false);
@@ -234,18 +248,23 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
     }
     
     /**
-     * Add the given widget to the Figure Skating grid table along with a label.  
-     * The Label is placed in column 2 of the grid, and the widget in column 1.
+     * Add the given FSClassCheckBox to the Figure Skating grid table along with a label.  
+     * The Label is placed in column 2 of the grid, and the checkbox in column 1. 
+     * FSClassCheckBox also contains a label that can be used to display the price
+     * of a figure skating class, and this label is placed in column 5.
+     *  
      * @param label the label to display in column 2
-     * @param widget the widget to display in column 1
+     * @param widget the FSClassCheckBox to display in column 1
      */
-    private void addToFSGrid(String label, Widget widget) {
-        int newRow = figureSkatingGrid.insertRow(figureSkatingGrid.getRowCount()-1);
+    private void addToFSGrid(String label, FSClassCheckBox widget) {
+        int newRow = figureSkatingGrid.insertRow(figureSkatingGrid.getRowCount()-2);
         figureSkatingGrid.setWidget(newRow, 0, widget);
         figureSkatingGrid.setWidget(newRow, 1, new Label(label));
+        figureSkatingGrid.setWidget(newRow, 5, widget.getClassPriceLabel());
         HTMLTable.CellFormatter fmt = figureSkatingGrid.getCellFormatter();
         fmt.addStyleName(newRow, 0,  "jsc-fieldlabel");
         fmt.addStyleName(newRow, 1,  "jsc-field");
+        fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
     }
     
     /**
@@ -266,9 +285,12 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         classField.clear();
         sessionClassLabels = new TreeMap<String, String>();
         
-        // Remove all of the rows from the FS grid table except the first and last
+        // Clear the set of fsClasses to be registered
+        fsClassesToRegister.clear();
+        
+        // Remove all of the rows from the FS grid table except the first and last two rows
         int rows = figureSkatingGrid.getRowCount();
-        for (int i = rows-2; i > 0; i--) {
+        for (int i = rows-3; i > 0; i--) {
             GWT.log("Removing FS table row: " + i, null);
             figureSkatingGrid.removeRow(i);
         }
@@ -313,7 +335,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         String sessionStart = list.get(0).getStartDate();
         DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
         if (sessionStart != null) {
-            NumberFormat numfmt = NumberFormat.getCurrencyFormat();
             Date startDate = fmt.parse(sessionStart);
             Date today = new Date(System.currentTimeMillis());
             if (today.before(startDate) && 
@@ -340,14 +361,21 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         GWT.log("Registering for a class...", null);
         
         if (loginSession.isAuthenticated()) {
-            // Gather information from the form
-            String selectedClassId = classField.getValue(classField.getSelectedIndex());
-            Person registrant = loginSession.getPerson();
-            RosterEntry entry = new RosterEntry();
-            entry.setClassid(new Long(selectedClassId).longValue());
-            entry.setPid(registrant.getPid());
-            entry.setPayment_amount(cost);
-            
+            RosterEntry entry = null;
+            // Gather information from the Basic Skills form if it is selected
+            if (bsRadio.getValue()) {
+                String selectedClassId = classField.getValue(classField.getSelectedIndex());
+                Person registrant = loginSession.getPerson();
+                entry = new RosterEntry();
+                entry.setClassid(new Long(selectedClassId).longValue());
+                entry.setPid(registrant.getPid());
+                entry.setPayment_amount(cost);    
+            // Otherwise gather information from the Figure Skating form if it is selected
+            } else {
+                // TODO: Get the FS class date
+                return;
+            }
+                        
             // Initialize the service proxy.
             if (regService == null) {
                 regService = GWT.create(SkaterRegistrationService.class);
@@ -443,34 +471,34 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                 dues = 0;
                 totalFSCost -= MEMBERSHIP_PRICE;
             }
-            NumberFormat numfmt = NumberFormat.getCurrencyFormat();
             String duesString = numfmt.format(dues);
             memberDues.setText(duesString);
-            total = recalculateTotal();
-            totalCostLabel.setText(numfmt.format(total));
+            recalculateAndDisplayTotals();        
         } else if (sender instanceof FSClassCheckBox) {
             FSClassCheckBox sendercb = (FSClassCheckBox)sender;
             GWT.log( "Checked class: " + sendercb.getName(), null);
             if (sendercb.getValue() == true) {
                 totalFSCost += FS_PRICE;
-                fsClassCount++;
+                fsClassesToRegister.add(sendercb.getName());
+                sendercb.setClassPrice(FS_PRICE);
             } else {
                 totalFSCost -= FS_PRICE;
-                fsClassCount--;
+                fsClassesToRegister.remove(sendercb.getName());
+                sendercb.setClassPrice(0);
             }
-            total = recalculateTotal();
-            NumberFormat numfmt = NumberFormat.getCurrencyFormat();
-            totalCostLabel.setText(numfmt.format(total));
+            recalculateAndDisplayTotals();
         }
     }
 
     /**
-     * Recalculate the total amount of the registration charge.
-     * @return the total charge
+     * Recalculate the total amount of the registration charges, and update the
+     * screen to reflect the totals.
      */
-    private double recalculateTotal() {
-        double total = totalFSCost - calculateDiscount();
-        return total;
+    private void recalculateAndDisplayTotals() {
+        double discount = calculateDiscount();
+        discountLabel.setText(numfmt.format(discount));
+        total = totalFSCost - discount;
+        totalCostLabel.setText(numfmt.format(total));
     }
     
     /**
@@ -482,11 +510,12 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
      */
     private double calculateDiscount() {
         double multiclassDiscount = 0;        
-        if (fsClassCount == 3) {
+        // TODO: determine how to externalize this algorithm for discounting
+        if (fsClassesToRegister.size() == 3) {
             multiclassDiscount = 10;
-        } else if (fsClassCount == 4) {
+        } else if (fsClassesToRegister.size() == 4) {
             multiclassDiscount = 25;
-        } else if (fsClassCount >= 5) {
+        } else if (fsClassesToRegister.size() >= 5) {
             multiclassDiscount = 50;
         }
         
@@ -494,13 +523,57 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         // membership box, then include the membership discount
         double membershipDiscount = 0;
         if (loginSession.getPerson().isMember() || memberCheckbox.getValue()) {
-            membershipDiscount = fsClassCount*MEMBERSHIP_DISCOUNT;
+            membershipDiscount = fsClassesToRegister.size()*MEMBERSHIP_DISCOUNT;
         }
         
         return multiclassDiscount + membershipDiscount;
     }
     
+    /**
+     * An extension of CheckBox that is used to display a figure skating class
+     * checkbox on the registration panel.  Instances of FSClassCheckBox keep
+     * track of the current price of the class to be displayed, and contain a
+     * label that can be used to display the current price.  Whenever the price
+     * of a class is updated, the label is also updated.
+     * @author Matt Jones
+     *
+     */
     private class FSClassCheckBox extends CheckBox {
+        private Label classPriceLabel;
+        private double classPrice;
+        private NumberFormat numfmt;
+
+        /**
+         * Construct the checkbox, initializing the internal label and price.
+         */
+        public FSClassCheckBox() {
+            super();
+            numfmt = NumberFormat.getFormat("$#,##0.00");
+            classPriceLabel = new Label();
+            setClassPrice(0);
+        }
         
+        /**
+         * @return the classPrice
+         */
+        public double getClassPrice() {
+            return classPrice;
+        }
+
+        /**
+         * @param classPrice the classPrice to set
+         */
+        public void setClassPrice(double classPrice) {
+            this.classPrice = classPrice;
+            
+            this.classPriceLabel.setText(numfmt.format(classPrice));
+        }
+
+        /**
+         * @return the classPriceLabel
+         */
+        public Label getClassPriceLabel() {
+            return classPriceLabel;
+        }
     }
 }

@@ -128,6 +128,14 @@ table.jsc-toolbar {
 	opacity: 1.0;
 }
 
+.jsc-currencyfield {
+	background: white;
+	text-align: right;
+	text-decoration: italic;
+	padding-left: 10px;
+	opacity: 1.0;
+}
+
 .jsc-tablehead {
 	text-align: left;
 	font-weight: bold;
