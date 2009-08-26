@@ -361,6 +361,9 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         GWT.log("Registering for a class...", null);
         
         if (loginSession.isAuthenticated()) {
+            // This is the array of roster entries that should be created in the db
+            ArrayList<RosterEntry> entryList = new ArrayList<RosterEntry>();
+            
             RosterEntry entry = null;
             // Gather information from the Basic Skills form if it is selected
             if (bsRadio.getValue()) {
@@ -369,7 +372,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                 entry = new RosterEntry();
                 entry.setClassid(new Long(selectedClassId).longValue());
                 entry.setPid(registrant.getPid());
-                entry.setPayment_amount(cost);    
+                entry.setPayment_amount(cost);
+                entryList.add(entry);
             // Otherwise gather information from the Figure Skating form if it is selected
             } else {
                 // TODO: Get the FS class date
@@ -382,21 +386,23 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             }
 
             // Set up the callback object.
-            AsyncCallback<RosterEntry> callback = new AsyncCallback<RosterEntry>() {
+            AsyncCallback<ArrayList<RosterEntry>> callback = new AsyncCallback<ArrayList<RosterEntry>>() {
 
                 public void onFailure(Throwable caught) {
                     // TODO: Do something with errors.
-                    GWT.log("Failed to register the RosterEntry.", null);
+                    GWT.log("Failed to register the RosterEntry array.", null);
                 }
 
-                public void onSuccess(RosterEntry newEntry) {
+                public void onSuccess(ArrayList<RosterEntry> newEntryList) {
+                    RosterEntry newEntry = newEntryList.get(0);
+                    
                     if (newEntry == null) {
                         // Failure on the remote end.
                         setMessage("Error registering for the class.");
                         return;
                     } else {
                         clearMessage();
-                        String testForm = 
+                        String paypalFormString = 
                             "<form id=\"wizard\" action=\""+ PAYPAL_URL + "\" method=\"post\">" +
                             "<input type=\"hidden\" name=\"cmd\" value=\"_xclick\">" +
                             "<input type=\"hidden\" name=\"business\" value=\"" + MERCHANT_ID + "\">" +
@@ -420,7 +426,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                         bsPaymentPanel.clear();
                         bsPaymentPanel.setVisible(true);
                         bsPaymentPanel.add(new HTMLPanel(PAYPAL_EXPLANATION));
-                        bsPaymentPanel.add(new HTMLPanel(testForm));
+                        bsPaymentPanel.add(new HTMLPanel(paypalFormString));
                         
                         /*
                         <form action="https://www.paypal.com/cgi-bin/webscr" method="post"> 
@@ -439,7 +445,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             };
 
             // Make the call to the registration service.
-            regService.register(loginSession.getPerson(), entry, callback);
+            regService.register(loginSession.getPerson(), entryList, callback);
             
         } else {
             GWT.log("Error: Can not register without first signing in.", null);

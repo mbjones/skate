@@ -198,69 +198,75 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     }
     
     /**
-     * Register a person for a class by creating a new entry in the roster
-     * table in the backing relational database.  This method takes on input a
-     * skeleton RosterEntry that contains the classid and pid to be registered,
+     * Register a person for one or more classes by creating a new entry in the roster
+     * table in the backing relational database for each RosterEntry that is passed in
+     * the newEntryList array.  This method takes on input an array of
+     * skeleton RosterEntry instances that each contains the classid and pid to be registered,
      * and then creates and returns a new RosterEntry from the database after 
-     * the rosterid has been created.
+     * the rosterid has been created for each one.
      * @param person to be used to authenticate the connection
-     * @param entry containing the details of the class and person to be registered
-     * @return the completed RosterEntry from the database
+     * @param newEntryList list of RosterEntry objects containing the details of the class and person to be registered
+     * @return an array of the completed RosterEntry instances from the database
      */
-    public RosterEntry register(Person person, RosterEntry entry) {
-        RosterEntry newEntry = null;
-        
-        if (person != null && entry != null) {
-            // Verify that the user is valid before allowing an insert
-            boolean isAuthentic = checkCredentials(person);
-            if (!isAuthentic) {
+    public ArrayList<RosterEntry> register(Person person, ArrayList<RosterEntry> newEntryList) {
+        ArrayList<RosterEntry> entriesCreated = new ArrayList<RosterEntry>();
+                
+        // Loop through each of the entries we've been passed, and for each one
+        // insert it in the database, look up its rosterid to create a new
+        // RosterEntry for it, add this to the list of created roster entries
+        for (RosterEntry entry : newEntryList) {
+            
+            RosterEntry newEntry = null;
+
+            if (person != null && entry != null) {
+                // Verify that the user is valid before allowing an insert
+                boolean isAuthentic = checkCredentials(person);
+                if (!isAuthentic) {
+                    return null;
+                }
+            } else {
                 return null;
             }
-        } else {
-            return null;
-        }
-        
-        // Create the SQL INSERT statement
-        StringBuffer sql = new StringBuffer();
-        sql.append("insert into roster (classid, pid, payment_amount) values ('");
-        sql.append(entry.getClassid()).append("','");
-        sql.append(entry.getPid()).append("',");
-        sql.append(entry.getPayment_amount());
-        sql.append(")");
-        System.out.println(sql.toString());
-
-        // Execute the INSERT to create the new roster table entry
-        try {
-            Connection con = getConnection();
-            Statement stmt = con.createStatement();
-            stmt.executeUpdate(sql.toString());
-            stmt.close();
             
-            // query the roster table to find the rosterid that was created
-            stmt = con.createStatement();
-            StringBuffer rsql = new StringBuffer();
-            rsql.append(ROSTER_QUERY);
-
-            //rsql.append("SELECT rosterid,classid,pid,levelpassed,payment_amount,");
-            //rsql.append("payment_date,paypal_tx_id,paypal_gross,paypal_fee,");
-            //rsql.append("paypal_status from roster ");
-            rsql.append(" WHERE classid = '").append(entry.getClassid()).append("'");
-            rsql.append(" AND ");
-            rsql.append("pid = '").append(entry.getPid()).append("'");
-            System.out.println(rsql.toString());
-            
-            ResultSet rs = stmt.executeQuery(rsql.toString());
-            if (rs.next()) {
-                newEntry = createRosterEntry(rs);
+            // Create the SQL INSERT statement
+            StringBuffer sql = new StringBuffer();
+            sql.append("insert into roster (classid, pid, payment_amount) values ('");
+            sql.append(entry.getClassid()).append("','");
+            sql.append(entry.getPid()).append("',");
+            sql.append(entry.getPayment_amount());
+            sql.append(")");
+            System.out.println(sql.toString());
+    
+            // Execute the INSERT to create the new roster table entry
+            try {
+                Connection con = getConnection();
+                Statement stmt = con.createStatement();
+                stmt.executeUpdate(sql.toString());
+                stmt.close();
+                
+                // query the roster table to find the rosterid that was created
+                stmt = con.createStatement();
+                StringBuffer rsql = new StringBuffer();
+                rsql.append(ROSTER_QUERY);
+                rsql.append(" WHERE classid = '").append(entry.getClassid()).append("'");
+                rsql.append(" AND ");
+                rsql.append("pid = '").append(entry.getPid()).append("'");
+                System.out.println(rsql.toString());
+                
+                ResultSet rs = stmt.executeQuery(rsql.toString());
+                if (rs.next()) {
+                    newEntry = createRosterEntry(rs);
+                    entriesCreated.add(newEntry);
+                }
+                stmt.close();
+                con.close();
+    
+            } catch(SQLException ex) {
+                System.err.println("SQLException: " + ex.getMessage());
             }
-            stmt.close();
-            con.close();
-
-        } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage());
         }
         
-        return newEntry;
+        return entriesCreated;
     }
 
     /**

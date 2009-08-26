@@ -1,7 +1,6 @@
 package org.jsc.client;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -19,7 +18,7 @@ public interface SkaterRegistrationService extends RemoteService {
     Person authenticate(String username, String password);
     Person getPerson(long pid);
     ArrayList<SessionSkatingClass> getSessionClassList(Person person);
-    RosterEntry register(Person person, RosterEntry newEntry);
+    ArrayList<RosterEntry> register(Person person, ArrayList<RosterEntry> newEntryList);
     ArrayList<RosterEntry> getStudentRoster(Person person);
     ArrayList<RosterEntry> getClassRoster(Person person, long classId);
 }
