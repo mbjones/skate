@@ -66,7 +66,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
     private RadioButton bsRadio;
     private RadioButton fsRadio;
     private VerticalPanel bsClassChoicePanel;
-    private VerticalPanel bsPaymentPanel;
+    private VerticalPanel ppPaymentPanel;
     private VerticalPanel bsPanel;
     private VerticalPanel fsPanel;
     private Label stepLabel;
@@ -75,9 +75,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
     private Label feeLabel;
     private ListBox classField;
     private Button registerButton;
-    private double cost;    
     private SkaterRegistrationServiceAsync regService;
-    private String costFormatted;
     private CheckBox memberCheckbox;
     private Label memberDues;
     private double totalFSCost;
@@ -87,6 +85,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
     private HashSet<String> fsClassesToRegister;
     private Label discountLabel;
     private NumberFormat numfmt;
+    private Label bsTotalLabel;
+    private Label bsDiscountLabel;
     
     /**
      * Construct the Registration view and controller used to display a form for
@@ -99,6 +99,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         this.sessionClassList = sessionClassList;
         sessionClassLabels = new TreeMap<String, String>();
         numfmt = NumberFormat.getFormat("$#,##0.00");
+        fsClassesToRegister = new HashSet<String>();
+        totalFSCost = 0;
         layoutScreen();
         this.setContentPanel(screen);
         regService = GWT.create(SkaterRegistrationService.class);
@@ -113,38 +115,12 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         
         screen = new HorizontalPanel();
                         
-        basicSkillsGrid = new Grid(0, 2);
-        
-        feeLabel = new Label("");
-        addToBSGrid("Registration fee:", feeLabel);
-
-        fsClassesToRegister = new HashSet<String>();
-        totalFSCost = 0;
-        
-        addToBSGrid(" ", new Label(" "));
-        
-        classField = new ListBox();
-        classField.setVisibleItemCount(1);
-        addToBSGrid("Class:", classField);
-        
-        bsClassChoicePanel = new VerticalPanel();
-        bsClassChoicePanel.add(new HTMLPanel(PRICE_EXPLANATION));
-        bsClassChoicePanel.add(basicSkillsGrid);
-        
-        bsPaymentPanel = new VerticalPanel();
-        bsPaymentPanel.setVisible(false);
-        
-        bsPanel = new VerticalPanel();
-        Label bscTitle = new Label("Basic Skills Classes");
-        bscTitle.addStyleName("jsc-fieldlabel-left");
-        bsPanel.add(bscTitle);
-        Label bscDescription = new Label(BS_EXPLANATION);
-        bscDescription.addStyleName("jsc-text");
-        bsPanel.add(bscDescription);
-        bsPanel.add(bsClassChoicePanel);
-        bsPanel.add(bsPaymentPanel);
+        layoutBsPanel();
         
         layoutFsPanel();
+        
+        ppPaymentPanel = new VerticalPanel();
+        ppPaymentPanel.setVisible(false);
         
         registerButton = new Button("Go to Step 2");
         registerButton.addClickHandler(new ClickHandler() {
@@ -170,10 +146,59 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         outerHorizPanel = new HorizontalPanel();
         outerHorizPanel.add(bsPanel);
         outerHorizPanel.add(fsPanel);
+        outerHorizPanel.add(ppPaymentPanel);
         outerVerticalPanel.add(outerHorizPanel);
         outerVerticalPanel.add(registerButton);
         outerVerticalPanel.addStyleName("jsc-rightpanel");
         screen.add(outerVerticalPanel);
+    }
+
+    /**
+     * Layout the user interface widgets for the basic skills screen.
+     */
+    private void layoutBsPanel() {
+        bsPanel = new VerticalPanel();
+        Label bscTitle = new Label("Basic Skills Classes");
+        bscTitle.addStyleName("jsc-fieldlabel-left");
+        bsPanel.add(bscTitle);
+        Label bscDescription = new Label(BS_EXPLANATION);
+        bscDescription.addStyleName("jsc-text");
+        bsPanel.add(bscDescription);
+
+        basicSkillsGrid = new Grid(0, 4);
+        
+        addToBSGrid(" ", new Label(" "));
+        
+        classField = new ListBox();
+        classField.setVisibleItemCount(1);
+        addToBSGrid("Class:", classField);
+        int currentRow = basicSkillsGrid.getRowCount() - 1;
+        feeLabel = new Label("");
+        basicSkillsGrid.setWidget(currentRow, 2, new Label("Cost"));
+        basicSkillsGrid.setWidget(currentRow, 3, feeLabel);
+        HTMLTable.CellFormatter fmt = basicSkillsGrid.getCellFormatter();
+        fmt.addStyleName(currentRow, 2,  "jsc-fieldlabel");
+        fmt.addStyleName(currentRow, 3,  "jsc-currencyfield");
+        
+        bsDiscountLabel = new Label();
+        int newRow = basicSkillsGrid.insertRow(basicSkillsGrid.getRowCount());
+        basicSkillsGrid.setWidget(newRow, 2, new Label("Discount"));
+        basicSkillsGrid.setWidget(newRow, 3, bsDiscountLabel);
+        fmt.addStyleName(newRow, 2,  "jsc-fieldlabel");
+        fmt.addStyleName(newRow, 3,  "jsc-currencyfield");
+        
+        bsTotalLabel = new Label();
+        newRow = basicSkillsGrid.insertRow(basicSkillsGrid.getRowCount());
+        basicSkillsGrid.setWidget(newRow, 2, new Label("Total"));
+        basicSkillsGrid.setWidget(newRow, 3, bsTotalLabel);
+        fmt.addStyleName(newRow, 2,  "jsc-fieldlabel");
+        fmt.addStyleName(newRow, 3,  "jsc-currencyfield");
+        
+        bsClassChoicePanel = new VerticalPanel();
+        bsClassChoicePanel.add(new HTMLPanel(PRICE_EXPLANATION));
+        bsClassChoicePanel.add(basicSkillsGrid);
+
+        bsPanel.add(bsClassChoicePanel);
     }
 
     /**
@@ -274,11 +299,17 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
      */
     protected void updateRegistrationScreenDetails() {
         // Reset the form fields to begin registration
-        bsPaymentPanel.setVisible(false);
+        ppPaymentPanel.setVisible(false);
         stepLabel.setText(STEP_1);
         bsRadio.setVisible(true);
         fsRadio.setVisible(true);
-        bsClassChoicePanel.setVisible(true);
+        if (bsRadio.getValue()) {
+            bsPanel.setVisible(true);
+            fsPanel.setVisible(false);
+        } else {
+            bsPanel.setVisible(false);
+            fsPanel.setVisible(true);
+        }
         registerButton.setVisible(true);
         
         // Clear the list of basic skills classes to reflect the new data
@@ -303,7 +334,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             for (SessionSkatingClass curClass : list) {
                 GWT.log("SessionClass: " + (new Long(curClass.getClassId()).toString()) + " " + curClass.getClassType(), null);
                 String classLabel = curClass.formatClassLabel();
-                
+                sessionClassLabels.put(new Long(curClass.getClassId()).toString(), classLabel);    
+
                 // If it starts with "FS " it is a figure skating class
                 if (curClass.getClassType().startsWith("FS ")) {
                     FSClassCheckBox checkbox = new FSClassCheckBox();
@@ -315,7 +347,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                 // Otherwise it is a Basic Skills class
                 } else {
                     classField.addItem(classLabel, new Long(curClass.getClassId()).toString());
-                    sessionClassLabels.put(new Long(curClass.getClassId()).toString(), classLabel.toString());    
                 }
             }
         }
@@ -329,28 +360,13 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             memberCheckbox.setEnabled(true);
         }
         
-        // Update the cost and paypal forms
-        cost = STANDARD_PRICE;
-        String costExplanation = "";
-        String sessionStart = list.get(0).getStartDate();
-        DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
-        if (sessionStart != null) {
-            Date startDate = fmt.parse(sessionStart);
-            Date today = new Date(System.currentTimeMillis());
-            if (today.before(startDate) && 
-               (startDate.getTime() - today.getTime() > EARLY_PRICE_GRACE_DAYS*MILLISECS_PER_DAY)) {
-                cost = EARLY_PRICE;
-                String normalPrice = numfmt.format(STANDARD_PRICE);
-                costExplanation = " [Early registration discount applies (normally " + normalPrice + ").]";
-            } else {
-                cost = STANDARD_PRICE; 
-                costExplanation = " (Standard price applied.)";
-            }
-            
-            costFormatted = numfmt.format(cost);
-            String feeText = costFormatted + costExplanation;
-            feeLabel.setText(feeText);
-        }
+        // Update the cost discount, and total fields on the BS Form
+        feeLabel.setText(numfmt.format(STANDARD_PRICE));
+        double bsDiscount = calculateDiscount();
+        bsDiscountLabel.setText(numfmt.format(bsDiscount));
+        double bsTotal = STANDARD_PRICE - bsDiscount;
+        bsTotalLabel.setText(numfmt.format(bsTotal));
+        
     }
 
     /**
@@ -371,7 +387,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                 RosterEntry entry = new RosterEntry();
                 entry.setClassid(new Long(selectedClassId).longValue());
                 entry.setPid(registrant.getPid());
-                entry.setPayment_amount(cost);
+                entry.setPayment_amount(STANDARD_PRICE);
                 entryList.add(entry);
                 
             // Otherwise gather information from the Figure Skating form if it is selected
@@ -407,52 +423,54 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                 public void onSuccess(ArrayList<RosterEntry> newEntryList) {
                     
                     // TODO: handle all of the entries in the list, not just the first
-                    RosterEntry newEntry = newEntryList.get(0);
+                    //RosterEntry newEntry = newEntryList.get(0);
                     
-                    if (newEntry == null) {
+                    if (newEntryList == null && newEntryList.size() > 0) {
                         // Failure on the remote end.
+                        // Could simply be due to duplication errors
+                        // TODO: Handle case where all duplication errors occur
                         setMessage("Error registering for the class.");
                         return;
                     } else {
+                        // TODO: Handle case where some duplication errors occur on insert but not all
                         clearMessage();
-                        String paypalFormString = 
-                            "<form id=\"wizard\" action=\""+ PAYPAL_URL + "\" method=\"post\">" +
-                            "<input type=\"hidden\" name=\"cmd\" value=\"_xclick\">" +
-                            "<input type=\"hidden\" name=\"business\" value=\"" + MERCHANT_ID + "\">" +
-                            "<input type=\"hidden\" name=\"item_name\" value=\"" + sessionClassLabels.get(new Long(newEntry.getClassid()).toString()) + "\">" +
-                            "<input type=\"hidden\" name=\"currency_code\" value=\"USD\">" +
-                            "<input type=\"hidden\" name=\"item_number\" value=\""+ newEntry.getRosterid() +"\">" +
-                            "<input type=\"hidden\" name=\"amount\" value=\"" + cost + "\">" +
-                            "<input type=\"hidden\" name=\"no_note\" value=\"1\">" +
-                            "<input type=\"hidden\" name=\"no_shipping\" value=\"1\">" +
-                            "<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ PAYPAL_HEADER_IMAGE + "\">" +
-                            "<input type=\"hidden\" name=\"return\" value=\"" + PAYPAL_RETURN_URL + "\">" +
-                            "<input type=\"hidden\" name=\"cancel_return\" value=\"" + PAYPAL_CANCEL_URL + "\">" +
-                            "<input type=\"image\" src=\"https://www.sandbox.paypal.com/en_US/i/btn/btn_paynow_LG.gif\" border=\"0\" name=\"submit\" alt=\"PayPal - The safer, easier way to pay online!\">" +
-                            "<img alt=\"\" border=\"0\" src=\"https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif\" width=\"1\" height=\"1\">" +
-                            "</form>";
+                        StringBuffer ppCart = new StringBuffer();
+                        ppCart.append("<form id=\"wizard\" action=\""+ PAYPAL_URL + "\" method=\"post\">");
+                        ppCart.append("<input type=\"hidden\" name=\"cmd\" value=\"_cart\">");
+                        ppCart.append("<input type=\"hidden\" name=\"upload\" value=\"1\">");
+                        ppCart.append("<input type=\"hidden\" name=\"business\" value=\"" + MERCHANT_ID + "\">");
+                        ppCart.append("<input type=\"hidden\" name=\"currency_code\" value=\"USD\">");
+                        ppCart.append("<input type=\"hidden\" name=\"no_note\" value=\"1\">");
+                        ppCart.append("<input type=\"hidden\" name=\"no_shipping\" value=\"1\">");
+                        ppCart.append("<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ PAYPAL_HEADER_IMAGE + "\">");
+                        int i = 0;
+                        for (RosterEntry newEntry : newEntryList) {
+                            i++;
+                            ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"" + sessionClassLabels.get(new Long(newEntry.getClassid()).toString()) + "\">");
+                            ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\""+ newEntry.getRosterid() +"\">");
+                            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + newEntry.getPayment_amount() + "\">");
+                        }
+                        ppCart.append("<input type=\"hidden\" name=\"discount_amount_cart\" value=\"" + calculateDiscount() + "\">");
+                        
+                        ppCart.append("<input type=\"hidden\" name=\"return\" value=\"" + PAYPAL_RETURN_URL + "\">");
+                        ppCart.append("<input type=\"hidden\" name=\"cancel_return\" value=\"" + PAYPAL_CANCEL_URL + "\">");
+                        ppCart.append("<input type=\"submit\" name=\"Pay Now\" value=\"Complete Payment Now\">");
+
+                        //ppCart.append("<input type=\"image\" src=\"https://www.sandbox.paypal.com/en_US/i/btn/btn_paynow_LG.gif\" border=\"0\" name=\"submit\" alt=\"PayPal - The safer, easier way to pay online!\">");
+                        //ppCart.append("<img alt=\"\" border=\"0\" src=\"https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif\" width=\"1\" height=\"1\">");
+                        ppCart.append("</form>");
+                        
                         registerButton.setVisible(false);
                         stepLabel.setText(STEP_2);
                         bsRadio.setVisible(false);
                         fsRadio.setVisible(false);
-                        bsClassChoicePanel.setVisible(false);
-                        bsPaymentPanel.clear();
-                        bsPaymentPanel.setVisible(true);
-                        bsPaymentPanel.add(new HTMLPanel(PAYPAL_EXPLANATION));
-                        bsPaymentPanel.add(new HTMLPanel(paypalFormString));
+                        bsPanel.setVisible(false);
+                        fsPanel.setVisible(false);
                         
-                        /*
-                        <form action="https://www.paypal.com/cgi-bin/webscr" method="post"> 
-                        <input type="hidden" name="cmd" value="_cart"> 
-                        <input type="hidden" name="upload" value="1"> 
-                        <input type="hidden" name="business" value="seller@designerfotos.com"> 
-                        <input type="hidden" name="item_name_1" value="Item Name 1"> 
-                        <input type="hidden" name="amount_1" value="1.00"> 
-                        <input type="hidden" name="item_name_2" value="Item Name 2"> 
-                        <input type="hidden" name="amount_2" value="2.00"> 
-                        <input type="submit" value="PayPal"> 
-                        </form>
-                        */
+                        ppPaymentPanel.clear();
+                        ppPaymentPanel.add(new HTMLPanel(PAYPAL_EXPLANATION));
+                        ppPaymentPanel.add(new HTMLPanel(ppCart.toString()));
+                        ppPaymentPanel.setVisible(true);
                     }
                 }
             };
@@ -545,7 +563,27 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             membershipDiscount = fsClassesToRegister.size()*MEMBERSHIP_DISCOUNT;
         }
         
-        return multiclassDiscount + membershipDiscount;
+        // Calculate the basic skills discount
+        ArrayList<SessionSkatingClass> list = sessionClassList.getClassList();
+        double bsDiscount = 0;
+        String sessionStart = list.get(0).getStartDate();
+        DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
+        if (sessionStart != null) {
+            Date startDate = fmt.parse(sessionStart);
+            Date today = new Date(System.currentTimeMillis());
+            if (today.before(startDate) && 
+               (startDate.getTime() - today.getTime() > EARLY_PRICE_GRACE_DAYS*MILLISECS_PER_DAY)) {
+                bsDiscount = STANDARD_PRICE - EARLY_PRICE;
+            }
+        }
+        
+        // If the Basic Skills screen is active, return the bsDiscount
+        // Otherwise, return the figure skating discount    
+        if (bsRadio.getValue()) {
+            return bsDiscount;            
+        } else {
+            return multiclassDiscount + membershipDiscount;
+        }
     }
     
     /**
