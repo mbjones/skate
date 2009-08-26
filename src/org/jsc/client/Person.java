@@ -33,6 +33,7 @@ public class Person implements Serializable {
     private String password;
     private String newPassword;
     private String newEmail;
+    private boolean isMember;
     
     /**
      * Construct a new person object with no fields set.
@@ -384,5 +385,18 @@ public class Person implements Serializable {
      */
     public void setZip(String zip) {
         this.zip = zip;
+    }
+    /**
+     * @return true if this person has a paid membership this season
+     */
+    public boolean isMember() {
+        return isMember;
+    }
+    /**
+     * Set whether the person is a club member this season.
+     * @param isMember the boolean value, true if a member
+     */
+    public void setMember(boolean isMember) {
+        this.isMember = isMember;
     }
 }

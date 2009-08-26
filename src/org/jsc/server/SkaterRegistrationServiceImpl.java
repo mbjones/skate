@@ -385,6 +385,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 person.setHomephone(rs.getString(6));
                 person.setBday(rs.getString(7));
                 person.setPassword(rs.getString(8));
+                person.setMember(true);
             }
             stmt.close();
             con.close();

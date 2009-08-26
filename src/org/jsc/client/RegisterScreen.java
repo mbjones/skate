@@ -83,6 +83,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
     private double totalFSCost;
     private Label totalCostLabel;
     private int fsClassCount;
+    private double total;
+    private Label memberCheckboxLabel;
 
     /**
      * Construct the Registration view and controller used to display a form for
@@ -186,7 +188,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         // Insert the first row containing the membership fields
         int newRow = figureSkatingGrid.insertRow(figureSkatingGrid.getRowCount());
         memberCheckbox = new CheckBox();
-        Label memberCheckboxLabel = new Label("Pay membership dues");
+        memberCheckboxLabel = new Label("Pay membership dues");
         memberDues = new Label();
         double zero = 0;
         NumberFormat numfmt = NumberFormat.getCurrencyFormat();
@@ -271,7 +273,9 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             figureSkatingGrid.removeRow(i);
         }
 
-        // Iterate over the new list of classes, populating the right widgets
+        // Iterate over the new list of classes, putting each class into either
+        // the dropdown for Basic Skills classes or the checkbox list for 
+        // Figure Skating classes
         ArrayList<SessionSkatingClass> list = sessionClassList.getClassList();
         if (list != null) {
             for (SessionSkatingClass curClass : list) {
@@ -292,6 +296,15 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                     sessionClassLabels.put(new Long(curClass.getClassId()).toString(), classLabel.toString());    
                 }
             }
+        }
+        
+        // Update the membership checkbox status based on the Person logged in
+        if (loginSession.getPerson().isMember()) {
+            memberCheckboxLabel.setText("Membership dues already paid. Discount applies.");
+            memberCheckbox.setEnabled(false);
+        } else {
+            memberCheckboxLabel.setText("Pay membership dues");
+            memberCheckbox.setEnabled(true);
         }
         
         // Update the cost and paypal forms
@@ -423,7 +436,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         } else if (sender == memberCheckbox) {
             GWT.log("memberCheckbox clicked", null);
             double dues = 0;
-            if (memberCheckbox.getValue() == true) {
+            if (memberCheckbox.getValue() == true &! loginSession.getPerson().isMember()) {
                 dues = MEMBERSHIP_PRICE;
                 totalFSCost += MEMBERSHIP_PRICE;
             } else {
@@ -433,7 +446,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             NumberFormat numfmt = NumberFormat.getCurrencyFormat();
             String duesString = numfmt.format(dues);
             memberDues.setText(duesString);
-            totalCostLabel.setText(numfmt.format(totalFSCost));
+            total = recalculateTotal();
+            totalCostLabel.setText(numfmt.format(total));
         } else if (sender instanceof FSClassCheckBox) {
             FSClassCheckBox sendercb = (FSClassCheckBox)sender;
             GWT.log( "Checked class: " + sendercb.getName(), null);
@@ -444,19 +458,29 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                 totalFSCost -= FS_PRICE;
                 fsClassCount--;
             }
-            double total = recalculateTotal();
+            total = recalculateTotal();
             NumberFormat numfmt = NumberFormat.getCurrencyFormat();
             totalCostLabel.setText(numfmt.format(total));
         }
     }
 
+    /**
+     * Recalculate the total amount of the registration charge.
+     * @return the total charge
+     */
     private double recalculateTotal() {
         double total = totalFSCost - calculateDiscount();
         return total;
     }
     
+    /**
+     * Calculate the registration discount based on the number of classes
+     * for which the user registers and whether or not they are a member of
+     * the club.  Hard coding this algorithm is painful, but there are so many
+     * possible variants it seems that some aspect will be hardcoded.
+     * @return the amount of the discount
+     */
     private double calculateDiscount() {
-        // TODO: calculate discount correctly! THIS IS WRONG NOW.
         double multiclassDiscount = 0;        
         if (fsClassCount == 3) {
             multiclassDiscount = 10;
@@ -466,10 +490,14 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             multiclassDiscount = 50;
         }
         
-        // TODO: store membership status, and look it up in the DB
-        //double membershipDiscount = fsClassCount*MEMBERSHIP_DISCOUNT;
+        // If the person is already a member, or if they have checked the 
+        // membership box, then include the membership discount
+        double membershipDiscount = 0;
+        if (loginSession.getPerson().isMember() || memberCheckbox.getValue()) {
+            membershipDiscount = fsClassCount*MEMBERSHIP_DISCOUNT;
+        }
         
-        return multiclassDiscount;
+        return multiclassDiscount + membershipDiscount;
     }
     
     private class FSClassCheckBox extends CheckBox {
