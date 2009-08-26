@@ -110,7 +110,8 @@ public class MyClassesScreen extends BaseScreen {
             Date datePaid = entry.getPayment_date();
             String datePaidString = datePaid != null ? fmt.format(datePaid) : " ";
             Label datePaidLabel = new Label(datePaidString);
-            NumberFormat numFmt = NumberFormat.getCurrencyFormat();
+            //NumberFormat numFmt = NumberFormat.getCurrencyFormat();
+            NumberFormat numFmt = NumberFormat.getFormat("$#,##0.00");
             double amountPaid = entry.getPayment_amount();
             Label amountPaidLabel = new Label(numFmt.format(amountPaid));
             Label levelPassedLabel = new Label(entry.getLevelpassed());
