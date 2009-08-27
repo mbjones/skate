@@ -422,9 +422,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
 
                 public void onSuccess(ArrayList<RosterEntry> newEntryList) {
                     
-                    // TODO: handle all of the entries in the list, not just the first
-                    //RosterEntry newEntry = newEntryList.get(0);
-                    
                     if (newEntryList == null && newEntryList.size() > 0) {
                         // Failure on the remote end.
                         // Could simply be due to duplication errors
@@ -443,6 +440,9 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                         ppCart.append("<input type=\"hidden\" name=\"no_note\" value=\"1\">");
                         ppCart.append("<input type=\"hidden\" name=\"no_shipping\" value=\"1\">");
                         ppCart.append("<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ PAYPAL_HEADER_IMAGE + "\">");
+
+                        // TODO: Handle membership payment by creating form items as needed
+                        
                         int i = 0;
                         for (RosterEntry newEntry : newEntryList) {
                             i++;

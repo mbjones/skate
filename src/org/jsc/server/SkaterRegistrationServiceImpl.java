@@ -28,7 +28,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     private static final String JDBC_USER = "jscdb";
     private static final String JDBC_PASS = "1skate2";
     private static final String JDBC_DRIVER = "org.postgresql.Driver";
-    private static final String ROSTER_QUERY = "SELECT rosterid, classid, pid, levelPassed, payment_amount, payment_date, paypal_tx_id, paypal_gross, paypal_fee, paypal_status, date_updated, surname, givenname FROM rosterpeople";
+    private static final String ROSTER_QUERY = "SELECT rosterid, classid, pid, levelPassed, paymentid, payment_amount, date_updated, surname, givenname FROM rosterpeople";
     
     /**
      * Create a new person entry in the backing relational database, or update
@@ -351,15 +351,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         entry.setClassid(rs.getLong(2));
         entry.setPid(rs.getLong(3));
         entry.setLevelpassed(rs.getString(4));
-        entry.setPayment_amount(rs.getDouble(5));
-        entry.setPayment_date(rs.getDate(6));
-        entry.setPaypal_tx_id(rs.getString(7));
-        entry.setPaypal_gross(rs.getDouble(8));
-        entry.setPaypal_fee(rs.getDouble(9));
-        entry.setPaypal_status(rs.getString(10));
-        entry.setDate_updated(rs.getDate(11));
-        entry.setSurname(rs.getString(12));
-        entry.setGivenname(rs.getString(13));
+        entry.setPaymentid(rs.getLong(5));
+        entry.setPayment_amount(rs.getDouble(6));
+        entry.setDate_updated(rs.getDate(7));
+        entry.setSurname(rs.getString(8));
+        entry.setGivenname(rs.getString(9));
         return entry;
     }
     

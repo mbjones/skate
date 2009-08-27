@@ -70,7 +70,7 @@ public class MyClassesScreen extends BaseScreen {
         
         // Add a header row to the table
         Label classNameLabel = new Label("Class Name");
-        Label datePaidLabel = new Label("Date Paid");
+        Label datePaidLabel = new Label("Confirmation #");
         Label amountPaidLabel = new Label("Amount Paid");
         Label levelPassedLabel = new Label("Level Passed");
         addToGrid(classNameLabel, datePaidLabel, amountPaidLabel, levelPassedLabel);
@@ -99,23 +99,22 @@ public class MyClassesScreen extends BaseScreen {
         
         // Add all of the new roster entries into the table
         for (RosterEntry entry : event.getRoster()) {
-            // TODO: Get the class label
             SessionSkatingClass curClass = sessionClassList.getSkatingClass(entry.getClassid());
             if (curClass == null) {
                 GWT.log("Expected SessionSkatingClass was not found in model", null);
                 break;
             }
             Label classNameLabel = new Label(curClass.formatClassLabel());
-            DateTimeFormat fmt = DateTimeFormat.getShortDateFormat();
-            Date datePaid = entry.getPayment_date();
-            String datePaidString = datePaid != null ? fmt.format(datePaid) : " ";
-            Label datePaidLabel = new Label(datePaidString);
-            //NumberFormat numFmt = NumberFormat.getCurrencyFormat();
+            //DateTimeFormat fmt = DateTimeFormat.getShortDateFormat();
+            //Date datePaid = entry.getPayment_date();
+            //String datePaidString = datePaid != null ? fmt.format(datePaid) : " ";
+            // TODO: set the paypal_tx here
+            Label paymentConfirmLabel = new Label(" ");
             NumberFormat numFmt = NumberFormat.getFormat("$#,##0.00");
             double amountPaid = entry.getPayment_amount();
             Label amountPaidLabel = new Label(numFmt.format(amountPaid));
             Label levelPassedLabel = new Label(entry.getLevelpassed());
-            addToGrid(classNameLabel, datePaidLabel, amountPaidLabel, levelPassedLabel);
+            addToGrid(classNameLabel, paymentConfirmLabel, amountPaidLabel, levelPassedLabel);
             // TODO: assign an appropriate CSS style to the row
         }
     }

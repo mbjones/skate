@@ -40,7 +40,7 @@ CREATE SEQUENCE session_id_seq START 5000;
 CREATE TABLE sessions (
 	sid INT8 default nextval('session_id_seq'), -- the unique node id (pk)
     sessionname VARCHAR(20),  -- the label for this session (e.g., 'Session 2')
-    season VARCHAR(20),       -- the name of the season (e.g., 'Fall 2008')
+    season VARCHAR(20),       -- the name of the season (e.g., '2008-2009')
 	startdate DATE,           -- the date the session starts
 	enddate DATE,             -- the date the session ends
    CONSTRAINT session_pk PRIMARY KEY (sid)
@@ -91,31 +91,51 @@ CREATE TABLE levels (
    CONSTRAINT levels_pk PRIMARY KEY (levelcode)
 );
 
--- Rosters -- table to store the list of students enrolled in a class
-CREATE SEQUENCE roster_id_seq START 10000;
-CREATE TABLE roster (
-	rosterid INT8 default nextval('roster_id_seq'), -- the identifier of this entry in the roster
-	classid INT8,            -- the id of the class for this roster
-    pid INT8,                -- the id of the person enrolled
-    levelPassed VARCHAR(20), -- the ASFS Level passed during testing
-    payment_amount FLOAT8,   -- the amount to be paid
+-- payment -- table to store the list of payments made for transactions
+CREATE SEQUENCE payment_id_seq START 50000;
+CREATE TABLE payment (
+	paymentid INT8 default nextval('payment_id_seq'), -- the identifier of this payment
 	payment_date DATE,       -- the date the payment was made
     paypal_tx_id VARCHAR(20), -- the transaction id from paypal
     paypal_gross FLOAT8,     -- the gross amount actually paid at paypal
     paypal_fee FLOAT8,       -- the amount of the fee at paypal (gross-fee=net amount to JSC)
     paypal_status VARCHAR(20), -- the status of the payment at PayPal
 	date_updated TIMESTAMP default CURRENT_TIMESTAMP, -- the date the record was last updated
+   CONSTRAINT payment_pk PRIMARY KEY (paymentid)
+);
+
+-- Rosters -- table to store the list of students enrolled in a class
+CREATE SEQUENCE roster_id_seq START 10000;
+CREATE TABLE roster (
+	rosterid INT8 default nextval('roster_id_seq'), -- the identifier of this entry in the roster
+	classid INT8,            -- the id of the class for this roster
+    pid INT8,                -- the id of the person enrolled
+    paymentid INT8,          -- the id of the payment for this roster entry
+    payment_amount FLOAT8,   -- the amount paid for this single roster entry, excluding discounts
+    levelPassed VARCHAR(20), -- the ASFS Level passed during testing
+   	date_updated TIMESTAMP default CURRENT_TIMESTAMP, -- the date the record was last updated
    CONSTRAINT roster_pk PRIMARY KEY (rosterid),
    CONSTRAINT roster_uk UNIQUE (classid,pid),
    CONSTRAINT roster_class_fk FOREIGN KEY (classid) REFERENCES skatingclass,
-   CONSTRAINT roster_student_fk FOREIGN KEY (pid) REFERENCES people
+   CONSTRAINT roster_student_fk FOREIGN KEY (pid) REFERENCES people,
+   CONSTRAINT roster_payment_fk FOREIGN KEY (paymentid) REFERENCES payment
 );
 
 -- rosterpeople -- a view over the roster and person tables joined showing selected fields
 CREATE OR REPLACE VIEW rosterpeople AS 
- SELECT r.rosterid, r.classid, r.pid, r.levelPassed, r.payment_amount, 
-        r.payment_date, r.paypal_tx_id, r.paypal_gross, r.paypal_fee, 
-        r.paypal_status, r.date_updated, p.surname, p.givenname
+ SELECT r.rosterid, r.classid, r.pid, r.levelPassed, r.paymentid, r.payment_amount,
+        r.date_updated, p.surname, p.givenname
    FROM roster r, people p
   WHERE r.pid = p.pid;
 
+-- membership -- table to store the memberships of students each season
+CREATE SEQUENCE membership_id_seq START 50000;
+CREATE TABLE membership (
+	mid INT8 default nextval('membership_id_seq'), -- the identifier of this membership
+	pid INT8,                -- the id of the person who is the member
+    paymentid INT8,          -- the id of the payment for this membership
+    season VARCHAR(20),      -- the name of the season (e.g., '2008-2009')
+	date_updated TIMESTAMP default CURRENT_TIMESTAMP, -- the date the record was last updated
+   CONSTRAINT membership_pk PRIMARY KEY (mid),
+   CONSTRAINT membership_payment_fk FOREIGN KEY (paymentid) REFERENCES payment
+);

@@ -15,12 +15,8 @@ public class RosterEntry implements Serializable {
     private long classid;
     private long pid;
     private String levelpassed;
+    private long paymentid;
     private double payment_amount;
-    private Date payment_date;
-    private String paypal_tx_id;
-    private double paypal_gross;
-    private double paypal_fee;
-    private String paypal_status;
     private Date date_updated;
     private String surname;
     private String givenname;
@@ -68,6 +64,21 @@ public class RosterEntry implements Serializable {
     public void setPid(long pid) {
         this.pid = pid;
     }
+    
+    /**
+     * @return the paymentid
+     */
+    public long getPaymentid() {
+        return paymentid;
+    }
+
+    /**
+     * @param paymentid the paymentid to set
+     */
+    public void setPaymentid(long paymentid) {
+        this.paymentid = paymentid;
+    }
+
     /**
      * @return the levelpassed
      */
@@ -91,66 +102,6 @@ public class RosterEntry implements Serializable {
      */
     public void setPayment_amount(double paymentAmount) {
         payment_amount = paymentAmount;
-    }
-    /**
-     * @return the payment_date
-     */
-    public Date getPayment_date() {
-        return payment_date;
-    }
-    /**
-     * @param paymentDate the payment_date to set
-     */
-    public void setPayment_date(Date paymentDate) {
-        payment_date = paymentDate;
-    }
-    /**
-     * @return the paypal_tx_id
-     */
-    public String getPaypal_tx_id() {
-        return paypal_tx_id;
-    }
-    /**
-     * @param paypalTxId the paypal_tx_id to set
-     */
-    public void setPaypal_tx_id(String paypalTxId) {
-        paypal_tx_id = paypalTxId;
-    }
-    /**
-     * @return the paypal_gross
-     */
-    public double getPaypal_gross() {
-        return paypal_gross;
-    }
-    /**
-     * @param paypalGross the paypal_gross to set
-     */
-    public void setPaypal_gross(double paypalGross) {
-        paypal_gross = paypalGross;
-    }
-    /**
-     * @return the paypal_fee
-     */
-    public double getPaypal_fee() {
-        return paypal_fee;
-    }
-    /**
-     * @param paypalFee the paypal_fee to set
-     */
-    public void setPaypal_fee(double paypalFee) {
-        paypal_fee = paypalFee;
-    }
-    /**
-     * @return the paypal_status
-     */
-    public String getPaypal_status() {
-        return paypal_status;
-    }
-    /**
-     * @param paypalStatus the paypal_status to set
-     */
-    public void setPaypal_status(String paypalStatus) {
-        paypal_status = paypalStatus;
     }
 
     /**

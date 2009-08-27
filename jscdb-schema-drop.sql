@@ -7,6 +7,8 @@
 
 DROP VIEW rosterpeople;
 DROP TABLE roster;
+DROP TABLE payment;
+DROP TABLE membership;
 DROP VIEW sessionclasses;
 DROP TABLE levels;
 DROP TABLE skatingclass;
