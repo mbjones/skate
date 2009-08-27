@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TreeMap;
 
@@ -387,9 +388,27 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 person.setHomephone(rs.getString(6));
                 person.setBday(rs.getString(7));
                 person.setPassword(rs.getString(8));
+                person.setMember(false);
+            }
+            stmt.close();
+            
+            // Now look up if the person already paid their membership this season
+            // If so, set their membership flag
+            String season = calculateSeason();
+            StringBuffer msql = new StringBuffer();
+            msql.append("select mid, pid, paymentid, season from membership where ");
+            msql.append("pid = '").append(pid).append("'");
+            msql.append(" AND ");
+            msql.append("season LIKE '").append(season).append("'");
+            System.out.println(msql.toString());
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(msql.toString());
+            if (rs.next()) {
+                // if we found a matching record, they have paid their membership
                 person.setMember(true);
             }
             stmt.close();
+            
             con.close();
 
         } catch(SQLException ex) {
@@ -397,6 +416,28 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         }
         
         return person;
+    }
+
+    /**
+     * Utility function to determine the current skating season.  If the current
+     * month is before June, we assume we are in the Spring of the previous 
+     * year's season, otherwise we assume we're in Fall of this year's season.
+     * @return season as a String (e.g., "2009-2010")
+     */
+    private String calculateSeason() {
+        Calendar rightNow = Calendar.getInstance();
+        int month = rightNow.get(Calendar.MONTH);
+        int year = rightNow.get(Calendar.YEAR);
+        int previousyear = year-1;
+        int nextyear = year+1;
+        String season;
+        if (month < 6) {
+            season = previousyear + "-" + year;
+        } else {
+            season = year + "-" + nextyear;
+        }
+        
+        return season;
     }
     
     /**

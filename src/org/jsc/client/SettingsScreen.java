@@ -30,6 +30,7 @@ public class SettingsScreen extends BaseScreen {
     private TextBox homephoneField;
     private PasswordTextBox password1Field;
     private PasswordTextBox password2Field;
+    private Label membershipLabel;
     private Button accountButton;
     
     // TODO: move regService to a separate class, one instance for the client
@@ -58,7 +59,7 @@ public class SettingsScreen extends BaseScreen {
         HorizontalPanel accountPanel = new HorizontalPanel();
         accountPanel.addStyleName("jsc-rightpanel");
         
-        int numrows = 9;
+        int numrows = 10;
         
         Grid g = new Grid(numrows, 2);
 
@@ -87,6 +88,9 @@ public class SettingsScreen extends BaseScreen {
         g.setWidget(7, 0, new Label("Re-type password:"));
         password2Field = new PasswordTextBox();
         g.setWidget(7, 1, password2Field);
+        g.setWidget(8, 0, new Label("Membership paid:"));
+        membershipLabel = new Label("false");
+        g.setWidget(8, 1, membershipLabel);
         
         accountButton = new Button("Create Account");
         accountButton.addClickHandler(new ClickHandler() {
@@ -94,7 +98,7 @@ public class SettingsScreen extends BaseScreen {
                 createAccount();
             }
         });
-        g.setWidget(8, 0, accountButton);
+        g.setWidget(9, 0, accountButton);
 
         // Set the css style for each row
         for (int row=0; row < numrows; row++) {
@@ -136,6 +140,8 @@ public class SettingsScreen extends BaseScreen {
             birthdayField.setText(person.getBday());
             password1Field.setText("");
             password2Field.setText("");
+            membershipLabel.setText(Boolean.toString(person.isMember()));
+
         } else {
             fnameField.setText("");
             mnameField.setText("");
@@ -145,6 +151,7 @@ public class SettingsScreen extends BaseScreen {
             birthdayField.setText("");
             password1Field.setText("");
             password2Field.setText("");
+            membershipLabel.setText("");
         }
     }
     
