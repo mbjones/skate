@@ -1,13 +1,10 @@
 package org.jsc.client;
 
-import java.util.Date;
-
 import org.jsc.client.event.RosterChangeEvent;
 import org.jsc.client.event.RosterChangeHandler;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable;
@@ -65,21 +62,13 @@ public class MyClassesScreen extends BaseScreen {
         outerRegPanel.addStyleName("jsc-rightpanel");
                 
         classesGrid = new Grid(0, 4);
-      
-//        HTMLTable.CellFormatter fmt = classesGrid.getCellFormatter();
-        
+              
         // Add a header row to the table
         Label classNameLabel = new Label("Class Name");
         Label datePaidLabel = new Label("Confirmation #");
         Label amountPaidLabel = new Label("Amount Paid");
         Label levelPassedLabel = new Label("Level Passed");
         addToGrid(classNameLabel, datePaidLabel, amountPaidLabel, levelPassedLabel);
-
-        // Set the css style for each row
-//        for (int row=0; row < classesGrid.getRowCount(); row++) {
-//            fmt.addStyleName(row, 0,  "jsc-fieldlabel");
-//            fmt.addStyleName(row, 1,  "jsc-field");
-//        }
         
         outerRegPanel.add(classesGrid);
         screen.add(outerRegPanel);
@@ -105,9 +94,6 @@ public class MyClassesScreen extends BaseScreen {
                 break;
             }
             Label classNameLabel = new Label(curClass.formatClassLabel());
-            //DateTimeFormat fmt = DateTimeFormat.getShortDateFormat();
-            //Date datePaid = entry.getPayment_date();
-            //String datePaidString = datePaid != null ? fmt.format(datePaid) : " ";
             // TODO: set the paypal_tx here
             Label paymentConfirmLabel = new Label(" ");
             NumberFormat numFmt = NumberFormat.getFormat("$#,##0.00");
@@ -115,7 +101,6 @@ public class MyClassesScreen extends BaseScreen {
             Label amountPaidLabel = new Label(numFmt.format(amountPaid));
             Label levelPassedLabel = new Label(entry.getLevelpassed());
             addToGrid(classNameLabel, paymentConfirmLabel, amountPaidLabel, levelPassedLabel);
-            // TODO: assign an appropriate CSS style to the row
         }
     }
     
