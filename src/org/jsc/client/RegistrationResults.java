@@ -14,7 +14,7 @@ public class RegistrationResults implements Serializable {
     private String membershipErrorMessage;
     private long membershipId;
     private ArrayList<RosterEntry> entriesCreated;
-    private ArrayList<String> entriesNotCreated;
+    private ArrayList<Long> entriesNotCreated;
     
     /** 
      * Construct a registration results object to be populated with accessors.
@@ -95,14 +95,14 @@ public class RegistrationResults implements Serializable {
     /**
      * @return the entriesNotCreated
      */
-    public ArrayList<String> getEntriesNotCreated() {
+    public ArrayList<Long> getEntriesNotCreated() {
         return entriesNotCreated;
     }
 
     /**
      * @param entriesNotCreated the entriesNotCreated to set
      */
-    public void setEntriesNotCreated(ArrayList<String> entriesNotCreated) {
+    public void setEntriesNotCreated(ArrayList<Long> entriesNotCreated) {
         this.entriesNotCreated = entriesNotCreated;
     }
 }

@@ -6,11 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TreeMap;
 
 import org.jsc.client.Person;
+import org.jsc.client.RegistrationResults;
 import org.jsc.client.RosterEntry;
 import org.jsc.client.SessionSkatingClass;
 import org.jsc.client.SkaterRegistrationService;
@@ -210,8 +208,12 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * @param createMembership boolean, set to true if the membership for the user should be created for this season
      * @return an array of the completed RosterEntry instances from the database
      */
-    public ArrayList<RosterEntry> register(Person person, ArrayList<RosterEntry> newEntryList, boolean createMembership) {
+    public RegistrationResults register(Person person, ArrayList<RosterEntry> newEntryList, boolean createMembership) {
+        
+        RegistrationResults results = new RegistrationResults();
+        
         ArrayList<RosterEntry> entriesCreated = new ArrayList<RosterEntry>();
+        ArrayList<Long> entriesFailed = new ArrayList<Long>();
                 
         // Check credentials
         if (person != null && newEntryList != null) {
@@ -226,11 +228,12 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         
         // Check if a membership entry should be created, and do so
         if (createMembership) {
+            results.setMembershipAttempted(true);
             // Create the SQL INSERT statement
             StringBuffer sql = new StringBuffer();
             sql.append("insert into membership (pid, season) VALUES ('");
             sql.append(person.getPid()).append("','");
-            sql.append(calculateSeason());
+            sql.append(SessionSkatingClass.calculateSeason());
             sql.append("')");
             System.out.println(sql.toString());
     
@@ -240,9 +243,29 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 Statement stmt = con.createStatement();
                 stmt.executeUpdate(sql.toString());
                 stmt.close();
+                
+                // Now look up the membershipId that was generated
+                String season = SessionSkatingClass.calculateSeason();
+                StringBuffer msql = new StringBuffer();
+                msql.append("select mid, pid, paymentid, season from membership where ");
+                msql.append("pid = '").append(person.getPid()).append("'");
+                msql.append(" AND ");
+                msql.append("season LIKE '").append(season).append("'");
+                System.out.println(msql.toString());
+                stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery(msql.toString());
+                if (rs.next()) {
+                    // if we found a matching record, the record was created
+                    results.setMembershipId(rs.getLong(1));
+                    results.setMembershipCreated(true);
+                }
+                stmt.close();
                 con.close();
+
             } catch(SQLException ex) {
                 System.err.println("SQLException: " + ex.getMessage());
+                results.setMembershipCreated(false);
+                results.setMembershipErrorMessage("SQLException: " + ex.getMessage());
             }
         }
         
@@ -282,16 +305,22 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 if (rs.next()) {
                     newEntry = createRosterEntry(rs);
                     entriesCreated.add(newEntry);
+                } else {
+                    entriesFailed.add(new Long(entry.getClassid()));
                 }
                 stmt.close();
                 con.close();
     
             } catch(SQLException ex) {
                 System.err.println("SQLException: " + ex.getMessage());
+                entriesFailed.add(new Long(entry.getClassid()));
             }
         }
         
-        return entriesCreated;
+        results.setEntriesCreated(entriesCreated);
+        results.setEntriesNotCreated(entriesFailed);
+        
+        return results;
     }
 
     /**
@@ -418,7 +447,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             
             // Now look up if the person already paid their membership this season
             // If so, set their membership flag
-            String season = calculateSeason();
+            String season = SessionSkatingClass.calculateSeason();
             StringBuffer msql = new StringBuffer();
             msql.append("select mid, pid, paymentid, season from membership where ");
             msql.append("pid = '").append(pid).append("'");
@@ -449,6 +478,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * year's season, otherwise we assume we're in Fall of this year's season.
      * @return season as a String (e.g., "2009-2010")
      */
+    /*
     private String calculateSeason() {
         Calendar rightNow = Calendar.getInstance();
         int month = rightNow.get(Calendar.MONTH);
@@ -464,6 +494,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         
         return season;
     }
+    */
     
     /**
      * Check the credentials for the person, determining if their email and

@@ -1,6 +1,7 @@
 package org.jsc.client;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * A model of a Session and SkatingClass combination, with properties from both
@@ -257,5 +258,32 @@ public class SessionSkatingClass implements Serializable {
         classLabel.append(" (").append(getDay());
         classLabel.append(" ").append(getTimeslot()).append(")");
         return classLabel.toString();
+    }
+    
+    /**
+     * Utility function to determine the current skating season.  If the current
+     * month is before June, we assume we are in the Spring of the previous 
+     * year's season, otherwise we assume we're in Fall of this year's season.
+     * @return season as a String (e.g., "2009-2010")
+     */
+    public static String calculateSeason() {
+        /*
+        Calendar rightNow = Calendar.getInstance();
+        int month = rightNow.get(Calendar.MONTH);
+        int year = rightNow.get(Calendar.YEAR);
+        */
+        Date rightNow = new Date(System.currentTimeMillis());
+        int month = rightNow.getMonth();
+        int year = rightNow.getYear()+1900;
+        int previousyear = year-1;
+        int nextyear = year+1;
+        String season;
+        if (month < 6) {
+            season = previousyear + "-" + year;
+        } else {
+            season = year + "-" + nextyear;
+        }
+        
+        return season;
     }
 }

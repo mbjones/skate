@@ -355,9 +355,16 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         if (loginSession.getPerson().isMember()) {
             memberCheckboxLabel.setText("Membership dues already paid. Discount applies.");
             memberCheckbox.setEnabled(false);
+            double dues = 0;
+            String duesString = numfmt.format(dues);
+            memberDues.setText(duesString);
+            recalculateAndDisplayTotals();
         } else {
             memberCheckboxLabel.setText("Pay membership dues");
             memberCheckbox.setEnabled(true);
+            //String duesString = numfmt.format(MEMBERSHIP_PRICE);
+            //memberDues.setText(duesString);
+            recalculateAndDisplayTotals();
         }
         
         // Update the cost discount, and total fields on the BS Form
@@ -417,23 +424,27 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             }
 
             // Set up the callback object.
-            AsyncCallback<ArrayList<RosterEntry>> callback = new AsyncCallback<ArrayList<RosterEntry>>() {
+            AsyncCallback<RegistrationResults> callback = new AsyncCallback<RegistrationResults>() {
 
                 public void onFailure(Throwable caught) {
                     // TODO: Do something with errors.
                     GWT.log("Failed to register the RosterEntry array.", null);
                 }
 
-                public void onSuccess(ArrayList<RosterEntry> newEntryList) {
+                public void onSuccess(RegistrationResults results) {
+                    
+                    ArrayList<RosterEntry> newEntryList = results.getEntriesCreated();
                     
                     if (newEntryList == null || newEntryList.size() == 0) {
                         // Failure on the remote end.
                         // Could simply be due to duplication errors
                         // TODO: Handle case where all duplication errors occur
+                        // Could still have membership created in this case
                         setMessage("Error registering for the class(es).");
                         return;
                     } else {
                         // TODO: Handle case where some duplication errors occur on insert but not all
+                        // TODO: Post error messages about entries that were not created
                         clearMessage();
                         StringBuffer ppCart = new StringBuffer();
                         ppCart.append("<form id=\"wizard\" action=\""+ PAYPAL_URL + "\" method=\"post\">");
@@ -454,12 +465,14 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                         }
                         
                         // Handle membership payment by creating form items as needed
-                        if (memberCheckbox.getValue() == true &! loginSession.getPerson().isMember()) {
+                        if (results.isMembershipCreated()) {
+                            loginSession.getPerson().setMember(true);
+                            loginSession.getPerson().setMembershipId(results.getMembershipId());
                             double dues = MEMBERSHIP_PRICE;
                             i++;
-                            String season = "2009-2010";
+                            String season = SessionSkatingClass.calculateSeason();
                             ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"Membership dues for " + season + " season\">");
-                            ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\"" + loginSession.getPerson().getMembershipId() +"\">");
+                            ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\"" + results.getMembershipId() +"\">");
                             ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + MEMBERSHIP_PRICE + "\">");
                         }
                         
