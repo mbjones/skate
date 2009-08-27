@@ -207,27 +207,51 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * the rosterid has been created for each one.
      * @param person to be used to authenticate the connection
      * @param newEntryList list of RosterEntry objects containing the details of the class and person to be registered
+     * @param createMembership boolean, set to true if the membership for the user should be created for this season
      * @return an array of the completed RosterEntry instances from the database
      */
-    public ArrayList<RosterEntry> register(Person person, ArrayList<RosterEntry> newEntryList) {
+    public ArrayList<RosterEntry> register(Person person, ArrayList<RosterEntry> newEntryList, boolean createMembership) {
         ArrayList<RosterEntry> entriesCreated = new ArrayList<RosterEntry>();
                 
+        // Check credentials
+        if (person != null && newEntryList != null) {
+            // Verify that the user is valid before allowing an insert
+            boolean isAuthentic = checkCredentials(person);
+            if (!isAuthentic) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+        
+        // Check if a membership entry should be created, and do so
+        if (createMembership) {
+            // Create the SQL INSERT statement
+            StringBuffer sql = new StringBuffer();
+            sql.append("insert into membership (pid, season) VALUES ('");
+            sql.append(person.getPid()).append("','");
+            sql.append(calculateSeason());
+            sql.append("')");
+            System.out.println(sql.toString());
+    
+            // Execute the INSERT to create the new membership table entry
+            try {
+                Connection con = getConnection();
+                Statement stmt = con.createStatement();
+                stmt.executeUpdate(sql.toString());
+                stmt.close();
+                con.close();
+            } catch(SQLException ex) {
+                System.err.println("SQLException: " + ex.getMessage());
+            }
+        }
+        
         // Loop through each of the entries we've been passed, and for each one
         // insert it in the database, look up its rosterid to create a new
         // RosterEntry for it, add this to the list of created roster entries
         for (RosterEntry entry : newEntryList) {
             
             RosterEntry newEntry = null;
-
-            if (person != null && entry != null) {
-                // Verify that the user is valid before allowing an insert
-                boolean isAuthentic = checkCredentials(person);
-                if (!isAuthentic) {
-                    return null;
-                }
-            } else {
-                return null;
-            }
             
             // Create the SQL INSERT statement
             StringBuffer sql = new StringBuffer();
@@ -406,6 +430,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             if (rs.next()) {
                 // if we found a matching record, they have paid their membership
                 person.setMember(true);
+                person.setMembershipId(rs.getLong(1));
             }
             stmt.close();
             

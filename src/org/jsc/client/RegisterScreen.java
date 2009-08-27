@@ -380,6 +380,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             // This is the array of roster entries that should be created in the db
             ArrayList<RosterEntry> entryList = new ArrayList<RosterEntry>();
             
+            boolean createMembership = false;
             // Gather information from the Basic Skills form if it is selected
             if (bsRadio.getValue()) {
                 String selectedClassId = classField.getValue(classField.getSelectedIndex());
@@ -392,6 +393,9 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                 
             // Otherwise gather information from the Figure Skating form if it is selected
             } else if (fsRadio.getValue()) {
+                if (memberCheckbox.getValue() == true &! loginSession.getPerson().isMember()) {
+                    createMembership = true;
+                }
                 // Loop through the checked classes, creating a RosterEntry for each
                 for (String selectedClassId : fsClassesToRegister) {
                     GWT.log("Need to register class: " + selectedClassId, null);
@@ -422,11 +426,11 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
 
                 public void onSuccess(ArrayList<RosterEntry> newEntryList) {
                     
-                    if (newEntryList == null && newEntryList.size() > 0) {
+                    if (newEntryList == null || newEntryList.size() == 0) {
                         // Failure on the remote end.
                         // Could simply be due to duplication errors
                         // TODO: Handle case where all duplication errors occur
-                        setMessage("Error registering for the class.");
+                        setMessage("Error registering for the class(es).");
                         return;
                     } else {
                         // TODO: Handle case where some duplication errors occur on insert but not all
@@ -440,8 +444,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                         ppCart.append("<input type=\"hidden\" name=\"no_note\" value=\"1\">");
                         ppCart.append("<input type=\"hidden\" name=\"no_shipping\" value=\"1\">");
                         ppCart.append("<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ PAYPAL_HEADER_IMAGE + "\">");
-
-                        // TODO: Handle membership payment by creating form items as needed
                         
                         int i = 0;
                         for (RosterEntry newEntry : newEntryList) {
@@ -450,6 +452,17 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                             ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\""+ newEntry.getRosterid() +"\">");
                             ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + newEntry.getPayment_amount() + "\">");
                         }
+                        
+                        // Handle membership payment by creating form items as needed
+                        if (memberCheckbox.getValue() == true &! loginSession.getPerson().isMember()) {
+                            double dues = MEMBERSHIP_PRICE;
+                            i++;
+                            String season = "2009-2010";
+                            ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"Membership dues for " + season + " season\">");
+                            ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\"" + loginSession.getPerson().getMembershipId() +"\">");
+                            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + MEMBERSHIP_PRICE + "\">");
+                        }
+                        
                         ppCart.append("<input type=\"hidden\" name=\"discount_amount_cart\" value=\"" + calculateDiscount() + "\">");
                         
                         ppCart.append("<input type=\"hidden\" name=\"return\" value=\"" + PAYPAL_RETURN_URL + "\">");
@@ -476,7 +489,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             };
 
             // Make the call to the registration service.
-            regService.register(loginSession.getPerson(), entryList, callback);
+            regService.register(loginSession.getPerson(), entryList, createMembership, callback);
             
         } else {
             GWT.log("Error: Can not register without first signing in.", null);

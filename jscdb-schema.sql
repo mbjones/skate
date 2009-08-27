@@ -137,5 +137,6 @@ CREATE TABLE membership (
     season VARCHAR(20),      -- the name of the season (e.g., '2008-2009')
 	date_updated TIMESTAMP default CURRENT_TIMESTAMP, -- the date the record was last updated
    CONSTRAINT membership_pk PRIMARY KEY (mid),
+   CONSTRAINT membership_uk UNIQUE (pid,season),
    CONSTRAINT membership_payment_fk FOREIGN KEY (paymentid) REFERENCES payment
 );

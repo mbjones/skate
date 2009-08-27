@@ -34,6 +34,7 @@ public class Person implements Serializable {
     private String newPassword;
     private String newEmail;
     private boolean isMember;
+    private long mid;
     
     /**
      * Construct a new person object with no fields set.
@@ -399,4 +400,21 @@ public class Person implements Serializable {
     public void setMember(boolean isMember) {
         this.isMember = isMember;
     }
+
+    /**
+     * Get the membership id for this person if they are a member
+     * @return the mid
+     */
+    public long getMembershipId() {
+        return mid;
+    }
+
+    /**
+     * Set the membership id for this person if they are a member
+     * @param mid the mid to set
+     */
+    public void setMembershipId(long mid) {
+        this.mid = mid;
+    }
+    
 }
