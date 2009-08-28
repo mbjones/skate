@@ -7,14 +7,16 @@
 
 DROP VIEW rosterpeople;
 DROP TABLE roster;
-DROP TABLE payment;
 DROP TABLE membership;
+DROP TABLE payment;
 DROP VIEW sessionclasses;
 DROP TABLE levels;
 DROP TABLE skatingclass;
 DROP TABLE sessions;
 DROP TABLE classtypes;
 DROP TABLE people;
+DROP SEQUENCE payment_id_seq;
+DROP SEQUENCE membership_id_seq;
 DROP SEQUENCE roster_id_seq;
 DROP SEQUENCE person_id_seq;
 DROP SEQUENCE class_id_seq;

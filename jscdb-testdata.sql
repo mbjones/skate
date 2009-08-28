@@ -28,79 +28,97 @@ INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS 
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Power and Artistry','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Synchro','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('Hockey','TBD','SS1');
-    
---INSERT INTO people (surname, givenname, middlename, birthdate, password, role,)
---     email, home_phone, cell_phone, work_phone, street1, street2, city, state,
---     zipcode, usafsaid, parentSurname, parentFirstname, parentEmail) VALUES
+
       
 INSERT INTO people (surname, givenname, birthdate, password, role,
-     email, home_phone) VALUES ('Anderson','Lauren', '1988-10-08', 'foo', 
-     1, 'lauren@jsc.org', '907-789-0000');
-INSERT INTO people (surname, givenname, birthdate, password, role,
-     email, home_phone) VALUES ('Jones','Matt', '1988-10-08', 'foo', 
-     3, 'mbjones.89@gmail.com', '907-789-0000');
+     email, home_phone) VALUES ('Jones','Matt', '1967-02-09', 'foo', 
+     3, 'mbjones.89@gmail.com', '907-789-0496');
+INSERT INTO people (surname, givenname, password, role,
+     email, home_phone) VALUES ('Anderson','Lauren', 'foo', 
+     1, 'ldipenti@hotmail.com', '907-957-1545');
+INSERT INTO people (surname, givenname, middlename, password, role,
+     email, home_phone) VALUES ('Siddon','Ebett', 'Calvert', 'foo', 
+     1, 'ebett_calvert@hotmail.com', '907-957-1545');
+INSERT INTO people (surname, givenname, middlename, password, role,
+     email, home_phone) VALUES ('Dahlberg','Sigrid', '', 'foo', 
+     1, 'sdahlberg@carsondorn.com', '');
+INSERT INTO people (surname, givenname, middlename, password, role,
+     email, home_phone) VALUES ('Green','Pam', '', 'foo', 
+     1, 'pammyjo00@yahoo.com', '907-723-2031');
+INSERT INTO people (surname, givenname, middlename, password, role,
+     email, home_phone) VALUES ('Geissler','Karla', '', 'foo', 
+     1, 'kmgeissler@gmail.com', '907-723-6743');
+INSERT INTO people (surname, givenname, middlename, password, role,
+     email, home_phone) VALUES ('Siddon','Chris', '', 'foo', 
+     1, 'chris_siddon@hotmail.com', '');
+INSERT INTO people (surname, givenname, middlename, password, role,
+     email, home_phone) VALUES ('Vuille','Wendy', '', 'foo', 
+     1, 'wendy.vuille@alaska.gov', '');
+INSERT INTO people (surname, givenname, middlename, password, role,
+     email, home_phone) VALUES ('Mix','Kim', '', 'foo', 
+     1, 'kim@bar.com', '');
+INSERT INTO people (surname, givenname, middlename, password, role,
+     email, home_phone) VALUES ('Bishop','Kayla', '', 'foo', 
+     1, 'kayla@bar.com', '');
+INSERT INTO people (surname, givenname, middlename, password, role,
+     email, home_phone) VALUES ('Instructor','Alex', '', 'foo', 
+     1, 'alex@bar.com', '');
      
 INSERT INTO sessions (sessionname, season, startdate, enddate)
-     VALUES ('1', '2009-2010', '2009-09-15', '2009-10-31');
+     VALUES ('1', '2009-2010', '2009-09-21', '2009-11-01');
 INSERT INTO sessions (sessionname, season, startdate, enddate)
-     VALUES ('2', '2009-2010', '2009-11-01', '2009-12-31');
+     VALUES ('2', '2009-2010', '2009-11-09', '2009-12-20');
 INSERT INTO sessions (sessionname, season, startdate, enddate)
-     VALUES ('3', '2009-2010', '2010-01-07', '2010-02-15');
+     VALUES ('3', '2009-2010', '2010-01-11', '2010-02-21');
 INSERT INTO sessions (sessionname, season, startdate, enddate)
-     VALUES ('4', '2009-2010', '2010-02-16', '2010-04-15');
+     VALUES ('4', '2009-2010', '2010-03-01', '2010-04-11');
 
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'Snowplow Sam', 'Saturday', '11:45am-12:45pm', 1000, 80.00, 'Sigrid');
+    (5000, 'Snowplow Sam', 'Saturday', '11:45am-12:45pm', 1009, 80.00, 'Alex');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'Beginner Youth', 'Friday', '6:30-7:30pm', 1000, 80.00, 'Katie, Pam');
+    (5000, 'Beginner Youth', 'Friday', '6:30-7:30pm', 1007, 80.00, 'Alex');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'Beginner Youth', 'Saturday', '11:45am-12:45pm', 1000, 80.00, 'Katie, Pam');
+    (5000, 'Beginner Youth', 'Saturday', '11:45am-12:45pm', 1005, 80.00, 'Kim');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'Intermediate Youth', 'Friday', '6:30-7:30pm', 1000, 80.00, 'Katie, Pam');
+    (5000, 'Intermediate Youth', 'Friday', '6:30-7:30pm', 1010, 80.00, '');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'Intermediate Youth', 'Saturday', '11:45am-12:45pm', 1000, 80.00, 'Katie, Pam');    
+    (5000, 'Intermediate Youth', 'Saturday', '11:45am-12:45pm', 1005, 80.00, '');    
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'Advanced Youth', 'Friday', '6:30-7:30pm', 1000, 80.00, 'Katie, Pam');
-INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
-    otherinstructors) VALUES
-    (5000, 'Advanced Youth', 'Saturday', '11:45am-12:45pm', 1000, 80.00, 'Katie, Pam');
+    (5000, 'Advanced Youth', 'Friday', '6:30-7:30pm', 1002, 80.00, '');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost,
     otherinstructors) VALUES
-    (5000, 'Beginner Adult', 'Friday', '6:30-7:30pm', 1000, 80.00, 'Katie, Pam');
+    (5000, 'Beginner Adult', 'Friday', '6:30-7:30pm', 1003, 80.00, '');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost,
     otherinstructors) VALUES
-    (5000, 'Beginner Adult', 'Saturday', '11:45am-12:45pm', 1000, 80.00, 'Katie, Pam');
+    (5000, 'Beginner Adult', 'Saturday', '11:45am-12:45pm', 1008, 80.00, '');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'Advanced Adult', 'Friday', '6:30-7:30pm', 1000, 80.00, 'Katie, Pam');
+    (5000, 'Advanced Adult', 'Friday', '6:30-7:30pm', 1003, 80.00, '');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'Advanced Adult', 'Saturday', '11:45am-12:45pm', 1000, 80.00, 'Katie, Pam');
-INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
-    otherinstructors) VALUES
-    (5000, 'Hockey Skating Skills', 'Sunday', '10:30-11:30am', 1000, 80.00, 'Chris');
+    (5000, 'Hockey Skating Skills', 'Sunday', '10:30-11:30am', 1006, 80.00, '');
 
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'FS Moves in the Field', 'Monday', '5:15-6:15pm', 1000, 75.00, 'Ebett');
+    (5000, 'FS Moves in the Field', 'Monday', '5:15-6:15pm', 1005, 75.00, '');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'FS Artistry', 'Tuesday', '6:15-7:15am', 1000, 75.00, 'Ebett');
+    (5000, 'FS Artistry', 'Tuesday', '6:15-7:15am', 1002, 75.00, '');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'FS Club Ice', 'Wednesday', '5:15-6:15pm', 1000, 75.00, 'Ebett');
+    (5000, 'FS Club Ice', 'Wednesday', '5:15-6:15pm', 1004, 75.00, '');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'FS Club Ice', 'Friday', '5:15-6:15pm', 1000, 75.00, 'Ebett');
+    (5000, 'FS Club Ice', 'Friday', '5:15-6:15pm', 1004, 75.00, '');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'FS Synchro', 'Sunday', '9:15-10:15am', 1000, 75.00, 'Ebett');
+    (5000, 'FS Synchro', 'Sunday', '9:15-10:15am', 1005, 75.00, '');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5000, 'FS Club Ice', 'Sunday', '9:15-10:15am', 1000, 75.00, 'Ebett');
+    (5000, 'FS Club Ice', 'Sunday', '9:15-10:15am', 1004, 75.00, '');
