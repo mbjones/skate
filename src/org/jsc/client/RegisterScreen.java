@@ -316,8 +316,10 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         classField.clear();
         sessionClassLabels = new TreeMap<String, String>();
         
-        // Clear the set of fsClasses to be registered
+        // Clear the set of fsClasses to be registered, and the form totals
         fsClassesToRegister.clear();
+        totalFSCost = 0;
+        total = 0;
         
         // Remove all of the rows from the FS grid table except the first and last two rows
         int rows = figureSkatingGrid.getRowCount();
@@ -358,13 +360,11 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             double dues = 0;
             String duesString = numfmt.format(dues);
             memberDues.setText(duesString);
-            recalculateAndDisplayTotals();
         } else {
             memberCheckboxLabel.setText("Pay membership dues");
             memberCheckbox.setEnabled(true);
             //String duesString = numfmt.format(MEMBERSHIP_PRICE);
             //memberDues.setText(duesString);
-            recalculateAndDisplayTotals();
         }
         
         // Update the cost discount, and total fields on the BS Form
@@ -373,7 +373,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         bsDiscountLabel.setText(numfmt.format(bsDiscount));
         double bsTotal = STANDARD_PRICE - bsDiscount;
         bsTotalLabel.setText(numfmt.format(bsTotal));
-        
+        recalculateAndDisplayTotals();
     }
 
     /**
@@ -522,6 +522,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             fsPanel.setVisible(false);
         } else if (sender == fsRadio) {
             GWT.log("fsRadio clicked", null);
+            recalculateAndDisplayTotals();
             bsPanel.setVisible(false);
             fsPanel.setVisible(true);
         } else if (sender == memberCheckbox) {
