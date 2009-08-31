@@ -56,13 +56,13 @@ INSERT INTO people (surname, givenname, middlename, password, role,
      1, 'wendy.vuille@alaska.gov', '');
 INSERT INTO people (surname, givenname, middlename, password, role,
      email, home_phone) VALUES ('Mix','Kim', '', 'foo', 
-     1, 'kim@bar.com', '');
+     1, 'ak1tourist@hotmail.com', '');
 INSERT INTO people (surname, givenname, middlename, password, role,
      email, home_phone) VALUES ('Bishop','Kayla', '', 'foo', 
-     1, 'kayla@bar.com', '');
+     1, 'anitab@eagle.ptialaska.net', '');
 INSERT INTO people (surname, givenname, middlename, password, role,
-     email, home_phone) VALUES ('Instructor','Alex', '', 'foo', 
-     1, 'alex@bar.com', '');
+     email, home_phone) VALUES ('Sargent','Alex', '', 'foo', 
+     1, 'alaskangrl_87@hotmail.com', '');
      
 INSERT INTO sessions (sessionname, season, startdate, enddate)
      VALUES ('1', '2009-2010', '2009-09-21', '2009-11-01');
