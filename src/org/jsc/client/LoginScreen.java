@@ -1,8 +1,11 @@
 package org.jsc.client;
 
+import java.util.Date;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -21,6 +24,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * @author Matt Jones
  */
 public class LoginScreen extends BaseScreen {
+
+    private static final long DURATION = 1000 * 60 * 30;
 
     private HorizontalPanel screen;
     private VerticalPanel loginPanel;
@@ -109,29 +114,39 @@ public class LoginScreen extends BaseScreen {
         }
 
         // Set up the callback object.
-        AsyncCallback<Person> callback = new AsyncCallback<Person>() {
+        AsyncCallback<LoginSession> callback = new AsyncCallback<LoginSession>() {
             public void onFailure(Throwable caught) {
                 // TODO: Do something with errors.
                 loginSession.setAuthenticated(false);
+                loginSession.setSessionId("invalid");
                 GWT.log("Authentication failed to complete.", null);
                 password.setText("");
             }
 
-            public void onSuccess(Person person) {
+            public void onSuccess(LoginSession newLoginSession) {
                 // Clear the password box
                 password.setText("");
                 
-                if (person != null) {
+                if (newLoginSession != null) {
                     // Login succeeded
-                    long pid = person.getPid();
+                    loginSession.setPerson(newLoginSession.getPerson());
+                    loginSession.setSessionId(newLoginSession.getSessionId());
+                    loginSession.setAuthenticated(newLoginSession.isAuthenticated());
+                    Date expires = new Date(System.currentTimeMillis() + DURATION);
+                    Cookies.setCookie("jscSession", loginSession.getSessionId(), expires, null, "/", false);
+                    
+                    long pid = loginSession.getPerson().getPid();
                     GWT.log("Login succeeded: " + pid, null);
-                    GWT.log(person.toString(), null);
+                    GWT.log(loginSession.getPerson().toString(), null);
                     clearMessage();
 
                     // Record the authenticated person in the LoginSession
-                    loginSession.setPerson(person);
-                    loginSession.setAuthenticated(true);
-
+                    //String sessionId = "FFEEEEDDMMEE";
+                    //String sessionID = /*(Get sessionID from server's response to your login request.)*/;
+                    //loginSession.setPerson(person);
+                    //loginSession.setAuthenticated(true);
+                    //loginSession.setSessionId(sessionId);
+                    
                     // Change our application state to the classes screen
                     History.newItem("register");
                 } else {

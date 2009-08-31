@@ -6,13 +6,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.jsc.client.LoginSession;
 import org.jsc.client.Person;
 import org.jsc.client.RegistrationResults;
 import org.jsc.client.RosterEntry;
 import org.jsc.client.SessionSkatingClass;
 import org.jsc.client.SkaterRegistrationService;
 
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -28,6 +34,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     private static final String JDBC_PASS = "1skate2";
     private static final String JDBC_DRIVER = "org.postgresql.Driver";
     private static final String ROSTER_QUERY = "SELECT rosterid, classid, pid, levelPassed, paymentid, payment_amount, date_updated, surname, givenname FROM rosterpeople";
+    private static final int MAX_SESSION_INTERVAL = 60 * 30;
     
     /**
      * Create a new person entry in the backing relational database, or update
@@ -37,7 +44,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * @param person the Person to be created or updated in the database
      * @return the Person that was created or updated, or null on error
      */
-    public Person createAccount(Person person) {
+    public Person createAccount(LoginSession loginSession, Person person) {
         long pid = 0;
 
         StringBuffer sql = new StringBuffer();
@@ -56,8 +63,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             sql.append(person.getNewPassword()).append("'");
             sql.append(")");
         } else {
-            // Verify that the user is valid before allowing an update
-            boolean isAuthentic = checkCredentials(person);
+            // Verify that the session is valid before allowing an update
+            boolean isAuthentic = isSessionValid(loginSession);
             if (!isAuthentic) {
                 return null;
             }
@@ -116,17 +123,29 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * Check if the user is in the database, and if the given password matches
      * @param username the username of the person who is signing in
      * @param password the password of the person who is signing in
-     * @return the Person that was authenticated if valid, otherwise null
+     * @return the LoginSession containing the person that was authenticated if valid, otherwise null
      */
-    public Person authenticate(String username, String password) {
+    public LoginSession authenticate(String username, String password) {
         Person person = null;
+        LoginSession loginSession = null;
+        
         if (username != null && password != null) {
+            HttpServletRequest request = this.getThreadLocalRequest();
+            HttpSession session = request.getSession();
+            session.setMaxInactiveInterval(MAX_SESSION_INTERVAL);
+            System.out.println("Servlet got session with id: " + session.getId());
+            String sessionId = session.getId();
+            
             int pid = checkPassword(username, password);
             if (pid > 0) {
                 person = lookupPerson(pid);
+                loginSession = new LoginSession();
+                loginSession.setPerson(person);
+                loginSession.setSessionId(sessionId);
+                loginSession.setAuthenticated(true);
             }
         }
-        return person;
+        return loginSession;
     }
     
     /**
@@ -440,7 +459,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 person.setEmail(rs.getString(5));
                 person.setHomephone(rs.getString(6));
                 person.setBday(rs.getString(7));
-                person.setPassword(rs.getString(8));
+                //person.setPassword(rs.getString(8));
+                person.setPassword(null);
                 person.setMember(false);
             }
             stmt.close();
@@ -495,6 +515,23 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         return season;
     }
     */
+    
+    /**
+     * Check the LoginSession to see if it is a valid session that corresponds
+     * to the correct user and that it has not expired.
+     * @param LoginSession containing the the sessionId to be checked
+     * @return true if valid session is valid, false if otherwise
+     */
+    private boolean isSessionValid(LoginSession loginSession) {
+        boolean isAuthenticated = false;
+        HttpServletRequest request = this.getThreadLocalRequest();
+        HttpSession session = request.getSession();
+        if (loginSession != null && session.getId().equals(loginSession.getSessionId())) {
+            // TODO: Also check if session corresponds to a PID (which requires having written the sessionId to the database with a PID
+            isAuthenticated = true;
+        }
+        return isAuthenticated;
+    }
     
     /**
      * Check the credentials for the person, determining if their email and

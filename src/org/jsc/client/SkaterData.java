@@ -15,6 +15,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
@@ -128,6 +129,13 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         // Add history listener
         History.addValueChangeHandler(this);
 
+        String sessionId = Cookies.getCookie("jscSession");
+        if ( sessionId != null ) {
+            GWT.log("SessionID in onModuleLoad is: " + sessionId, null);
+        } else {
+            GWT.log("SessionId not found in onModuleLoad.", null);
+        }
+        
         // Now that we've setup our listener, fire the initial history state.
         History.fireCurrentHistoryState();
     }
@@ -138,6 +146,14 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
      */
     public void onValueChange(ValueChangeEvent event) {
         Object historyToken = event.getValue();
+
+        String sessionId = Cookies.getCookie("jscSession");
+        if ( sessionId != null ) {
+            GWT.log("SessionId in onValueChange is: " + sessionId, null);
+        } else {
+            GWT.log("SessionId not found in onValueChange.", null);
+        }
+        
         if (historyToken.equals("about")) {
             about.center();
             about.show();

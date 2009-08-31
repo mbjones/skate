@@ -255,7 +255,7 @@ public class SettingsScreen extends BaseScreen {
         };
 
         // Make the call to the registration service.
-        regService.createAccount(person, callback);
+        regService.createAccount(loginSession, person, callback);
     }
     
     /**

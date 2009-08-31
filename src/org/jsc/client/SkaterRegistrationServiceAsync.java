@@ -14,8 +14,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public interface SkaterRegistrationServiceAsync {
 
-  void createAccount(Person person, AsyncCallback<Person> callback);
-  void authenticate(String username, String password, AsyncCallback<Person> callback);
+  void createAccount(LoginSession loginSession, Person person, AsyncCallback<Person> callback);
+  void authenticate(String username, String password, AsyncCallback<LoginSession> callback);
   void getPerson(long pid, AsyncCallback<Person> callback);
   void getSessionClassList(Person person, AsyncCallback<ArrayList<SessionSkatingClass>> callback);
   void register(Person person, ArrayList<RosterEntry> newEntryList, boolean createMembership, AsyncCallback<RegistrationResults> callback);
