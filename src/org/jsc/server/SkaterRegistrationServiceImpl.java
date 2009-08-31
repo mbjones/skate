@@ -149,6 +149,16 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     }
     
     /**
+     * Invalidate the session, forcing a new authentication call from the client.
+     */
+    public boolean logout() {
+        HttpServletRequest request = this.getThreadLocalRequest();
+        HttpSession session = request.getSession();
+        session.invalidate();
+        return true;
+    }
+    
+    /**
      * Look up the person in the database based on their identifier. If found,
      * return the Person object.
      * @param pid the identifier of the person to look up
@@ -168,11 +178,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * @param person the person used for authentication credentials
      * @return the ArrayList of SessionSkatingClass instances
      */
-    public ArrayList<SessionSkatingClass> getSessionClassList(Person person) {
+    public ArrayList<SessionSkatingClass> getSessionClassList(LoginSession loginSession, Person person) {
         ArrayList<SessionSkatingClass> classList = new ArrayList<SessionSkatingClass>();
         
         // Check authentication credentials
-        boolean isAuthentic = checkCredentials(person);
+        boolean isAuthentic = isSessionValid(loginSession);
         if (!isAuthentic) {
             return null;
         }
@@ -227,7 +237,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * @param createMembership boolean, set to true if the membership for the user should be created for this season
      * @return an array of the completed RosterEntry instances from the database
      */
-    public RegistrationResults register(Person person, ArrayList<RosterEntry> newEntryList, boolean createMembership) {
+    public RegistrationResults register(LoginSession loginSession, Person person, ArrayList<RosterEntry> newEntryList, boolean createMembership) {
         
         RegistrationResults results = new RegistrationResults();
         
@@ -237,7 +247,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         // Check credentials
         if (person != null && newEntryList != null) {
             // Verify that the user is valid before allowing an insert
-            boolean isAuthentic = checkCredentials(person);
+            boolean isAuthentic = isSessionValid(loginSession);
             if (!isAuthentic) {
                 return null;
             }
@@ -348,14 +358,14 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * @param person the person for whom the roster is compiled
      * @return an ArrayList of RosterEntry objects 
      */
-    public ArrayList<RosterEntry> getStudentRoster(Person person) {
+    public ArrayList<RosterEntry> getStudentRoster(LoginSession loginSession, Person person) {
         // Create the query string to find the roster membership
         StringBuffer sql = new StringBuffer();
         sql.append(ROSTER_QUERY);
         sql.append(" WHERE pid = ").append(person.getPid());
         System.out.println(sql.toString());
         
-        return getRoster(person, sql.toString());
+        return getRoster(loginSession, person, sql.toString());
     }
     
     /**
@@ -364,14 +374,14 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * @param person the person for whom the roster is compiled
      * @return an ArrayList of RosterEntry objects 
      */
-    public ArrayList<RosterEntry> getClassRoster(Person person, long classId) {
+    public ArrayList<RosterEntry> getClassRoster(LoginSession loginSession, Person person, long classId) {
         // Create the query string to find the roster membership
         StringBuffer sql = new StringBuffer();
         sql.append(ROSTER_QUERY);
         sql.append(" WHERE classid = ").append(classId);
         System.out.println(sql.toString());
         
-        return getRoster(person, sql.toString());
+        return getRoster(loginSession, person, sql.toString());
     }
     
     /**
@@ -382,12 +392,12 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * @param rosterQuery the SQL query used to find the roster
      * @return and ArrayList of RosterEntry objects matching the query
      */
-    private ArrayList<RosterEntry> getRoster(Person person, String rosterQuery) {
+    private ArrayList<RosterEntry> getRoster(LoginSession loginSession, Person person, String rosterQuery) {
 
         ArrayList<RosterEntry> roster = new ArrayList<RosterEntry>();
         
         // Check authentication credentials
-        boolean isAuthentic = checkCredentials(person);
+        boolean isAuthentic = isSessionValid(loginSession);
         if (!isAuthentic) {
             return null;
         }
@@ -529,6 +539,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         if (loginSession != null && session.getId().equals(loginSession.getSessionId())) {
             // TODO: Also check if session corresponds to a PID (which requires having written the sessionId to the database with a PID
             isAuthenticated = true;
+        } else {
+            session.invalidate();
         }
         return isAuthenticated;
     }

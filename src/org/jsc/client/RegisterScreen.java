@@ -367,13 +367,21 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             //memberDues.setText(duesString);
         }
         
+        recalculateAndDisplayBasicSkillsTotal();
+        recalculateAndDisplayTotals();
+    }
+
+    /**
+     * Set the price and discount for the Basic Skills form by recalculating the
+     * discount.
+     */
+    private void recalculateAndDisplayBasicSkillsTotal() {
         // Update the cost discount, and total fields on the BS Form
         feeLabel.setText(numfmt.format(STANDARD_PRICE));
         double bsDiscount = calculateDiscount();
         bsDiscountLabel.setText(numfmt.format(bsDiscount));
         double bsTotal = STANDARD_PRICE - bsDiscount;
         bsTotalLabel.setText(numfmt.format(bsTotal));
-        recalculateAndDisplayTotals();
     }
 
     /**
@@ -502,7 +510,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             };
 
             // Make the call to the registration service.
-            regService.register(loginSession.getPerson(), entryList, createMembership, callback);
+            regService.register(loginSession, loginSession.getPerson(), entryList, createMembership, callback);
             
         } else {
             GWT.log("Error: Can not register without first signing in.", null);
@@ -518,6 +526,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
 
         if (sender == bsRadio) {
             GWT.log("bsRadio clicked", null);
+            recalculateAndDisplayBasicSkillsTotal();
             bsPanel.setVisible(true);
             fsPanel.setVisible(false);
         } else if (sender == fsRadio) {

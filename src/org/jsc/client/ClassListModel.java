@@ -3,6 +3,8 @@ package org.jsc.client;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.jsc.client.event.LoginSessionChangeEvent;
+import org.jsc.client.event.LoginSessionChangeHandler;
 import org.jsc.client.event.SkatingClassChangeEvent;
 
 import com.google.gwt.core.client.GWT;
@@ -29,6 +31,14 @@ public class ClassListModel {
     public ClassListModel(HandlerManager eventBus, LoginSession loginSession) {
         this.loginSession = loginSession;
         this.eventBus = eventBus;
+        
+        // Register as a handler for LoginSession changes, and handle those changes
+        // by updating the header appropriately
+        eventBus.addHandler(LoginSessionChangeEvent.TYPE, new LoginSessionChangeHandler() {
+            public void onLoginSessionChange(LoginSessionChangeEvent event) {
+                refreshClassList();
+            }
+        });
     }
     
     /**
@@ -63,7 +73,7 @@ public class ClassListModel {
         };
 
         // Make the call to the registration service.
-        regService.getSessionClassList(loginSession.getPerson(), callback);
+        regService.getSessionClassList(loginSession, loginSession.getPerson(), callback);
     }
 
     /**

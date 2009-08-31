@@ -16,9 +16,10 @@ public interface SkaterRegistrationServiceAsync {
 
   void createAccount(LoginSession loginSession, Person person, AsyncCallback<Person> callback);
   void authenticate(String username, String password, AsyncCallback<LoginSession> callback);
+  void logout(AsyncCallback<Boolean> callback);
   void getPerson(long pid, AsyncCallback<Person> callback);
-  void getSessionClassList(Person person, AsyncCallback<ArrayList<SessionSkatingClass>> callback);
-  void register(Person person, ArrayList<RosterEntry> newEntryList, boolean createMembership, AsyncCallback<RegistrationResults> callback);
-  void getStudentRoster(Person person, AsyncCallback<ArrayList<RosterEntry>> callback);
-  void getClassRoster(Person person, long classid, AsyncCallback<ArrayList<RosterEntry>> callback);
+  void getSessionClassList(LoginSession loginSession, Person person, AsyncCallback<ArrayList<SessionSkatingClass>> callback);
+  void register(LoginSession loginSession, Person person, ArrayList<RosterEntry> newEntryList, boolean createMembership, AsyncCallback<RegistrationResults> callback);
+  void getStudentRoster(LoginSession loginSession, Person person, AsyncCallback<ArrayList<RosterEntry>> callback);
+  void getClassRoster(LoginSession loginSession, Person person, long classid, AsyncCallback<ArrayList<RosterEntry>> callback);
 }

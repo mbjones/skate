@@ -1,10 +1,13 @@
 package org.jsc.client;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.jsc.client.event.LoginSessionChangeEvent;
+import org.jsc.client.event.RosterChangeEvent;
 import org.jsc.client.event.SkatingClassChangeEvent;
 import org.jsc.client.event.SkatingClassChangeHandler;
 
@@ -18,6 +21,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -62,6 +66,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
     //private Panel leftPanel;
     //private Panel rightPanel;
     private HandlerManager eventBus;
+    private SkaterRegistrationServiceAsync regService;
     private AboutDialog about;
 
     /**
@@ -78,11 +83,27 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         // Create a login session, which initially is not logged in
         loginSession = new LoginSession();
         
+        // Check for a cookie to see if we have a previously valid session
+        String sessionId = Cookies.getCookie("jscSession");
+        String savedPid = Cookies.getCookie("jscPid");
+        if ( sessionId != null && savedPid != null) {
+            GWT.log("SessionID in onModuleLoad is: " + sessionId, null);
+            loginSession.setAuthenticated(true);
+            loginSession.setSessionId(sessionId);
+            Person person = new Person();
+            person.setPid(new Long(savedPid).longValue());
+            loginSession.setPerson(person);
+            refreshLoginSessionPerson(person.getPid());
+            // TODO: need to get hold of the Person and set it too (maybe look it up on the server?
+        } else {
+            GWT.log("SessionId not found in onModuleLoad.", null);
+        }
+        
         sessionClassList = new ClassListModel(eventBus, loginSession);
         rosterModel = new RosterModel(eventBus, loginSession);
 
         // Create our header with internal toolbar
-        header = new HeaderPanel(loginSession);
+        header = new HeaderPanel(loginSession, eventBus);
         header.setTitle("Juneau Skating Club");
    
         // Create the screens to be used in the application
@@ -128,13 +149,6 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         
         // Add history listener
         History.addValueChangeHandler(this);
-
-        String sessionId = Cookies.getCookie("jscSession");
-        if ( sessionId != null ) {
-            GWT.log("SessionID in onModuleLoad is: " + sessionId, null);
-        } else {
-            GWT.log("SessionId not found in onModuleLoad.", null);
-        }
         
         // Now that we've setup our listener, fire the initial history state.
         History.fireCurrentHistoryState();
@@ -146,13 +160,6 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
      */
     public void onValueChange(ValueChangeEvent event) {
         Object historyToken = event.getValue();
-
-        String sessionId = Cookies.getCookie("jscSession");
-        if ( sessionId != null ) {
-            GWT.log("SessionId in onValueChange is: " + sessionId, null);
-        } else {
-            GWT.log("SessionId not found in onValueChange.", null);
-        }
         
         if (historyToken.equals("about")) {
             about.center();
@@ -179,7 +186,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
             settings.updateScreen();
             content.setScreen(settings);
         } else if (historyToken.equals("signout")) {
-            loginSession.setAuthenticated(false);
+            logout();
             content.setScreen(login);
         } else if (historyToken.equals("myclasses")) {
             rosterModel.refreshRoster();
@@ -211,6 +218,77 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         register.updateMessage();
         manage.updateMessage();
         confirm.updateMessage();
+    }
+    
+    /**
+     * Look up the current details for this Person from the remote service. This
+     * method is called when we enter the application without authenticating and
+     * instead use the previous session to validate.  
+     */
+    private void refreshLoginSessionPerson(long pid) {
+        // Initialize the service proxy.
+        if (regService == null) {
+            regService = GWT.create(SkaterRegistrationService.class);
+        }
+
+        // Set up the callback object.
+        AsyncCallback<Person> callback = new AsyncCallback<Person>() {
+            public void onFailure(Throwable caught) {
+                // TODO: Do something with errors.
+                GWT.log("Failed to refresh the person record.", caught);
+            }
+
+            public void onSuccess(Person newPerson) {
+                if (newPerson == null) {
+                    // Failure on the remote end.
+                    GWT.log("Error refreshing the person's attributes.", null);
+                    return;
+                } else {
+                    // Update the loginSession to contain the newly looked up Person
+                    loginSession.setPerson(newPerson);
+                    //sessionClassList.refreshClassList();
+                    rosterModel.refreshRoster();
+                    LoginSessionChangeEvent event = new LoginSessionChangeEvent();
+                    eventBus.fireEvent(event);
+                }
+            }
+        };
+
+        // Make the call to the registration service.
+        regService.getPerson(pid, callback);
+    }
+    
+    /**
+     * Look up the current details for this Person from the remote service. This
+     * method is called when we enter the application without authenticating and
+     * instead use the previous session to validate.  
+     */
+    private void logout() {
+        
+        Date expires = new Date(System.currentTimeMillis());
+        Cookies.setCookie("jscSession", "invalid", expires, null, "/", false);
+        Cookies.setCookie("jscPid", "0", expires, null, "/", false);
+        loginSession.setAuthenticated(false);
+        
+        // Initialize the service proxy.
+        if (regService == null) {
+            regService = GWT.create(SkaterRegistrationService.class);
+        }
+
+        // Set up the callback object.
+        AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+            public void onFailure(Throwable caught) {
+                // TODO: Do something with errors.
+                GWT.log("Failed to logout.", caught);
+            }
+
+            public void onSuccess(Boolean isLoggedOut) {
+                GWT.log("Logout succeeded. HttpSession should be invalid.", null);
+            }
+        };
+
+        // Make the call to the registration service.
+        //regService.logout(null);
     }
     
     /**

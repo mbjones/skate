@@ -134,6 +134,7 @@ public class LoginScreen extends BaseScreen {
                     loginSession.setAuthenticated(newLoginSession.isAuthenticated());
                     Date expires = new Date(System.currentTimeMillis() + DURATION);
                     Cookies.setCookie("jscSession", loginSession.getSessionId(), expires, null, "/", false);
+                    Cookies.setCookie("jscPid", Long.toString(loginSession.getPerson().getPid()), expires, null, "/", false);
                     
                     long pid = loginSession.getPerson().getPid();
                     GWT.log("Login succeeded: " + pid, null);

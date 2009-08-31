@@ -1,5 +1,11 @@
 package org.jsc.client;
 
+import org.jsc.client.event.LoginSessionChangeEvent;
+import org.jsc.client.event.LoginSessionChangeHandler;
+import org.jsc.client.event.RosterChangeEvent;
+import org.jsc.client.event.RosterChangeHandler;
+
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
@@ -25,10 +31,18 @@ public class HeaderPanel extends VerticalPanel {
      * the login status.
      * @param loginSession the session information for status updates
      */
-    public HeaderPanel(LoginSession loginSession) {
+    public HeaderPanel(LoginSession loginSession, HandlerManager eventBus) {
         super();
         this.loginSession = loginSession;
         layoutHeaderPanel();
+        
+        // Register as a handler for LoginSession changes, and handle those changes
+        // by updating the header appropriately
+        eventBus.addHandler(LoginSessionChangeEvent.TYPE, new LoginSessionChangeHandler() {
+            public void onLoginSessionChange(LoginSessionChangeEvent event) {
+                updateStatus();
+            }
+        });
     }
     
     /**
@@ -47,10 +61,12 @@ public class HeaderPanel extends VerticalPanel {
         leftLinks.add(createSeparatorLabel());
         classesLink = new Hyperlink("My Classes", "myclasses");
         leftLinks.add(classesLink);
-        leftLinks.add(createSeparatorLabel());
+        
+        //leftLinks.add(createSeparatorLabel());
         manageLink = new Hyperlink("Manage Classes", "manage");
         leftLinks.add(manageLink);
         leftLinks.addStyleName("jsc-toolbar");
+        manageLink.setVisible(false);
         
         HorizontalPanel rightLinks = new HorizontalPanel();
         rightLinks.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
@@ -94,7 +110,7 @@ public class HeaderPanel extends VerticalPanel {
      * reflect the current login status.
      */
     protected void updateStatus() {
-        if (loginSession.isAuthenticated()) {
+        if (loginSession.isAuthenticated() && loginSession.getPerson() != null) {
             statusLabel.setText(loginSession.getPerson().getFname() + " " + 
                     loginSession.getPerson().getLname());
             //signoutLink.setText("Sign Out");

@@ -1,7 +1,6 @@
 package org.jsc.client;
 
 import java.io.Serializable;
-import java.util.Date;
 
 
 /**
@@ -31,11 +30,6 @@ public class LoginSession implements Serializable {
      */
     public boolean isAuthenticated() {
             return isAuthenticated;
-    }
-    
-    private boolean isServerSessionValid() {
-        // TODO Auto-generated method stub
-        return false;
     }
 
     /**

@@ -3,6 +3,8 @@ package org.jsc.client;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.jsc.client.event.LoginSessionChangeEvent;
+import org.jsc.client.event.LoginSessionChangeHandler;
 import org.jsc.client.event.RosterChangeEvent;
 import org.jsc.client.event.SkatingClassChangeEvent;
 
@@ -31,6 +33,14 @@ public class RosterModel {
     public RosterModel(HandlerManager eventBus, LoginSession loginSession) {
         this.loginSession = loginSession;
         this.eventBus = eventBus;
+        
+        // Register as a handler for LoginSession changes, and handle those changes
+        // by updating the header appropriately
+        eventBus.addHandler(LoginSessionChangeEvent.TYPE, new LoginSessionChangeHandler() {
+            public void onLoginSessionChange(LoginSessionChangeEvent event) {
+                refreshRoster();
+            }
+        });
     }
     
     /**
@@ -65,7 +75,7 @@ public class RosterModel {
         };
 
         // Make the call to the registration service.
-        regService.getStudentRoster(loginSession.getPerson(), callback);
+        regService.getStudentRoster(loginSession, loginSession.getPerson(), callback);
     }
 
     /**

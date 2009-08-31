@@ -16,9 +16,10 @@ public interface SkaterRegistrationService extends RemoteService {
 
     Person createAccount(LoginSession loginSession, Person person);
     LoginSession authenticate(String username, String password);
+    boolean logout();
     Person getPerson(long pid);
-    ArrayList<SessionSkatingClass> getSessionClassList(Person person);
-    RegistrationResults register(Person person, ArrayList<RosterEntry> newEntryList, boolean createMembership);
-    ArrayList<RosterEntry> getStudentRoster(Person person);
-    ArrayList<RosterEntry> getClassRoster(Person person, long classId);
+    ArrayList<SessionSkatingClass> getSessionClassList(LoginSession loginSession, Person person);
+    RegistrationResults register(LoginSession loginSession, Person person, ArrayList<RosterEntry> newEntryList, boolean createMembership);
+    ArrayList<RosterEntry> getStudentRoster(LoginSession loginSession, Person person);
+    ArrayList<RosterEntry> getClassRoster(LoginSession loginSession, Person person, long classId);
 }
