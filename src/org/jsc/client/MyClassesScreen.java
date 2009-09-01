@@ -65,7 +65,7 @@ public class MyClassesScreen extends BaseScreen {
               
         // Add a header row to the table
         Label classNameLabel = new Label("Class Name");
-        Label datePaidLabel = new Label("Confirmation #");
+        Label datePaidLabel = new Label("Payment #");
         Label amountPaidLabel = new Label("Payment Status");
         Label levelPassedLabel = new Label("Level Passed");
         addToGrid(classNameLabel, datePaidLabel, amountPaidLabel, levelPassedLabel);
@@ -94,14 +94,14 @@ public class MyClassesScreen extends BaseScreen {
                 break;
             }
             Label classNameLabel = new Label(curClass.formatClassLabel());
-            // TODO: set the paypal_tx here
-            Label paymentConfirmLabel = new Label(entry.getPaypal_status());
+            Label paymentConfirmLabel = new Label(Long.toString(entry.getPaymentid()));
+            Label paymentStatusLabel = new Label(entry.getPaypal_status());
             GWT.log("Paypal_status is : " + entry.getPaypal_status(), null);
             //NumberFormat numFmt = NumberFormat.getFormat("$#,##0.00");
             //double amountPaid = entry.getPayment_amount();
             //Label amountPaidLabel = new Label(numFmt.format(amountPaid));
             Label levelPassedLabel = new Label(entry.getLevelpassed());
-            addToGrid(classNameLabel, paymentConfirmLabel, paymentConfirmLabel, levelPassedLabel);
+            addToGrid(classNameLabel, paymentConfirmLabel, paymentStatusLabel, levelPassedLabel);
         }
     }
     
