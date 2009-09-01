@@ -283,7 +283,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             stmt.executeUpdate(psql.toString());
             stmt.close();
             con.close();
-
+            results.setPaymentId(paymentId);
+            
         } catch(SQLException ex) {
             System.err.println("SQLException: " + ex.getMessage());
             results.setMembershipCreated(false);

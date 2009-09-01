@@ -13,6 +13,7 @@ public class RegistrationResults implements Serializable {
     private boolean membershipCreated;
     private String membershipErrorMessage;
     private long membershipId;
+    private long paymentId;
     private ArrayList<RosterEntry> entriesCreated;
     private ArrayList<Long> entriesNotCreated;
     
@@ -76,6 +77,20 @@ public class RegistrationResults implements Serializable {
      */
     public void setMembershipId(long membershipId) {
         this.membershipId = membershipId;
+    }
+
+    /**
+     * @param paymentId the paymentId to set
+     */
+    public void setPaymentId(long paymentId) {
+        this.paymentId = paymentId;
+    }
+
+    /**
+     * @return the paymentId
+     */
+    public long getPaymentId() {
+        return paymentId;
     }
 
     /**

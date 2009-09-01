@@ -95,11 +95,15 @@ CREATE TABLE levels (
 CREATE SEQUENCE payment_id_seq START 50000;
 CREATE TABLE payment (
 	paymentid INT8 default nextval('payment_id_seq'), -- the identifier of this payment
-	payment_date DATE,       -- the date the payment was made
-    paypal_tx_id VARCHAR(20), -- the transaction id from paypal
-    paypal_gross FLOAT8,     -- the gross amount actually paid at paypal
-    paypal_fee FLOAT8,       -- the amount of the fee at paypal (gross-fee=net amount to JSC)
+	payment_date DATE,         -- the date the payment was made
+    paypal_tx_id VARCHAR(20),  -- the transaction id from paypal
+    paypal_gross FLOAT8,       -- the gross amount actually paid at paypal
+    discount FLOAT8,           -- the discount amount above gross that we waived
+    paypal_fee FLOAT8,         -- the amount of the fee at paypal
+    paypal_net FLOAT8,         -- the net amount to the organization (gross-fee=net amount to us)
     paypal_status VARCHAR(20), -- the status of the payment at PayPal
+    payer_email VARCHAR(60),   -- the email address of the payer
+    payer_id VARCHAR(60),      -- the PayPal ID of the payer
 	date_updated TIMESTAMP default CURRENT_TIMESTAMP, -- the date the record was last updated
    CONSTRAINT payment_pk PRIMARY KEY (paymentid)
 );

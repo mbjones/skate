@@ -463,13 +463,15 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                         ppCart.append("<input type=\"hidden\" name=\"no_note\" value=\"1\">");
                         ppCart.append("<input type=\"hidden\" name=\"no_shipping\" value=\"1\">");
                         ppCart.append("<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ PAYPAL_HEADER_IMAGE + "\">");
-                        
+                        ppCart.append("<input type=\"hidden\" name=\"item_name\" value=\""+ "Registration Invoice" + "\">");
+                        ppCart.append("<input type=\"hidden\" name=\"invoice\" value=\""+ results.getPaymentId() + "\">");
+
                         int i = 0;
                         for (RosterEntry newEntry : newEntryList) {
                             i++;
                             ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"" + sessionClassLabels.get(new Long(newEntry.getClassid()).toString()) + "\">");
                             ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\""+ newEntry.getRosterid() +"\">");
-                            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + newEntry.getPayment_amount() + "\">");
+                            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + STANDARD_PRICE + "\">");
                         }
                         
                         // Handle membership payment by creating form items as needed
