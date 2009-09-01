@@ -123,10 +123,11 @@ CREATE TABLE roster (
 
 -- rosterpeople -- a view over the roster and person tables joined showing selected fields
 CREATE OR REPLACE VIEW rosterpeople AS 
- SELECT r.rosterid, r.classid, r.pid, r.levelPassed, r.paymentid, r.payment_amount,
+ SELECT r.rosterid, r.classid, r.pid, r.levelPassed, r.paymentid, r.payment_amount, y.paypal_status,
         r.date_updated, p.surname, p.givenname
-   FROM roster r, people p
-  WHERE r.pid = p.pid;
+   FROM roster r, people p, payment y
+  WHERE r.pid = p.pid
+    AND r.paymentid = y.paymentid;
 
 -- membership -- table to store the memberships of students each season
 CREATE SEQUENCE membership_id_seq START 50000;
