@@ -33,7 +33,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     private static final String JDBC_USER = "jscdb";
     private static final String JDBC_PASS = "1skate2";
     private static final String JDBC_DRIVER = "org.postgresql.Driver";
-    private static final String ROSTER_QUERY = "SELECT rosterid, classid, pid, levelPassed, paymentid, payment_amount, date_updated, surname, givenname FROM rosterpeople";
+    private static final String ROSTER_QUERY = "SELECT rosterid, classid, pid, levelPassed, paymentid, payment_amount, paypal_status, date_updated, surname, givenname FROM rosterpeople";
     private static final int MAX_SESSION_INTERVAL = 60 * 30;
     
     /**
@@ -255,13 +255,51 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             return null;
         }
         
+        // Create an entry in the payments table to represent the transaction,
+        // setting the paypal_status field to incomplete. This field is later
+        // updated using the paypal IPN service when the transaction completes        
+        long paymentId = 0;
+        try {
+            Connection con = getConnection();
+            
+            // Look up the paymentId to be used for this insert
+            StringBuffer idsql = new StringBuffer();
+            idsql.append("SELECT NEXTVAL(\'\"payment_id_seq\"\')");
+            System.out.println(idsql.toString());
+            Statement stmt = con.createStatement();
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(idsql.toString());
+            if (rs.next()) {
+                // This is the next id in the payment id sequence
+                paymentId = rs.getLong(1);
+            }
+            stmt.close();
+            
+            // Execute the INSERT to create the new payment table entry
+            StringBuffer psql = new StringBuffer();
+            psql.append("insert into payment (paymentId, paypal_status) VALUES (" 
+                    + paymentId + ", 'Pending')");
+            System.out.println(psql.toString());
+   
+            stmt = con.createStatement();
+            stmt.executeUpdate(psql.toString());
+            stmt.close();
+            con.close();
+
+        } catch(SQLException ex) {
+            System.err.println("SQLException: " + ex.getMessage());
+            results.setMembershipCreated(false);
+            results.setMembershipErrorMessage("SQLException: " + ex.getMessage());
+        }
+        
         // Check if a membership entry should be created, and do so
         if (createMembership) {
             results.setMembershipAttempted(true);
             // Create the SQL INSERT statement
             StringBuffer sql = new StringBuffer();
-            sql.append("insert into membership (pid, season) VALUES ('");
+            sql.append("insert into membership (pid, paymentid, season) VALUES ('");
             sql.append(person.getPid()).append("','");
+            sql.append(paymentId).append("','");
             sql.append(SessionSkatingClass.calculateSeason());
             sql.append("')");
             System.out.println(sql.toString());
@@ -287,6 +325,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                     // if we found a matching record, the record was created
                     results.setMembershipId(rs.getLong(1));
                     results.setMembershipCreated(true);
+                    // TODO: set the paymentId in the results object
                 }
                 stmt.close();
                 con.close();
@@ -307,10 +346,10 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             
             // Create the SQL INSERT statement
             StringBuffer sql = new StringBuffer();
-            sql.append("insert into roster (classid, pid, payment_amount) values ('");
+            sql.append("insert into roster (classid, pid, paymentId) values ('");
             sql.append(entry.getClassid()).append("','");
             sql.append(entry.getPid()).append("',");
-            sql.append(entry.getPayment_amount());
+            sql.append(paymentId);
             sql.append(")");
             System.out.println(sql.toString());
     
@@ -352,6 +391,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         return results;
     }
 
+    protected String getPaymentIdentifierSql()
+    {
+        return "SELECT NEXTVAL(\'\"payment_id_seq\"\')";
+    }
+    
     /**
      * Look up the roster of classes for which this student has registered and
      * return it as an ArrayList.
@@ -436,9 +480,10 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         entry.setLevelpassed(rs.getString(4));
         entry.setPaymentid(rs.getLong(5));
         entry.setPayment_amount(rs.getDouble(6));
-        entry.setDate_updated(rs.getDate(7));
-        entry.setSurname(rs.getString(8));
-        entry.setGivenname(rs.getString(9));
+        entry.setPaypal_status(rs.getString(7));
+        entry.setDate_updated(rs.getDate(8));
+        entry.setSurname(rs.getString(9));
+        entry.setGivenname(rs.getString(10));
         return entry;
     }
     

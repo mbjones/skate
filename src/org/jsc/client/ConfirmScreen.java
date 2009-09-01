@@ -28,6 +28,7 @@ public class ConfirmScreen extends BaseScreen {
 
     
     // ?tx=89009871KK074674R&st=Completed&amt=77.00&cc=USD&cm=&item_number=7
+    // item_number is blank if coming from a cart rather than a single item purchase
     private String rosterId;
     private String transactionId;
     private String amountPaid;
@@ -74,9 +75,9 @@ public class ConfirmScreen extends BaseScreen {
         int numrows = 4;
         Grid g = new Grid(numrows, 2);
         HTMLTable.CellFormatter fmt = g.getCellFormatter();
-        g.setWidget(0, 0, new Label("Registration #:"));
-        rosterIdField = new Label("1234");
-        g.setWidget(0, 1, rosterIdField);
+        //g.setWidget(0, 0, new Label("Registration #:"));
+        //rosterIdField = new Label("1234");
+        //g.setWidget(0, 1, rosterIdField);
         g.setWidget(1, 0, new Label("Transaction #:"));
         transactionIdField = new Label("8TE412ER4091Q12EC72MMN");
         g.setWidget(1, 1, transactionIdField);
@@ -118,87 +119,6 @@ public class ConfirmScreen extends BaseScreen {
             setMessage("User is not logged in.");
             return;
         }
-        
-        /*// create Person object
-        Person person = null;
-        if (isValid) {
-            //clearMessage();
-            person = new Person(fname, mname, lname);
-            if (loginSession.isAuthenticated()) {
-                person.setPid(loginSession.getPerson().getPid());
-                person.setPassword(loginSession.getPerson().getPassword());
-            } else {
-                // Set the PID to 0 to indicate this is an update
-                person.setPid(0);
-            }
-            if (loginSession.isAuthenticated() && !email.equals(loginSession.getPerson().getEmail())) {
-                person.setEmail(loginSession.getPerson().getEmail());
-                person.setNewEmail(email);
-            } else {
-                person.setEmail(email);
-            }
-            
-            person.setBday(birthday);
-            person.setHomephone(homephone);
-            if (pw1 != null) {
-                person.setNewPassword(pw1);
-            }
-        } else {
-            GWT.log("Account NOT created: " + fname + " " + mname + " " + lname, null);
-            return;
-        }
-        
-        // Initialize the service proxy.
-        if (regService == null) {
-            regService = GWT.create(SkaterRegistrationService.class);
-        }
-
-        // Set up the callback object.
-        AsyncCallback<Person> callback = new AsyncCallback<Person>() {
-            public void onFailure(Throwable caught) {
-                // TODO: Do something with errors.
-                GWT.log("Failed to create account.", null);
-            }
-
-            public void onSuccess(Person newPerson) {
-                if (newPerson == null) {
-                    // Failure on the remote end.
-                    setMessage("Failed to create or update account.");
-                    return;
-                }
-                
-                GWT.log("Account created: " + newPerson.getPid(), null);
-                if (loginSession.isAuthenticated() &&
-                        loginSession.getPerson().getPid() == newPerson.getPid()) {
-                    setMessage("Settings saved.");
-                    // Update the loginSession with the new Person object
-                    loginSession.setPerson(newPerson);
-                } else {
-                    // Change our application state to the login screen
-                    setMessage("Account created. Please sign in.");
-                    History.newItem("signout");
-                }
-            }
-        };
-
-        // Make the call to the registration service.
-        regService.createAccount(person, callback);*/
-    }
-    
-    /**
-     * Check if each String in the array is non-null and has length > 0.
-     * @param fields the array of fields to be checked
-     * @return true if any field is null or zero length, otherwise false
-     */
-    private boolean fieldMissing(String[] fields) {
-        boolean isMissing = false;
-        for (String field : fields) {
-            if (field == null || field.length() == 0) {
-                isMissing = true;
-                return isMissing;
-            }
-        }
-        return isMissing;
     }
 
     /**

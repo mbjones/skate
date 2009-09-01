@@ -17,6 +17,7 @@ public class RosterEntry implements Serializable {
     private String levelpassed;
     private long paymentid;
     private double payment_amount;
+    private String paypal_status;
     private Date date_updated;
     private String surname;
     private String givenname;
@@ -102,6 +103,20 @@ public class RosterEntry implements Serializable {
      */
     public void setPayment_amount(double paymentAmount) {
         payment_amount = paymentAmount;
+    }
+
+    /**
+     * @param paypal_status the paypal_status to set
+     */
+    public void setPaypal_status(String paypal_status) {
+        this.paypal_status = paypal_status;
+    }
+
+    /**
+     * @return the paypal_status
+     */
+    public String getPaypal_status() {
+        return paypal_status;
     }
 
     /**
