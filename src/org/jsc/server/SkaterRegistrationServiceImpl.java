@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -18,7 +17,6 @@ import org.jsc.client.RosterEntry;
 import org.jsc.client.SessionSkatingClass;
 import org.jsc.client.SkaterRegistrationService;
 
-import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -390,11 +388,6 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         
         return results;
     }
-
-    protected String getPaymentIdentifierSql()
-    {
-        return "SELECT NEXTVAL(\'\"payment_id_seq\"\')";
-    }
     
     /**
      * Look up the roster of classes for which this student has registered and
@@ -547,30 +540,6 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         return person;
     }
 
-    /**
-     * Utility function to determine the current skating season.  If the current
-     * month is before June, we assume we are in the Spring of the previous 
-     * year's season, otherwise we assume we're in Fall of this year's season.
-     * @return season as a String (e.g., "2009-2010")
-     */
-    /*
-    private String calculateSeason() {
-        Calendar rightNow = Calendar.getInstance();
-        int month = rightNow.get(Calendar.MONTH);
-        int year = rightNow.get(Calendar.YEAR);
-        int previousyear = year-1;
-        int nextyear = year+1;
-        String season;
-        if (month < 6) {
-            season = previousyear + "-" + year;
-        } else {
-            season = year + "-" + nextyear;
-        }
-        
-        return season;
-    }
-    */
-    
     /**
      * Check the LoginSession to see if it is a valid session that corresponds
      * to the correct user and that it has not expired.

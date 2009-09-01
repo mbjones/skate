@@ -21,4 +21,14 @@
     <url-pattern>/skaterdata/registration</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>PaypalIPNServlet</servlet-name>
+    <servlet-class>org.jsc.server.PaypalIPNServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>PaypalIPNServlet</servlet-name>
+    <url-pattern>/skaterdata/ipn</url-pattern>
+  </servlet-mapping>
+  
 </web-app>

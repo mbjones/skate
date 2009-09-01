@@ -100,9 +100,6 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         manage = new ManageScreen(loginSession);
         confirm = new ConfirmScreen(loginSession);
         
-        //leftPanel = createLeftPanel();
-        //rightPanel = createRightPanel();
-
         // Set the default view screen to be login
         content.setScreen(login);
 
@@ -148,14 +145,14 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
             historyToken = "signout";
         }
         
-        //Check if this is an IPT response from PayPal, and if so redirect to the confirm page
+        //Check if this is an redirect from PayPal, and if so send to the confirm page
         List<String> txList = params.get("tx");
         if (txList != null && txList.size() > 0) {
             GWT.log("Transaction id: " + txList.get(0), null);
             confirm.setTransactionId(params.get("tx").get(0));
             confirm.setStatus(params.get("st").get(0));
             confirm.setAmountPaid(params.get("amt").get(0));
-            confirm.setRosterId(params.get("item_number").get(0));
+            //confirm.setRosterId(params.get("item_number").get(0));
             historyToken = "confirm";
         }
         
