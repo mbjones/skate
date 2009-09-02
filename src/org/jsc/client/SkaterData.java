@@ -93,6 +93,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
             GWT.log(param.getKey() + " " + param.getValue().toString(), null);
         }
         
+        // Initialize application screens
         login = new LoginScreen(loginSession);
         settings = new SettingsScreen(loginSession);
         myclasses = new MyClassesScreen(loginSession, eventBus, sessionClassList);
@@ -103,9 +104,8 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         // Set the default view screen to be login
         content.setScreen(login);
 
-        // Get rid of scrollbars, and clear out the window's built-in margin,
+        // Clear out the window's built-in margin,
         // because we want to take advantage of the entire client area.
-        //Window.enableScrolling(false);
         Window.setMargin("0px");
 
         // Add our header and content containers to the root panel of the window
@@ -140,14 +140,9 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
             about.show();
         }
         
-        if (!loginSession.isAuthenticated() &! historyToken.equals("settings")
-                &! historyToken.equals("confirm") &! historyToken.equals("cancel")) {
-            historyToken = "signout";
-        }
-        
         //Check if this is an redirect from PayPal, and if so send to the confirm page
         List<String> txList = params.get("tx");
-        if (txList != null && txList.size() > 0) {
+        if (historyToken.equals("") && txList != null && txList.size() > 0) {
             GWT.log("Transaction id: " + txList.get(0), null);
             confirm.setTransactionId(params.get("tx").get(0));
             confirm.setStatus(params.get("st").get(0));
@@ -156,11 +151,18 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
             historyToken = "confirm";
         }
         
+        if (!loginSession.isAuthenticated() &! historyToken.equals("settings")
+                &! historyToken.equals("confirm") &! historyToken.equals("cancel")) {
+            historyToken = "signin";
+        }
+        
         if (historyToken.equals("settings")) {
             settings.updateScreen();
             content.setScreen(settings);
         } else if (historyToken.equals("signout")) {
             logout();
+            content.setScreen(login);
+        } else if (historyToken.equals("signin")) {
             content.setScreen(login);
         } else if (historyToken.equals("myclasses")) {
             rosterModel.refreshRoster();

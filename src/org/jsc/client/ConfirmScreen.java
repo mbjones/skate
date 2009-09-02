@@ -24,7 +24,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 public class ConfirmScreen extends BaseScreen {
 
-    private static final String CONFIRM_MESSAGE = "<p class=\"jsc-text\">Thank you for registering.  Your payment in the amount shown below will be processed by PayPal.</p><p class=\"jsc-text\">Please review and keep the information in the table below for your records.  It is the receipt for your registration.</p></div>";
+    private static final String CONFIRM_MESSAGE = "<p class=\"jsc-text\">Thank you for registering.  Your payment in the amount shown below will be processed by PayPal. Please check the \"My Classes\" page to confirm your PayPal payment status.</p><p class=\"jsc-text\">Please review and keep the information in the table below for your records.  It is the receipt for your registration.</p></div>";
 
     
     // ?tx=89009871KK074674R&st=Completed&amt=77.00&cc=USD&cm=&item_number=7

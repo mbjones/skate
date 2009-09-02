@@ -122,7 +122,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         ppPaymentPanel = new VerticalPanel();
         ppPaymentPanel.setVisible(false);
         
-        registerButton = new Button("Go to Step 2");
+        registerButton = new Button("Continue");
         registerButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 register();
