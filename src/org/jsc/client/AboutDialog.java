@@ -16,9 +16,9 @@ public class AboutDialog extends DialogBox {
 
     public AboutDialog() {
         // Set the dialog box's caption.
-        setText("About Skater Data...");
+        setText("About Skate!...");
         VerticalPanel content = new VerticalPanel();
-        Label title = new Label("Skater Data");
+        Label title = new Label("Skate!");
         title.addStyleName("jsc-dialog");
         Label version = new Label("Version: 0.9.0");
         version.addStyleName("jsc-dialog");
