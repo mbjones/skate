@@ -9,6 +9,7 @@
 CREATE SEQUENCE person_id_seq START 1000;
 CREATE TABLE people (
 	pid INT8 default nextval('person_id_seq'), -- the unique node id (pk)
+	username VARCHAR(250),   -- the unique username for this account
 	surname VARCHAR(250),	 -- the surname of this person
     givenname VARCHAR(250),  -- the givenname of this person
     middlename VARCHAR(250), -- the middle name of this person
@@ -29,7 +30,8 @@ CREATE TABLE people (
     parentFirstname VARCHAR(250), -- First name of the parent
     parentEmail VARCHAR(250), -- email of the parent
 	date_updated TIMESTAMP default CURRENT_TIMESTAMP, -- the date the record was last updated
-   CONSTRAINT people_pk PRIMARY KEY (pid)
+   CONSTRAINT people_pk PRIMARY KEY (pid),
+   CONSTRAINT username_uk UNIQUE (username)
 );
 
 -- Index of surname

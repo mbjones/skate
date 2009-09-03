@@ -597,9 +597,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
 
         StringBuffer sql = new StringBuffer();
         sql.append("select pid,password from people where ");
-        sql.append("email LIKE '").append(username).append("'");
-        //sql.append(" AND ");
-        //sql.append("password LIKE '").append(password).append("'");
+        sql.append("username LIKE '").append(username).append("'");
         System.out.println(sql.toString());
 
         try {

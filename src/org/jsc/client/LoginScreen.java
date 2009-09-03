@@ -72,10 +72,9 @@ public class LoginScreen extends BaseScreen {
         loginPanel.addStyleName("jsc-leftpanel");
         Label signin = new Label("Sign In");
         signin.addStyleName("jsc-screentitle");
-        //loginPanel.add(signin);
-        Label emailLabel = new Label("Email:");
-        loginPanel.add(emailLabel);
-        emailLabel.addStyleName("jsc-fieldlabel-left");
+        Label usernameLabel = new Label("Username:");
+        loginPanel.add(usernameLabel);
+        usernameLabel.addStyleName("jsc-fieldlabel-left");
         username = new TextBox();
         username.addStyleName("jsc-field");
         loginPanel.add(username);
@@ -152,7 +151,7 @@ public class LoginScreen extends BaseScreen {
                     History.newItem("register");
                 } else {
                     loginSession.setAuthenticated(false);
-                    setMessage("Incorrect email or password. Please try again.");
+                    setMessage("Incorrect username or password. Please try again.");
                 }
             }
         };
