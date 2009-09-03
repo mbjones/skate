@@ -16,6 +16,7 @@ import org.jsc.client.RegistrationResults;
 import org.jsc.client.RosterEntry;
 import org.jsc.client.SessionSkatingClass;
 import org.jsc.client.SkaterRegistrationService;
+import org.mindrot.BCrypt;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -57,9 +58,13 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             sql.append(person.getMname()).append("','");
             sql.append(person.getEmail()).append("','");
             sql.append(person.getHomephone()).append("','");
+            
             sql.append(person.getBday()).append("','");
-            sql.append(person.getNewPassword()).append("'");
+            // Hash the password before insertion into the database
+            String hashed = BCrypt.hashpw(person.getNewPassword(), BCrypt.gensalt());
+            sql.append(hashed).append("'");
             sql.append(")");
+            
         } else {
             // Verify that the session is valid before allowing an update
             boolean isAuthentic = isSessionValid(loginSession);
@@ -79,7 +84,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             sql.append("home_phone='").append(person.getHomephone()).append("',");
             sql.append("birthdate='").append(person.getBday()).append("'");
             if (person.getNewPassword() != null && person.getNewPassword().length() > 0) {
-                sql.append(",password='").append(person.getNewPassword()).append("'");
+                // Hash the password before insertion into the database
+                String hashed = BCrypt.hashpw(person.getNewPassword(), BCrypt.gensalt());
+                sql.append(",password='").append(hashed).append("'");
             }
             sql.append(" where pid=").append(person.getPid());
         }
@@ -589,10 +596,10 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         int pid = 0;
 
         StringBuffer sql = new StringBuffer();
-        sql.append("select * from people where ");
+        sql.append("select pid,password from people where ");
         sql.append("email LIKE '").append(username).append("'");
-        sql.append(" AND ");
-        sql.append("password LIKE '").append(password).append("'");
+        //sql.append(" AND ");
+        //sql.append("password LIKE '").append(password).append("'");
         System.out.println(sql.toString());
 
         try {
@@ -601,6 +608,13 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             ResultSet rs = stmt.executeQuery(sql.toString());
             if (rs.next()) {
                 pid = rs.getInt(1);
+                String hashed = rs.getString(2);
+                // Check that an unencrypted password matches one that has
+                // previously been hashed
+                if (!BCrypt.checkpw(password, hashed)) {
+                    System.out.println("It does not match");
+                    pid = 0;
+                }
             }
             stmt.close();
             con.close();
