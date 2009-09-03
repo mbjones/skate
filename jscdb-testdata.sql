@@ -29,40 +29,40 @@ INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS 
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Synchro','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('Hockey','TBD','SS1');
 
-      
-INSERT INTO people (surname, givenname, birthdate, password, role,
-     email, home_phone) VALUES ('Jones','Matt', '1967-02-09', 'foo', 
-     3, 'mbjones.89@gmail.com', '907-789-0496');
-INSERT INTO people (surname, givenname, password, role,
-     email, home_phone) VALUES ('Anderson','Lauren', 'foo', 
-     1, 'ldipenti@hotmail.com', '907-957-1545');
-INSERT INTO people (surname, givenname, middlename, password, role,
-     email, home_phone) VALUES ('Siddon','Ebett', 'Calvert', 'foo', 
-     1, 'ebett_calvert@hotmail.com', '907-957-1545');
-INSERT INTO people (surname, givenname, middlename, password, role,
-     email, home_phone) VALUES ('Dahlberg','Sigrid', '', 'foo', 
-     1, 'sdahlberg@carsondorn.com', '');
-INSERT INTO people (surname, givenname, middlename, password, role,
-     email, home_phone) VALUES ('Green','Pam', '', 'foo', 
-     1, 'pammyjo00@yahoo.com', '907-723-2031');
-INSERT INTO people (surname, givenname, middlename, password, role,
-     email, home_phone) VALUES ('Geissler','Karla', '', 'foo', 
-     1, 'kmgeissler@gmail.com', '907-723-6743');
-INSERT INTO people (surname, givenname, middlename, password, role,
-     email, home_phone) VALUES ('Siddon','Chris', '', 'foo', 
-     1, 'chris_siddon@hotmail.com', '');
-INSERT INTO people (surname, givenname, middlename, password, role,
-     email, home_phone) VALUES ('Vuille','Wendy', '', 'foo', 
-     1, 'wendy.vuille@alaska.gov', '');
-INSERT INTO people (surname, givenname, middlename, password, role,
-     email, home_phone) VALUES ('Mix','Kim', '', 'foo', 
-     1, 'ak1tourist@hotmail.com', '');
-INSERT INTO people (surname, givenname, middlename, password, role,
-     email, home_phone) VALUES ('Bishop','Kayla', '', 'foo', 
-     1, 'anitab@eagle.ptialaska.net', '');
-INSERT INTO people (surname, givenname, middlename, password, role,
-     email, home_phone) VALUES ('Sargent','Alex', '', 'foo', 
-     1, 'alaskangrl_87@hotmail.com', '');
+-- Default password is encrypted, original is 'sk8gr8t'
+INSERT INTO people (surname, givenname, birthdate, password, role, email, home_phone, username) 
+     VALUES ('Jones','Matt', '1967-02-09', '$2a$10$1JBlWZRkefGrhAVoxFo3UOflKZtzcW4LwiRIPjGCvSXUKrpWs2xLK', 
+     3, 'mbjones.89@gmail.com', '907-789-0496', 'mbjones');
+INSERT INTO people (surname, givenname, password, role, email, home_phone, username) 
+     VALUES ('Anderson','Lauren', '$2a$10$1JBlWZRkefGrhAVoxFo3UOflKZtzcW4LwiRIPjGCvSXUKrpWs2xLK', 
+     1, 'ldipenti@hotmail.com', '', 'landerson');
+INSERT INTO people (surname, givenname, middlename, password, role, email, home_phone, username) 
+     VALUES ('Siddon','Ebett', 'Calvert', '$2a$10$1JBlWZRkefGrhAVoxFo3UOflKZtzcW4LwiRIPjGCvSXUKrpWs2xLK', 
+     1, 'ebett_calvert@hotmail.com', '', 'esiddon');
+INSERT INTO people (surname, givenname, middlename, password, role, email, home_phone, username) 
+     VALUES ('Dahlberg','Sigrid', '', '$2a$10$1JBlWZRkefGrhAVoxFo3UOflKZtzcW4LwiRIPjGCvSXUKrpWs2xLK', 
+     1, 'sdahlberg@carsondorn.com', '', 'sdahlberg');
+INSERT INTO people (surname, givenname, middlename, password, role, email, home_phone, username) 
+     VALUES ('Green','Pam', '', '$2a$10$1JBlWZRkefGrhAVoxFo3UOflKZtzcW4LwiRIPjGCvSXUKrpWs2xLK', 
+     1, 'pammyjo00@yahoo.com', '907-723-2031', 'pgreen');
+INSERT INTO people (surname, givenname, middlename, password, role, email, home_phone, username) 
+     VALUES ('Geissler','Karla', '', '$2a$10$1JBlWZRkefGrhAVoxFo3UOflKZtzcW4LwiRIPjGCvSXUKrpWs2xLK', 
+     1, 'kmgeissler@gmail.com', '907-723-6743', 'kgeisler');
+INSERT INTO people (surname, givenname, middlename, password, role, email, home_phone, username) 
+     VALUES ('Siddon','Chris', '', '$2a$10$1JBlWZRkefGrhAVoxFo3UOflKZtzcW4LwiRIPjGCvSXUKrpWs2xLK', 
+     1, 'chris_siddon@hotmail.com', '', 'csiddon');
+INSERT INTO people (surname, givenname, middlename, password, role, email, home_phone, username) 
+     VALUES ('Vuille','Wendy', '', '$2a$10$1JBlWZRkefGrhAVoxFo3UOflKZtzcW4LwiRIPjGCvSXUKrpWs2xLK', 
+     1, 'wendy.vuille@alaska.gov', '', 'wvuille');
+INSERT INTO people (surname, givenname, middlename, password, role, email, home_phone, username) 
+     VALUES ('Mix','Kim', '', '$2a$10$1JBlWZRkefGrhAVoxFo3UOflKZtzcW4LwiRIPjGCvSXUKrpWs2xLK', 
+     1, 'ak1tourist@hotmail.com', '', 'kmix');
+INSERT INTO people (surname, givenname, middlename, password, role, email, home_phone, username) 
+     VALUES ('Bishop','Kayla', '', '$2a$10$1JBlWZRkefGrhAVoxFo3UOflKZtzcW4LwiRIPjGCvSXUKrpWs2xLK', 
+     1, 'anitab@eagle.ptialaska.net', '', 'kbishop');
+INSERT INTO people (surname, givenname, middlename, password, role, email, home_phone, username) 
+     VALUES ('Sargent','Alex', '', '$2a$10$1JBlWZRkefGrhAVoxFo3UOflKZtzcW4LwiRIPjGCvSXUKrpWs2xLK', 
+     1, 'alaskangrl_87@hotmail.com', '', 'asargent');
      
 INSERT INTO sessions (sessionname, season, startdate, enddate)
      VALUES ('1', '2009-2010', '2009-09-21', '2009-11-01');
