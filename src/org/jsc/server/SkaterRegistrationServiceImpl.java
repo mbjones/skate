@@ -49,11 +49,34 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         StringBuffer sql = new StringBuffer();
         if (person.getPid() == 0) {
             // Creating a new account, so no authentication needed
+            
+            // Look up the pid to be used for this insert
+            long newPid = 0;
+            StringBuffer idsql = new StringBuffer();
+            idsql.append("SELECT NEXTVAL(\'\"person_id_seq\"\')");
+            System.out.println(idsql.toString());
+            Statement stmt;
+            try {
+                Connection con = getConnection();
+                stmt = con.createStatement();
+                stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery(idsql.toString());
+                if (rs.next()) {
+                    // This is the next id in the payment id sequence
+                    newPid = rs.getLong(1);
+                }
+                stmt.close();
+            } catch (SQLException e) {
+                System.err.println("SQLException: " + e.getMessage());
+                return null;
+            }
+            
             // Create the SQL INSERT statement
             sql.append("insert into people");
-            sql.append(" (surname, givenname, middlename, email, birthdate, home_phone, cell_phone, work_phone," +
+            sql.append(" (pid, surname, givenname, middlename, email, birthdate, home_phone, cell_phone, work_phone," +
             		"street1, street2, city, state, zipcode, parentfirstname, parentsurname, parentemail, username, password) ");
-            sql.append("values ('");
+            sql.append("values (");
+            sql.append(newPid).append(",'");
             sql.append(person.getLname()).append("','");
             sql.append(person.getFname()).append("','");
             sql.append(person.getMname()).append("','");

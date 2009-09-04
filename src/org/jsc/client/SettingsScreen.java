@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class SettingsScreen extends BaseScreen {
 
-    private static final String NEW_INSTRUCTIONS = "To create an account, please fill in the form below with all required fields.  After clicking 'Create Account', you will be able to sign in with your new username and password.";
+    private static final String NEW_INSTRUCTIONS = "Please fill in the form below with all required fields.  After clicking 'Create Account', you will be able to sign in with your new username and password.";
     private static final String UPDATE_INSTRUCTIONS = "You may update your account settings, including changing your password.  Any fields left unchanged (or blank in the case of the password fields) will remain unchanged when you Save.";
     private HorizontalPanel screen;
     private Label instructions;
@@ -87,7 +87,11 @@ public class SettingsScreen extends BaseScreen {
         accountPanel.add(instructions);
         HorizontalPanel horizontal = new HorizontalPanel();
         accountPanel.add(horizontal);
-        
+        Label footnote1 = new Label("* Required field");
+        Label footnote2 = new Label("** Required field if skater is younger than 18 yrs.");
+        accountPanel.add(footnote1);
+        accountPanel.add(footnote2);
+
         VerticalPanel leftVertical = new VerticalPanel();
         VerticalPanel rightVertical = new VerticalPanel();
         horizontal.add(leftVertical);
@@ -109,20 +113,20 @@ public class SettingsScreen extends BaseScreen {
 
     private void layoutLeftPanel() {
         fnameField = new TextBox();
-        addToLeftGrid("First Name:", fnameField);
+        addToLeftGrid("Skater's First Name*:", fnameField);
         mnameField = new TextBox();
-        addToLeftGrid("Middle Name:", mnameField);
+        addToLeftGrid("Skater's Middle Name:", mnameField);
         lnameField = new TextBox();
-        addToLeftGrid("Last Name:", lnameField);
+        addToLeftGrid("Skater's Last Name*:", lnameField);
         emailField = new TextBox();
-        addToLeftGrid("Skater Email:", emailField);
+        addToLeftGrid("Skater's Email*:", emailField);
         birthdayField = new TextBox();
-        addToLeftGrid("Birthdate:", birthdayField);
+        addToLeftGrid("Skater's Birthdate*:", birthdayField);
         
         addToLeftGrid(" ", new Label(" "));
         addToLeftGrid(" ", new Label("Account information:"));
         usernameField = new TextBox();
-        addToLeftGrid("Username:", usernameField);
+        addToLeftGrid("Username*:", usernameField);
         password1Field = new PasswordTextBox();
         addToLeftGrid("Password:", password1Field);
         password2Field = new PasswordTextBox();
@@ -134,28 +138,28 @@ public class SettingsScreen extends BaseScreen {
     
     private void layoutRightPanel() {
         homephoneField = new TextBox();
-        addToRightGrid("Home Phone:", homephoneField);
+        addToRightGrid("Home Phone*:", homephoneField);
         cellphoneField = new TextBox();
         addToRightGrid("Cell Phone:", cellphoneField);
         workphoneField = new TextBox();
         addToRightGrid("Work Phone:", workphoneField);
         street1Field = new TextBox();
-        addToRightGrid("Street 1:", street1Field);
+        addToRightGrid("Street 1*:", street1Field);
         street2Field = new TextBox();
         addToRightGrid("Street 2:", street2Field);
         cityField = new TextBox();
-        addToRightGrid("City:", cityField);
+        addToRightGrid("City*:", cityField);
         stateField = new TextBox();
-        addToRightGrid("State:", stateField);
+        addToRightGrid("State*:", stateField);
         zipField = new TextBox();
-        addToRightGrid("Zip:", zipField);
+        addToRightGrid("Zip*:", zipField);
 
         parentFirstnameField = new TextBox();
-        addToRightGrid("Parent First Name:", parentFirstnameField);
+        addToRightGrid("Parent First Name**:", parentFirstnameField);
         parentLastnameField = new TextBox();
-        addToRightGrid("Parent Last Name:", parentLastnameField);
+        addToRightGrid("Parent Last Name**:", parentLastnameField);
         parentEmailField = new TextBox();
-        addToRightGrid("Parent Email:", parentEmailField);
+        addToRightGrid("Parent Email**:", parentEmailField);
         
         addToRightGrid(" ", new Label(" "));
 
@@ -291,10 +295,10 @@ public class SettingsScreen extends BaseScreen {
         
         // Validate necessary input, making sure required fields are included
         boolean isValid = true;
-        String[] fields = {fname, lname, email, birthday, homephone};
+        String[] fields = {fname, lname, email, birthday, homephone, street1, city, state, zip, username};
         if (fieldMissing( fields )) {
             isValid = false;
-            setMessage("Missing required information. Please fill in all fields.");
+            setMessage("Missing required information. Please fill in all required fields.");
             return;
         }
 
@@ -338,7 +342,7 @@ public class SettingsScreen extends BaseScreen {
                 person.setUsername(loginSession.getPerson().getUsername());
                 person.setNewUsername(username);
             } else {
-                person.setUsername(loginSession.getPerson().getUsername());
+                person.setUsername(username);
             }
             if (pw1 != null) {
                 person.setNewPassword(pw1);

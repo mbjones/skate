@@ -443,7 +443,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                     
                     ArrayList<RosterEntry> newEntryList = results.getEntriesCreated();
                     
-                    if (newEntryList == null || newEntryList.size() == 0) {
+                    if ((newEntryList == null || newEntryList.size() == 0) && !results.isMembershipAttempted()) {
                         // Failure on the remote end.
                         // Could simply be due to duplication errors
                         // TODO: Handle case where all duplication errors occur
