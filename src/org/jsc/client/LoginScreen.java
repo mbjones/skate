@@ -5,6 +5,7 @@ import java.util.Date;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -39,8 +40,8 @@ public class LoginScreen extends BaseScreen {
      * Construct the login screen, recording the loginSession for later reference.
      * @param loginSession to be used for user information in later steps
      */
-    public LoginScreen(LoginSession loginSession) {
-        super(loginSession);
+    public LoginScreen(LoginSession loginSession, HandlerManager eventBus) {
+        super(loginSession, eventBus);
         layoutScreen();
         this.setContentPanel(screen);
     }
@@ -140,13 +141,6 @@ public class LoginScreen extends BaseScreen {
                     GWT.log(loginSession.getPerson().toString(), null);
                     clearMessage();
 
-                    // Record the authenticated person in the LoginSession
-                    //String sessionId = "FFEEEEDDMMEE";
-                    //String sessionID = /*(Get sessionID from server's response to your login request.)*/;
-                    //loginSession.setPerson(person);
-                    //loginSession.setAuthenticated(true);
-                    //loginSession.setSessionId(sessionId);
-                    
                     // Change our application state to the classes screen
                     History.newItem("register");
                 } else {

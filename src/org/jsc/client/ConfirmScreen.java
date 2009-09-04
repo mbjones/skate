@@ -3,6 +3,7 @@ package org.jsc.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -48,8 +49,8 @@ public class ConfirmScreen extends BaseScreen {
      * Construct the screen.
      *
      */
-    public ConfirmScreen(LoginSession loginSession) {
-        super(loginSession);
+    public ConfirmScreen(LoginSession loginSession, HandlerManager eventBus) {
+        super(loginSession, eventBus);
         layoutScreen();
         this.setContentPanel(screen);
         regService = GWT.create(SkaterRegistrationService.class);

@@ -1,6 +1,9 @@
 package org.jsc.client;
 
+import org.jsc.client.event.NotificationEvent;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -18,16 +21,18 @@ public class BaseScreen extends VerticalPanel {
     private Label message;
     private Panel contentPanel;
     protected LoginSession loginSession;
+    protected HandlerManager eventBus;
     
     /**
      * Construct the BaseScreen
      * @param loginSession to be saved for reference by subclass screens
      */
-    public BaseScreen(LoginSession loginSession) {
+    public BaseScreen(LoginSession loginSession, HandlerManager eventBus) {
         super();
         
-        // Record the LoginSession for later use
+        // Record the LoginSession and eventBus for later use
         this.loginSession = loginSession;
+        this.eventBus = eventBus;
         
         this.addStyleName("jsc-screen");
         this.screenTitle = "Base Screen";
@@ -36,7 +41,7 @@ public class BaseScreen extends VerticalPanel {
         title.addStyleName("jsc-screentitle");
         this.add(title);
         message = new Label();
-        setMessage("Hello");
+        setMessage("BaseScreen created.");
         message.addStyleName("jsc-message");
         clearMessage();
         this.add(message);
@@ -78,9 +83,12 @@ public class BaseScreen extends VerticalPanel {
      * @param currentMessage the currentMessage to display on the screen
      */
     protected void setMessage(String currentMessage) {
+        /*
         this.currentMessage = currentMessage;
         message.setText(currentMessage);
         message.removeStyleName("jsc-message-clear");
+        */
+        eventBus.fireEvent(new NotificationEvent(currentMessage));
         GWT.log(currentMessage, null);
     }
     

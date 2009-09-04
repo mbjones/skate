@@ -1,5 +1,6 @@
 package org.jsc.client;
 
+import org.jsc.client.event.NotificationEvent;
 import org.jsc.client.event.RosterChangeEvent;
 import org.jsc.client.event.RosterChangeHandler;
 
@@ -35,7 +36,7 @@ public class MyClassesScreen extends BaseScreen {
      */
     public MyClassesScreen(LoginSession loginSession, HandlerManager eventBus,
             ClassListModel sessionClassList) {
-        super(loginSession);
+        super(loginSession, eventBus);
         
         this.sessionClassList = sessionClassList;
         layoutScreen();

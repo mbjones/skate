@@ -10,6 +10,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -94,8 +95,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
      * @param loginSession the authenticated login session for submissions to the remote service
      * @param sessionClassList the model of skating classes
      */
-    public RegisterScreen(LoginSession loginSession, ClassListModel sessionClassList) {
-        super(loginSession);
+    public RegisterScreen(LoginSession loginSession, HandlerManager eventBus, ClassListModel sessionClassList) {
+        super(loginSession, eventBus);
         this.sessionClassList = sessionClassList;
         sessionClassLabels = new TreeMap<String, String>();
         numfmt = NumberFormat.getFormat("$#,##0.00");

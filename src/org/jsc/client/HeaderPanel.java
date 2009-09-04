@@ -2,9 +2,12 @@ package org.jsc.client;
 
 import org.jsc.client.event.LoginSessionChangeEvent;
 import org.jsc.client.event.LoginSessionChangeHandler;
+import org.jsc.client.event.NotificationEvent;
+import org.jsc.client.event.NotificationHandler;
 import org.jsc.client.event.RosterChangeEvent;
 import org.jsc.client.event.RosterChangeHandler;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -24,6 +27,8 @@ public class HeaderPanel extends VerticalPanel {
     private Hyperlink settingsLink;
     private Hyperlink signoutLink;
     private Hyperlink aboutLink;
+    private String currentMessage;
+    private Label message;
 
     
     /**
@@ -41,6 +46,18 @@ public class HeaderPanel extends VerticalPanel {
         eventBus.addHandler(LoginSessionChangeEvent.TYPE, new LoginSessionChangeHandler() {
             public void onLoginSessionChange(LoginSessionChangeEvent event) {
                 updateStatus();
+            }
+        });
+        
+        // Register as a handler for Notification events, and handle those changes
+        // by updating the message field appropriately
+        eventBus.addHandler(NotificationEvent.TYPE, new NotificationHandler() {
+            public void onNotification(NotificationEvent event) {
+                if (event.shouldClearMessage()) {
+                    clearMessage();
+                } else {
+                    setMessage(event.getMessage());
+                }
             }
         });
     }
@@ -72,7 +89,6 @@ public class HeaderPanel extends VerticalPanel {
         rightLinks.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         statusLabel = new Label(" ");
         rightLinks.add(statusLabel);
-        updateStatus();
         rightLinks.add(createSeparatorLabel());
         settingsLink = new Hyperlink("Settings", "settings");
         rightLinks.add(settingsLink);
@@ -88,14 +104,23 @@ public class HeaderPanel extends VerticalPanel {
         Label spacer = new Label();
         toolbar.add(spacer);
         spacer.addStyleName("jsc-toolbar-spacer");
+        //spacer.setWidth("100%");
         //toolbar.setCellWidth(spacer, "50%");
         toolbar.add(rightLinks);
         toolbar.setCellHorizontalAlignment(rightLinks, HasHorizontalAlignment.ALIGN_RIGHT);
         
+        message = new Label();
+        message.addStyleName("jsc-message");
+        //this.setMessage("Account created, please log in.");
+        //this.clearMessage();
+        
         this.add(toolbar);
-        title = new Label("Skater Data");
+        title = new Label("Skate!");
         title.addStyleName("jsc-header-title");
         this.add(title);
+        this.add(message);
+        
+        updateStatus();
     }
     
     /**
@@ -113,12 +138,14 @@ public class HeaderPanel extends VerticalPanel {
         if (loginSession.isAuthenticated() && loginSession.getPerson() != null) {
             statusLabel.setText(loginSession.getPerson().getFname() + " " + 
                     loginSession.getPerson().getLname());
-            //signoutLink.setText("Sign Out");
-            //regLink.setVisible(false);
+            signoutLink.setText("Sign Out");
+            //regLink.setVisible(true);
+            //classesLink.setVisible(true);
         } else {
             statusLabel.setText(" ");
-            //signoutLink.setText("Sign In");
-            //regLink.setVisible(true);
+            signoutLink.setText("Sign In");
+            //regLink.setVisible(false);
+            //classesLink.setVisible(false);
         }
     }
     
@@ -130,5 +157,37 @@ public class HeaderPanel extends VerticalPanel {
         Label l = new Label(" | ");
         l.addStyleName("jsc-toolbar-separator");
         return l;
+    }
+    
+    /**
+     * @return the currentMessage
+     */
+    protected String getMessage() {
+        return currentMessage;
+    }
+
+    /**
+     * @param currentMessage the currentMessage to display on the screen
+     */
+    protected void setMessage(String currentMessage) {
+        this.currentMessage = currentMessage;
+        message.setText(currentMessage);
+        message.removeStyleName("jsc-message-clear");
+        GWT.log(currentMessage, null);
+    }
+    
+    /**
+     * Update the message Label when the screen has been switched from another.
+     */
+    protected void updateMessage() {
+        message.setText(currentMessage);
+    }
+    
+    /**
+     * Clear the current message and change the style so it does not display
+     */
+    protected void clearMessage() {
+        message.setText("");
+        message.addStyleName("jsc-message-clear");
     }
 }

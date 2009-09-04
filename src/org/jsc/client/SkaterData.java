@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jsc.client.event.LoginSessionChangeEvent;
+import org.jsc.client.event.NotificationEvent;
 import org.jsc.client.event.SkatingClassChangeEvent;
 import org.jsc.client.event.SkatingClassChangeHandler;
 
@@ -94,12 +95,12 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         }
         
         // Initialize application screens
-        login = new LoginScreen(loginSession);
-        settings = new SettingsScreen(loginSession);
+        login = new LoginScreen(loginSession, eventBus);
+        settings = new SettingsScreen(loginSession, eventBus);
         myclasses = new MyClassesScreen(loginSession, eventBus, sessionClassList);
-        register = new RegisterScreen(loginSession, sessionClassList);
-        manage = new ManageScreen(loginSession);
-        confirm = new ConfirmScreen(loginSession);
+        register = new RegisterScreen(loginSession, eventBus, sessionClassList);
+        manage = new ManageScreen(loginSession, eventBus);
+        confirm = new ConfirmScreen(loginSession, eventBus);
         
         // Set the default view screen to be login
         content.setScreen(login);
@@ -177,7 +178,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         } else if (historyToken.equals("cancel")) {
             content.setScreen(manage);
         }
-
+        eventBus.fireEvent(new NotificationEvent(true));
         updateMessageFields();
         header.updateStatus();
     }
