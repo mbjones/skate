@@ -51,15 +51,27 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             // Creating a new account, so no authentication needed
             // Create the SQL INSERT statement
             sql.append("insert into people");
-            sql.append(" (surname, givenname, middlename, email, home_phone, birthdate, password) ");
+            sql.append(" (surname, givenname, middlename, email, birthdate, home_phone, cell_phone, work_phone," +
+            		"street1, street2, city, state, zipcode, parentfirstname, parentsurname, parentemail, username, password) ");
             sql.append("values ('");
             sql.append(person.getLname()).append("','");
             sql.append(person.getFname()).append("','");
             sql.append(person.getMname()).append("','");
             sql.append(person.getEmail()).append("','");
-            sql.append(person.getHomephone()).append("','");
-            
             sql.append(person.getBday()).append("','");
+            sql.append(person.getHomephone()).append("','");
+            sql.append(person.getCellphone()).append("','");
+            sql.append(person.getWorkphone()).append("','");
+            sql.append(person.getStreet1()).append("','");
+            sql.append(person.getStreet2()).append("','");
+            sql.append(person.getCity()).append("','");
+            sql.append(person.getState()).append("','");
+            sql.append(person.getZip()).append("','");
+            sql.append(person.getParentFirstname()).append("','");
+            sql.append(person.getParentLastname()).append("','");
+            sql.append(person.getParentEmail()).append("','");
+            sql.append(person.getUsername()).append("','");
+
             // Hash the password before insertion into the database
             String hashed = BCrypt.hashpw(person.getNewPassword(), BCrypt.gensalt());
             sql.append(hashed).append("'");
@@ -75,14 +87,26 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             sql.append("surname='").append(person.getLname()).append("',");
             sql.append("givenname='").append(person.getFname()).append("',");
             sql.append("middlename='").append(person.getMname()).append("',");
-            if (person.getNewEmail() != null && person.getNewEmail().length() > 0 && 
-                    !person.getEmail().equals(person.getNewEmail())) {
-                sql.append("email='").append(person.getNewEmail()).append("',");
+            sql.append("email='").append(person.getEmail()).append("',");
+            sql.append("birthdate='").append(person.getBday()).append("',");
+            sql.append("home_phone='").append(person.getHomephone()).append("',");  
+            sql.append("cell_phone='").append(person.getCellphone()).append("',");
+            sql.append("work_phone='").append(person.getWorkphone()).append("',");
+            sql.append("street1='").append(person.getStreet1()).append("',");
+            sql.append("street2='").append(person.getStreet2()).append("',");
+            sql.append("city='").append(person.getCity()).append("',");
+            sql.append("state='").append(person.getState()).append("',");
+            sql.append("zipcode='").append(person.getZip()).append("',");
+            sql.append("parentfirstname='").append(person.getParentFirstname()).append("',");
+            sql.append("parentsurname='").append(person.getParentLastname()).append("',");
+            sql.append("parentemail='").append(person.getParentEmail()).append("',");
+
+            if (person.getNewUsername() != null && person.getNewUsername().length() > 0 && 
+                    !person.getUsername().equals(person.getNewUsername())) {
+                sql.append("username='").append(person.getNewUsername()).append("'");
             } else {
-                sql.append("email='").append(person.getEmail()).append("',");
+                sql.append("username='").append(person.getUsername()).append("'");
             }
-            sql.append("home_phone='").append(person.getHomephone()).append("',");
-            sql.append("birthdate='").append(person.getBday()).append("'");
             if (person.getNewPassword() != null && person.getNewPassword().length() > 0) {
                 // Hash the password before insertion into the database
                 String hashed = BCrypt.hashpw(person.getNewPassword(), BCrypt.gensalt());
@@ -496,8 +520,10 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      */
     private Person lookupPerson(long pid) {
 
-        StringBuffer sql = new StringBuffer();
-        sql.append("select pid, surname, givenname, middlename, email, home_phone, birthdate, password from people where ");
+        StringBuffer sql = new StringBuffer();           
+        sql.append("select pid, surname, givenname, middlename, email, birthdate, home_phone, " +
+        		"cell_phone, work_phone, street1, street2, city, state, zipcode, parentfirstname, " +
+        		"parentsurname, parentemail, username, password from people where ");
         sql.append("pid = '").append(pid).append("'");
         System.out.println(sql.toString());
         
@@ -513,9 +539,19 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 person.setFname(rs.getString(3));
                 person.setMname(rs.getString(4));
                 person.setEmail(rs.getString(5));
-                person.setHomephone(rs.getString(6));
-                person.setBday(rs.getString(7));
-                //person.setPassword(rs.getString(8));
+                person.setBday(rs.getString(6));
+                person.setHomephone(rs.getString(7));
+                person.setCellphone(rs.getString(8));
+                person.setWorkphone(rs.getString(9));
+                person.setStreet1(rs.getString(10));
+                person.setStreet2(rs.getString(11));
+                person.setCity(rs.getString(12));
+                person.setState(rs.getString(13));
+                person.setZip(rs.getString(14));
+                person.setParentFirstname(rs.getString(15));
+                person.setParentLastname(rs.getString(16));
+                person.setParentEmail(rs.getString(17));
+                person.setUsername(rs.getString(18));
                 person.setPassword(null);
                 person.setMember(false);
             }

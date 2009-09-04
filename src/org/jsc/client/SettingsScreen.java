@@ -12,29 +12,52 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * A screen for collecting user information to create a new account.
  * 
  * @author Matthew Jones
- *
  */
 public class SettingsScreen extends BaseScreen {
 
+    private static final String NEW_INSTRUCTIONS = "To create an account, please fill in the form below with all required fields.  After clicking 'Create Account', you will be able to sign in with your new username and password.";
+    private static final String UPDATE_INSTRUCTIONS = "You may update your account settings, including changing your password.  Any fields left unchanged (or blank in the case of the password fields) will remain unchanged when you Save.";
     private HorizontalPanel screen;
+    private Label instructions;
+    
     private TextBox fnameField;
     private TextBox mnameField;
     private TextBox lnameField;
     private TextBox emailField;
     private TextBox birthdayField;
     private TextBox homephoneField;
+
+    private TextBox cellphoneField;
+    private TextBox workphoneField;
+    private TextBox street1Field;
+    private TextBox street2Field;
+    private TextBox cityField;
+    private TextBox stateField;
+    private TextBox zipField;
+    private TextBox usfsaidField;
+    private TextBox parentLastnameField;
+    private TextBox parentFirstnameField;
+    private TextBox parentEmailField;
+
+    private TextBox usernameField;
     private PasswordTextBox password1Field;
     private PasswordTextBox password2Field;
+    
     private Label membershipLabel;
     private Button accountButton;
+    private Grid leftGrid;
+    private Grid rightGrid;
     
     // TODO: move regService to a separate class, one instance for the client
     private SkaterRegistrationServiceAsync regService;
+
     
     /**
      * Construct the screen.
@@ -56,59 +79,112 @@ public class SettingsScreen extends BaseScreen {
         
         screen = new HorizontalPanel();
         
-        HorizontalPanel accountPanel = new HorizontalPanel();
+        VerticalPanel accountPanel = new VerticalPanel();
         accountPanel.addStyleName("jsc-rightpanel");
+                
+        instructions = new Label(" ");
+        accountPanel.addStyleName("jsc-text");
+        accountPanel.add(instructions);
+        HorizontalPanel horizontal = new HorizontalPanel();
+        accountPanel.add(horizontal);
         
-        int numrows = 10;
-        
-        Grid g = new Grid(numrows, 2);
+        VerticalPanel leftVertical = new VerticalPanel();
+        VerticalPanel rightVertical = new VerticalPanel();
+        horizontal.add(leftVertical);
+        Label spacer = new Label(" ");
+        spacer.addStyleName("jsc-panel-spacer");
+        horizontal.add(spacer);
+        horizontal.add(rightVertical);
 
-        HTMLTable.CellFormatter fmt = g.getCellFormatter();
-        g.setWidget(0, 0, new Label("First Name:"));
-        fnameField = new TextBox();
-        g.setWidget(0, 1, fnameField);
-        g.setWidget(1, 0, new Label("Middle Name:"));
-        mnameField = new TextBox();
-        g.setWidget(1, 1, mnameField);
-        g.setWidget(2, 0, new Label("Last Name:"));
-        lnameField = new TextBox();
-        g.setWidget(2, 1, lnameField);
-        g.setWidget(3, 0, new Label("Email:"));
-        emailField = new TextBox();
-        g.setWidget(3, 1, emailField);
-        g.setWidget(4, 0, new Label("Birth date:"));
-        birthdayField = new TextBox();
-        g.setWidget(4, 1, birthdayField);
-        g.setWidget(5, 0, new Label("Phone:"));
-        homephoneField = new TextBox();
-        g.setWidget(5, 1, homephoneField);
-        g.setWidget(6, 0, new Label("Password:"));
-        password1Field = new PasswordTextBox();
-        g.setWidget(6, 1, password1Field);
-        g.setWidget(7, 0, new Label("Re-type password:"));
-        password2Field = new PasswordTextBox();
-        g.setWidget(7, 1, password2Field);
-        g.setWidget(8, 0, new Label("Membership paid:"));
-        membershipLabel = new Label("false");
-        g.setWidget(8, 1, membershipLabel);
+        leftGrid = new Grid(0, 2);
+        layoutLeftPanel();
+        leftVertical.add(leftGrid);
         
+        rightGrid = new Grid(0, 2);
+        layoutRightPanel();
+        rightVertical.add(rightGrid);
+        
+        screen.add(accountPanel);
+    }
+
+    private void layoutLeftPanel() {
+        fnameField = new TextBox();
+        addToLeftGrid("First Name:", fnameField);
+        mnameField = new TextBox();
+        addToLeftGrid("Middle Name:", mnameField);
+        lnameField = new TextBox();
+        addToLeftGrid("Last Name:", lnameField);
+        emailField = new TextBox();
+        addToLeftGrid("Skater Email:", emailField);
+        birthdayField = new TextBox();
+        addToLeftGrid("Birthdate:", birthdayField);
+        
+        addToLeftGrid(" ", new Label(" "));
+        addToLeftGrid(" ", new Label("Account information:"));
+        usernameField = new TextBox();
+        addToLeftGrid("Username:", usernameField);
+        password1Field = new PasswordTextBox();
+        addToLeftGrid("Password:", password1Field);
+        password2Field = new PasswordTextBox();
+        addToLeftGrid("Re-type Password:", password2Field);
+        membershipLabel = new Label("false");
+        addToLeftGrid("Membership paid:", membershipLabel);
+        
+    }
+    
+    private void layoutRightPanel() {
+        homephoneField = new TextBox();
+        addToRightGrid("Home Phone:", homephoneField);
+        cellphoneField = new TextBox();
+        addToRightGrid("Cell Phone:", cellphoneField);
+        workphoneField = new TextBox();
+        addToRightGrid("Work Phone:", workphoneField);
+        street1Field = new TextBox();
+        addToRightGrid("Street 1:", street1Field);
+        street2Field = new TextBox();
+        addToRightGrid("Street 2:", street2Field);
+        cityField = new TextBox();
+        addToRightGrid("City:", cityField);
+        stateField = new TextBox();
+        addToRightGrid("State:", stateField);
+        zipField = new TextBox();
+        addToRightGrid("Zip:", zipField);
+
+        parentFirstnameField = new TextBox();
+        addToRightGrid("Parent First Name:", parentFirstnameField);
+        parentLastnameField = new TextBox();
+        addToRightGrid("Parent Last Name:", parentLastnameField);
+        parentEmailField = new TextBox();
+        addToRightGrid("Parent Email:", parentEmailField);
+        
+        addToRightGrid(" ", new Label(" "));
+
         accountButton = new Button("Create Account");
         accountButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 createAccount();
             }
         });
-        g.setWidget(9, 0, accountButton);
+        addToRightGrid(" ", accountButton);
 
-        // Set the css style for each row
-        for (int row=0; row < numrows; row++) {
-            fmt.addStyleName(row, 0,  "jsc-fieldlabel");
-            fmt.addStyleName(row, 1,  "jsc-field");
-        }
-        
-        accountPanel.add(g);
-        
-        screen.add(accountPanel);
+    }
+    
+    private void addToLeftGrid(String label, Widget widget) {
+        int newRow = leftGrid.insertRow(leftGrid.getRowCount());
+        leftGrid.setWidget(newRow, 0, new Label(label));
+        leftGrid.setWidget(newRow, 1, widget);
+        HTMLTable.CellFormatter fmt = leftGrid.getCellFormatter();
+        fmt.addStyleName(newRow, 0,  "jsc-fieldlabel");
+        fmt.addStyleName(newRow, 1,  "jsc-field");
+    }
+    
+    private void addToRightGrid(String label, Widget widget) {
+        int newRow = rightGrid.insertRow(rightGrid.getRowCount());
+        rightGrid.setWidget(newRow, 0, new Label(label));
+        rightGrid.setWidget(newRow, 1, widget);
+        HTMLTable.CellFormatter fmt = rightGrid.getCellFormatter();
+        fmt.addStyleName(newRow, 0,  "jsc-fieldlabel");
+        fmt.addStyleName(newRow, 1,  "jsc-field");
     }
     
     /**
@@ -118,9 +194,11 @@ public class SettingsScreen extends BaseScreen {
         if (loginSession.isAuthenticated()) {
             populateFields();
             accountButton.setText("Save");
+            instructions.setText(UPDATE_INSTRUCTIONS);
         } else {
             populateFields();
             accountButton.setText("Create Account");
+            instructions.setText(NEW_INSTRUCTIONS);
         }
         //clearMessage();
     }
@@ -136,8 +214,21 @@ public class SettingsScreen extends BaseScreen {
             mnameField.setText(person.getMname());
             lnameField.setText(person.getLname());
             emailField.setText(person.getEmail());
-            homephoneField.setText(person.getHomephone());
             birthdayField.setText(person.getBday());
+            
+            homephoneField.setText(person.getHomephone());
+            cellphoneField.setText(person.getCellphone());
+            workphoneField.setText(person.getWorkphone());
+            street1Field.setText(person.getStreet1());
+            street2Field.setText(person.getStreet2());
+            cityField.setText(person.getCity());
+            stateField.setText(person.getState());
+            zipField.setText(person.getZip());
+            parentFirstnameField.setText(person.getParentFirstname());
+            parentLastnameField.setText(person.getParentLastname());
+            parentEmailField.setText(person.getParentEmail());
+            
+            usernameField.setText(person.getUsername());
             password1Field.setText("");
             password2Field.setText("");
             membershipLabel.setText(Boolean.toString(person.isMember()));
@@ -147,8 +238,21 @@ public class SettingsScreen extends BaseScreen {
             mnameField.setText("");
             lnameField.setText("");
             emailField.setText("");
-            homephoneField.setText("");
             birthdayField.setText("");
+            
+            homephoneField.setText("");
+            cellphoneField.setText("");
+            workphoneField.setText("");
+            street1Field.setText("");
+            street2Field.setText("");
+            cityField.setText("");
+            stateField.setText("");
+            zipField.setText("");
+            parentFirstnameField.setText("");
+            parentLastnameField.setText("");
+            parentEmailField.setText("");
+            
+            usernameField.setText("");
             password1Field.setText("");
             password2Field.setText("");
             membershipLabel.setText("");
@@ -168,7 +272,20 @@ public class SettingsScreen extends BaseScreen {
         String lname = lnameField.getText();
         String email = emailField.getText();
         String birthday = birthdayField.getText();
+
         String homephone = homephoneField.getText();
+        String cellphone = cellphoneField.getText();
+        String workphone = workphoneField.getText();
+        String street1 = street1Field.getText();
+        String street2 = street2Field.getText();
+        String city = cityField.getText();
+        String state = stateField.getText();
+        String zip = zipField.getText();
+        String parentFirstname = parentFirstnameField.getText();
+        String parentLastname = parentLastnameField.getText();
+        String parentEmail = parentEmailField.getText();
+        
+        String username = usernameField.getText();
         String pw1 = password1Field.getText();
         String pw2 = password2Field.getText();
         
@@ -195,7 +312,6 @@ public class SettingsScreen extends BaseScreen {
         // create Person object
         Person person = null;
         if (isValid) {
-            //clearMessage();
             person = new Person(fname, mname, lname);
             if (loginSession.isAuthenticated()) {
                 person.setPid(loginSession.getPerson().getPid());
@@ -204,15 +320,26 @@ public class SettingsScreen extends BaseScreen {
                 // Set the PID to 0 to indicate this is an update
                 person.setPid(0);
             }
-            if (loginSession.isAuthenticated() && !email.equals(loginSession.getPerson().getEmail())) {
-                person.setEmail(loginSession.getPerson().getEmail());
-                person.setNewEmail(email);
-            } else {
-                person.setEmail(email);
-            }
-            
+            person.setEmail(email);
             person.setBday(birthday);
             person.setHomephone(homephone);
+            person.setCellphone(cellphone);
+            person.setWorkphone(workphone);
+            person.setStreet1(street1);
+            person.setStreet2(street2);
+            person.setCity(city);
+            person.setState(state);
+            person.setZip(zip);
+            person.setParentFirstname(parentFirstname);
+            person.setParentLastname(parentLastname);
+            person.setParentEmail(parentEmail);
+
+            if (loginSession.isAuthenticated() && !username.equals(loginSession.getPerson().getUsername())) {
+                person.setUsername(loginSession.getPerson().getUsername());
+                person.setNewUsername(username);
+            } else {
+                person.setUsername(loginSession.getPerson().getUsername());
+            }
             if (pw1 != null) {
                 person.setNewPassword(pw1);
             }

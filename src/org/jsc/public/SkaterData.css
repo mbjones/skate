@@ -22,13 +22,17 @@ table.jsc-toolbar {
 	font-weight: bold;
 }
 
+.jsc-toolbar-separator {
+    padding-right: 5px;
+    padding-left: 5px;
+}
+
 .jsc-toolbar-spacer {
     width: 275px;
 }
 
-.jsc-toolbar-separator {
-    padding-right: 5px;
-    padding-left: 5px;
+.jsc-panel-spacer {
+    width: 50px;
 }
 
 .jsc-header-title {

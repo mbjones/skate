@@ -33,9 +33,11 @@ public class Person implements Serializable {
     private String state;
     private String zip;
     private String usfsaid;
-    private String parentSurname;
-    private String parentFirstName;
+    private String parentLastname;
+    private String parentFirstname;
     private String parentEmail;
+    private String username;
+    private String newUsername;
     private String password;
     private String newPassword;
     private String newEmail;
@@ -240,26 +242,26 @@ public class Person implements Serializable {
     /**
      * @return the parentFirstName
      */
-    public String getParentFirstName() {
-        return parentFirstName;
+    public String getParentFirstname() {
+        return parentFirstname;
     }
     /**
      * @param parentFirstName the parentFirstName to set
      */
-    public void setParentFirstName(String parentFirstName) {
-        this.parentFirstName = parentFirstName;
+    public void setParentFirstname(String parentFirstname) {
+        this.parentFirstname = parentFirstname;
     }
     /**
      * @return the parentSurname
      */
-    public String getParentSurname() {
-        return parentSurname;
+    public String getParentLastname() {
+        return parentLastname;
     }
     /**
      * @param parentSurname the parentSurname to set
      */
-    public void setParentSurname(String parentSurname) {
-        this.parentSurname = parentSurname;
+    public void setParentLastname(String parentLastname) {
+        this.parentLastname = parentLastname;
     }
     /**
      * @return the password
@@ -285,6 +287,35 @@ public class Person implements Serializable {
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
     }
+    
+    /**
+     * @return the username
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * @param username the username to set
+     */
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    /**
+     * @return the newUsername
+     */
+    public String getNewUsername() {
+        return newUsername;
+    }
+
+    /**
+     * @param newUsername the newUsername to set
+     */
+    public void setNewUsername(String newUsername) {
+        this.newUsername = newUsername;
+    }
+
     /**
      * @return the pid
      */
