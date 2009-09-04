@@ -454,7 +454,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                     } else {
                         // TODO: Handle case where some duplication errors occur on insert but not all
                         // TODO: Post error messages about entries that were not created
-                        clearMessage();
                         StringBuffer ppCart = new StringBuffer();
                         ppCart.append("<form id=\"wizard\" action=\""+ PAYPAL_URL + "\" method=\"post\">");
                         ppCart.append("<input type=\"hidden\" name=\"cmd\" value=\"_cart\">");

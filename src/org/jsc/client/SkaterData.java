@@ -122,6 +122,8 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
             }
         });
         
+        clearMessage();
+
         // Add history listener
         History.addValueChangeHandler(this);
         
@@ -160,41 +162,39 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         if (historyToken.equals("settings")) {
             settings.updateScreen();
             content.setScreen(settings);
+            clearMessage();
         } else if (historyToken.equals("signout")) {
             logout();
             content.setScreen(login);
+            clearMessage();
         } else if (historyToken.equals("signin")) {
             content.setScreen(login);
         } else if (historyToken.equals("myclasses")) {
             rosterModel.refreshRoster();
             content.setScreen(myclasses);
+            clearMessage();
         } else if (historyToken.equals("register")) {
             sessionClassList.refreshClassList();
             content.setScreen(register);
+            clearMessage();
         } else if (historyToken.equals("manage")) {
             content.setScreen(manage);
+            clearMessage();
         } else if (historyToken.equals("confirm")) {
             content.setScreen(confirm);
+            clearMessage();
         } else if (historyToken.equals("cancel")) {
             content.setScreen(manage);
+            clearMessage();
         }
-        eventBus.fireEvent(new NotificationEvent(true));
-        updateMessageFields();
         header.updateStatus();
     }
 
     /**
-     * When the screen changes, update the message Label on each screen so they
-     * are synchronized.
+     * When the screen message should be cleared, generate a NotificationEvent.
      */
-    private void updateMessageFields() {
-        settings.clearMessage();
-        settings.updateMessage();
-        login.updateMessage();
-        myclasses.updateMessage();
-        register.updateMessage();
-        manage.updateMessage();
-        confirm.updateMessage();
+    private void clearMessage() {
+        eventBus.fireEvent(new NotificationEvent(true));
     }
     
     /**

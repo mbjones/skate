@@ -17,8 +17,6 @@ import com.google.gwt.user.client.ui.Label;
 public class BaseScreen extends VerticalPanel {
     private String screenTitle;
     private Label title;
-    private static String currentMessage;
-    private Label message;
     private Panel contentPanel;
     protected LoginSession loginSession;
     protected HandlerManager eventBus;
@@ -40,11 +38,6 @@ public class BaseScreen extends VerticalPanel {
         title.setText(screenTitle);
         title.addStyleName("jsc-screentitle");
         this.add(title);
-        message = new Label();
-        setMessage("BaseScreen created.");
-        message.addStyleName("jsc-message");
-        clearMessage();
-        this.add(message);
         contentPanel = new HorizontalPanel();
         contentPanel.setWidth("100%");
         this.add(contentPanel);
@@ -73,38 +66,11 @@ public class BaseScreen extends VerticalPanel {
     }
 
     /**
-     * @return the currentMessage
-     */
-    protected String getMessage() {
-        return currentMessage;
-    }
-
-    /**
      * @param currentMessage the currentMessage to display on the screen
      */
     protected void setMessage(String currentMessage) {
-        /*
-        this.currentMessage = currentMessage;
-        message.setText(currentMessage);
-        message.removeStyleName("jsc-message-clear");
-        */
         eventBus.fireEvent(new NotificationEvent(currentMessage));
         GWT.log(currentMessage, null);
-    }
-    
-    /**
-     * Update the message Label when the screen has been switched from another.
-     */
-    protected void updateMessage() {
-        message.setText(currentMessage);
-    }
-    
-    /**
-     * Clear the current message and change the style so it does not display
-     */
-    protected void clearMessage() {
-        message.setText("");
-        message.addStyleName("jsc-message-clear");
     }
     
     /**

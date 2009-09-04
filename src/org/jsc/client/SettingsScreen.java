@@ -381,7 +381,7 @@ public class SettingsScreen extends BaseScreen {
                 } else {
                     // Change our application state to the login screen
                     setMessage("Account created. Please sign in.");
-                    History.newItem("signout");
+                    History.newItem("signin");
                 }
             }
         };

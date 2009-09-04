@@ -139,7 +139,6 @@ public class LoginScreen extends BaseScreen {
                     long pid = loginSession.getPerson().getPid();
                     GWT.log("Login succeeded: " + pid, null);
                     GWT.log(loginSession.getPerson().toString(), null);
-                    clearMessage();
 
                     // Change our application state to the classes screen
                     History.newItem("register");
