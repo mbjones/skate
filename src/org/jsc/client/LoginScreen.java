@@ -146,7 +146,7 @@ public class LoginScreen extends BaseScreen {
                     History.newItem("register");
                 } else {
                     loginSession.setAuthenticated(false);
-                    setMessage("Incorrect username or password. Please try again.");
+                    setMessage("Incorrect username or password. Please check your Caps Lock key and try again.");
                 }
             }
         };
