@@ -453,7 +453,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                         // Could simply be due to duplication errors
                         // TODO: Handle case where all duplication errors occur
                         // Could still have membership created in this case
-                        setMessage("Error registering for the class(es).");
+                        setMessage("Error registering... Have you are already registered for these classes? Check 'My Classes'.");
                         return;
                     } else {
                         // TODO: Handle case where some duplication errors occur on insert but not all
