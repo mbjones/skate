@@ -14,7 +14,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("registration")
 public interface SkaterRegistrationService extends RemoteService {
 
-    Person createAccount(LoginSession loginSession, Person person);
+    Person createAccount(LoginSession loginSession, Person person) throws SQLRecordException;
     LoginSession authenticate(String username, String password);
     boolean logout();
     Person getPerson(long pid);

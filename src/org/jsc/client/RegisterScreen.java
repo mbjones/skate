@@ -33,8 +33,12 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
 
-    private static final String MERCHANT_ID = "339U3JVK2X4E6";
+    private static final String MERCHANT_ID = "339U3JVK2X4E6"; // sandbox testing merchantid
+//    private static final String MERCHANT_ID = "4STDKBE3NBV64"; // real JSC account merchantid
+    
     private static final String PAYPAL_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr";
+//  private static final String PAYPAL_URL = "https://www.paypal.com/cgi-bin/webscr";
+
     private static final String PAYPAL_HEADER_IMAGE = "http://juneauskatingclub.org/sites/all/themes/jsc/images/salamander1/jsc-header-bkg-paypal.png";
     private static final String PAYPAL_RETURN_URL = "http://reg.juneauskatingclub.org";
     private static final String PAYPAL_CANCEL_URL = "http://reg.juneauskatingclub.org";

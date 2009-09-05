@@ -361,8 +361,17 @@ public class SettingsScreen extends BaseScreen {
         // Set up the callback object.
         AsyncCallback<Person> callback = new AsyncCallback<Person>() {
             public void onFailure(Throwable caught) {
-                // TODO: Do something with errors.
                 GWT.log("Failed to create account.", null);
+                GWT.log("Got error from remote service: ", caught);
+                if (caught.getMessage().contains("duplicate key")) {
+                    String uiMessage = "Username already exists. Please try a different username.";
+                    GWT.log(uiMessage, null);
+                    setMessage(uiMessage);
+                } else if (caught.getMessage().contains("invalid input syntax for type date")) {
+                    String uiMessage = "Wrong format for date. Please use DD-MM-YYYY.";
+                    GWT.log(uiMessage, null);
+                    setMessage(uiMessage);
+                }
             }
 
             public void onSuccess(Person newPerson) {
