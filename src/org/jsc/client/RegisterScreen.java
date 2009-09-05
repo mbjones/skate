@@ -441,7 +441,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
 
                 public void onFailure(Throwable caught) {
                     // TODO: Do something with errors.
-                    GWT.log("Failed to register the RosterEntry array.", null);
+                    GWT.log("Failed to register the RosterEntry array.", caught);
                 }
 
                 public void onSuccess(RegistrationResults results) {
@@ -501,6 +501,11 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                         ppCart.append("</form>");
                         
                         registerButton.setVisible(false);
+                        ArrayList<Long> entriesFailed = results.getEntriesNotCreated();
+                        if (entriesFailed.size() > 0) {
+                            setMessage("You were already registered for " + entriesFailed.size() +
+                                    " classes, which were excluded.");
+                        }
                         stepLabel.setText(STEP_2);
                         bsRadio.setVisible(false);
                         fsRadio.setVisible(false);
