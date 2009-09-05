@@ -100,9 +100,9 @@ public class PaypalIPNServlet extends HttpServlet {
         String txnId = request.getParameter("txn_id");
         long paymentId = new Long(request.getParameter("invoice")).longValue();
         String paymentStatus = request.getParameter("payment_status");
-        double paymentGross = new Double(request.getParameter("mc_gross")).doubleValue();
-        double paypalFee = new Double(request.getParameter("mc_fee")).doubleValue();
-        double discount = new Double(request.getParameter("discount")).doubleValue();
+        double paymentGross = paramToDouble(request.getParameter("mc_gross"));
+        double paypalFee = paramToDouble(request.getParameter("mc_fee"));
+        double discount = paramToDouble(request.getParameter("discount"));
         double net = paymentGross - paypalFee;
         String receiverEmail = request.getParameter("receiver_email");
         String payerEmail = request.getParameter("payer_email");
@@ -208,6 +208,19 @@ public class PaypalIPNServlet extends HttpServlet {
         IPN SENT: shipping_method ==> Default
         IPN SENT: num_cart_items ==> 2
         */
+    }
+
+    /**
+     * Convert a string representation of a double to a double value
+     * @param doubleString the string to convert
+     * @return the double value represented by the string
+     */
+    private double paramToDouble(String doubleString) {
+        double value = 0;
+        if (doubleString != null) {
+            value = new Double(doubleString).doubleValue();
+        }
+        return value;
     }
     
     /**
