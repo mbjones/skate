@@ -25,8 +25,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class PaypalIPNServlet extends HttpServlet {
 
-//    private static final String PAYPAL_URL = "https://www.paypal.com/cgi-bin/webscr";
-    private static final String PAYPAL_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr";
+    private static final String PAYPAL_URL = "https://www.paypal.com/cgi-bin/webscr";
+//    private static final String PAYPAL_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr";
     private static final String JDBC_URL = "jdbc:postgresql://localhost/jscdb";
     private static final String JDBC_USER = "jscdb";
     private static final String JDBC_PASS = "1skate2";
