@@ -4,8 +4,6 @@ import org.jsc.client.event.LoginSessionChangeEvent;
 import org.jsc.client.event.LoginSessionChangeHandler;
 import org.jsc.client.event.NotificationEvent;
 import org.jsc.client.event.NotificationHandler;
-import org.jsc.client.event.RosterChangeEvent;
-import org.jsc.client.event.RosterChangeHandler;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
