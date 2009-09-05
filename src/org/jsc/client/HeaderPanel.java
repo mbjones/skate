@@ -68,14 +68,14 @@ public class HeaderPanel extends VerticalPanel {
         this.addStyleName("jsc-header");
         
         HorizontalPanel leftLinks = new HorizontalPanel(); 
-        aboutLink = new Hyperlink("About...", "about");
-        leftLinks.add(aboutLink);
+//        aboutLink = new Hyperlink("About...", "about");
+//        leftLinks.add(aboutLink);
+//        leftLinks.add(createSeparatorLabel());
+        classesLink = new Hyperlink("My Classes", "myclasses");
+        leftLinks.add(classesLink);
         leftLinks.add(createSeparatorLabel());
         regLink = new Hyperlink("Register for a Class", "register");
         leftLinks.add(regLink);
-        leftLinks.add(createSeparatorLabel());
-        classesLink = new Hyperlink("My Classes", "myclasses");
-        leftLinks.add(classesLink);
         
         //leftLinks.add(createSeparatorLabel());
         manageLink = new Hyperlink("Manage Classes", "manage");

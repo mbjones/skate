@@ -184,6 +184,16 @@ table.jsc-toolbar {
 	text-align: center;
 }
 
+.jsc-about-link {
+	display: block;
+	position: absolute;
+	left: 900px;
+	top: 325px;
+	font-size: 0.5em;
+	color: #2E385B;
+	font-weight: bold;
+}
+
 .classes-ListHeader {
   background: #c1eec8 url(gradient.gif) repeat-x 0px -1px;
   font-weight: bold;

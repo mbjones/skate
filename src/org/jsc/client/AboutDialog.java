@@ -13,14 +13,15 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * @author Matt Jones
  */
 public class AboutDialog extends DialogBox {
-
+    private static final String VERSION = "1.0.0alpha1";
+    
     public AboutDialog() {
         // Set the dialog box's caption.
-        setText("About Skate!...");
+        setText("About Skate...");
         VerticalPanel content = new VerticalPanel();
-        Label title = new Label("Skate!");
+        Label title = new Label("Skate");
         title.addStyleName("jsc-dialog");
-        Label version = new Label("Version: 0.9.0");
+        Label version = new Label("Version: " + VERSION);
         version.addStyleName("jsc-dialog");
         Label copyright = new Label("Copyright 2009 Matthew B. Jones. All rights reserved.");
         copyright.addStyleName("jsc-dialog");
