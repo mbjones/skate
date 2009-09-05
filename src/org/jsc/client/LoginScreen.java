@@ -101,9 +101,9 @@ public class LoginScreen extends BaseScreen {
         newAccountLink.addStyleName("jsc-link-right");
         loginPanel.add(newAccountLink);
         
-        Hyperlink forgotPasswordLink = new Hyperlink("Forgot password?", "resetpass");
-        forgotPasswordLink.addStyleName("jsc-link-right");
-        loginPanel.add(forgotPasswordLink);
+//        Hyperlink forgotPasswordLink = new Hyperlink("Forgot password?", "resetpass");
+//        forgotPasswordLink.addStyleName("jsc-link-right");
+//        loginPanel.add(forgotPasswordLink);
     }
     
     /**
@@ -168,6 +168,8 @@ public class LoginScreen extends BaseScreen {
         
         intro.append("<p class=\"jsc-text\">If you do not have an account, you can create a <a href=\"/SkaterData.html#settings\">New Account</a>.</p>");
         intro.append("<p class=\"jsc-text\">You can register for new classes after you have <a href=\"/SkaterData.html#signout\">Signed In</a>.</p>");
+        intro.append("<p class=\"jsc-text\"></p>");
+        intro.append("<p class=\"jsc-text\">Need help?  Contact 'registrar@juneauskatingclub.org'</p>");
 
         HTMLPanel introHTML = new HTMLPanel(intro.toString());
         introPanel.add(introHTML);
