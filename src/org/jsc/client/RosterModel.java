@@ -91,5 +91,26 @@ public class RosterModel {
     public void setRoster(ArrayList<RosterEntry> roster) {
         this.roster = roster;
     }
-
+    
+    /**
+     * Determine if this roster contains an entry for the given student and class
+     * @param pid the student identifier to look up
+     * @param classid the class identifier to look up
+     * @return true if the student pid is registered in the class classid
+     */
+    public boolean contains(long pid, long classid) {
+        boolean isRegistered = false;
+        
+        // This could be done more efficiently if we kept a hash of the roster
+        // keyed on classid/pid, but for now this loop will do.
+        if (roster != null) {
+            for (RosterEntry entry : roster) {
+                if (entry.getClassid() == classid && entry.getPid() == pid) {
+                    isRegistered = true;
+                    break;
+                }
+            }
+        }
+        return isRegistered;
+    }
 }

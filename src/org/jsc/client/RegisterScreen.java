@@ -3,7 +3,13 @@ package org.jsc.client;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.TreeMap;
+
+import org.jsc.client.event.RosterChangeEvent;
+import org.jsc.client.event.RosterChangeHandler;
+import org.jsc.client.event.SkatingClassChangeEvent;
+import org.jsc.client.event.SkatingClassChangeHandler;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -64,6 +70,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
     // sessionClassLabels has the same data as sessionClassList but is keyed on 
     // the classid for ease of lookup of the label associated with a class
     private TreeMap<String, String> sessionClassLabels;
+    private RosterModel studentRoster;
     
     private HorizontalPanel screen;
     private VerticalPanel outerVerticalPanel;
@@ -99,16 +106,24 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
      * @param loginSession the authenticated login session for submissions to the remote service
      * @param sessionClassList the model of skating classes
      */
-    public RegisterScreen(LoginSession loginSession, HandlerManager eventBus, ClassListModel sessionClassList) {
+    public RegisterScreen(LoginSession loginSession, HandlerManager eventBus, ClassListModel sessionClassList, RosterModel studentRoster) {
         super(loginSession, eventBus);
         this.sessionClassList = sessionClassList;
         sessionClassLabels = new TreeMap<String, String>();
+        this.studentRoster = studentRoster;
         numfmt = NumberFormat.getFormat("$#,##0.00");
         fsClassesToRegister = new HashSet<String>();
         totalFSCost = 0;
         layoutScreen();
         this.setContentPanel(screen);
         regService = GWT.create(SkaterRegistrationService.class);
+        
+//        // Register as a handler for Skating class changes, and handle those changes
+//        eventBus.addHandler(RosterChangeEvent.TYPE, new RosterChangeHandler(){
+//            public void onRosterChange(RosterChangeEvent event) {
+//                studentRoster = event.getRoster();
+//            }
+//        });
     }
     
     /**
@@ -350,10 +365,22 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                     checkbox.setName(Long.toString(curClass.getClassId()));
                     checkbox.addValueChangeHandler(this);
                     addToFSGrid(classLabel, checkbox);
+                    // Disable checkboxes if student is already registered
+                    if (studentRoster.contains(loginSession.getPerson().getPid(),
+                            curClass.getClassId())) {
+                        GWT.log("Disabling FS class: " + curClass.getClassId(), null);
+                        checkbox.setEnabled(false);
+                    }
                     
                 // Otherwise it is a Basic Skills class
                 } else {
-                    classField.addItem(classLabel, new Long(curClass.getClassId()).toString());
+                    // Only add item to list if student is not registered
+                    if (studentRoster.contains(loginSession.getPerson().getPid(),
+                            curClass.getClassId())) {
+                        GWT.log("Disabling BS class: " + curClass.getClassId(), null);
+                    } else {
+                        classField.addItem(classLabel, new Long(curClass.getClassId()).toString());
+                    }
                 }
             }
         }
@@ -450,14 +477,11 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
                     
                     if ((newEntryList == null || newEntryList.size() == 0) && !results.isMembershipAttempted()) {
                         // Failure on the remote end.
-                        // Could simply be due to duplication errors
-                        // TODO: Handle case where all duplication errors occur
                         // Could still have membership created in this case
                         setMessage("Error registering... Have you are already registered for these classes? Check 'My Classes'.");
                         return;
                     } else {
-                        // TODO: Handle case where some duplication errors occur on insert but not all
-                        // TODO: Post error messages about entries that were not created
+                        studentRoster.refreshRoster();
                         StringBuffer ppCart = new StringBuffer();
                         ppCart.append("<form id=\"wizard\" action=\""+ PAYPAL_URL + "\" method=\"post\">");
                         ppCart.append("<input type=\"hidden\" name=\"cmd\" value=\"_cart\">");
@@ -521,7 +545,12 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
             };
 
             // Make the call to the registration service.
-            regService.register(loginSession, loginSession.getPerson(), entryList, createMembership, callback);
+            if (entryList.size() > 0 || createMembership) {
+                GWT.log("Sending request to register " + entryList.size() + " classes.", null);
+                regService.register(loginSession, loginSession.getPerson(), entryList, createMembership, callback);
+            } else {
+                setMessage("You must select a class before clicking 'Continue'.");
+            }
             
         } else {
             GWT.log("Error: Can not register without first signing in.", null);

@@ -98,7 +98,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
         login = new LoginScreen(loginSession, eventBus);
         settings = new SettingsScreen(loginSession, eventBus);
         myclasses = new MyClassesScreen(loginSession, eventBus, sessionClassList);
-        register = new RegisterScreen(loginSession, eventBus, sessionClassList);
+        register = new RegisterScreen(loginSession, eventBus, sessionClassList, rosterModel);
         manage = new ManageScreen(loginSession, eventBus);
         confirm = new ConfirmScreen(loginSession, eventBus);
         
@@ -175,6 +175,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
             clearMessage();
         } else if (historyToken.equals("register")) {
             sessionClassList.refreshClassList();
+            rosterModel.refreshRoster();
             content.setScreen(register);
             clearMessage();
         } else if (historyToken.equals("manage")) {
