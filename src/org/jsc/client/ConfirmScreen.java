@@ -1,19 +1,11 @@
 package org.jsc.client;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -38,12 +30,11 @@ public class ConfirmScreen extends BaseScreen {
     private Label transactionIdField;
     private Label amountPaidField;
     private Label statusField;
-    private Button accountButton;
     private HorizontalPanel screen;
 
     
     // TODO: move regService to a separate class, one instance for the client
-    private SkaterRegistrationServiceAsync regService;
+//    private SkaterRegistrationServiceAsync regService;
     
     /**
      * Construct the screen.
@@ -53,7 +44,7 @@ public class ConfirmScreen extends BaseScreen {
         super(loginSession, eventBus);
         layoutScreen();
         this.setContentPanel(screen);
-        regService = GWT.create(SkaterRegistrationService.class);
+//        regService = GWT.create(SkaterRegistrationService.class);
     }
     
     /**
@@ -98,28 +89,6 @@ public class ConfirmScreen extends BaseScreen {
         accountPanel.add(g);
         
         screen.add(accountPanel);
-    }
-    
-    /**
-     * Called when the create account button is pressed, and contacts the server
-     * to update the account information in the database.
-     */
-    private void createAccount() {
-        GWT.log("Creating account...", null);
-    
-        // Gather information from the form
-        String fname = rosterIdField.getText();
-        String mname = transactionIdField.getText();
-        String lname = amountPaidField.getText();
-
-        // We only need a password if its a new account or the user is
-        // providing a new one; in either case, the retyped password must match
-        boolean isValid = true;
-        if (!loginSession.isAuthenticated()) {
-            isValid = false;
-            setMessage("User is not logged in.");
-            return;
-        }
     }
 
     /**

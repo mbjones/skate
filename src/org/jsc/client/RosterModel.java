@@ -1,12 +1,10 @@
 package org.jsc.client;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.jsc.client.event.LoginSessionChangeEvent;
 import org.jsc.client.event.LoginSessionChangeHandler;
 import org.jsc.client.event.RosterChangeEvent;
-import org.jsc.client.event.SkatingClassChangeEvent;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;

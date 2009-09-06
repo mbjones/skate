@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.RootPanel;
  * Entry point classes define <code>onModuleLoad()</code>.
  * @author Matt Jones
  */
-public class SkaterData implements EntryPoint, ValueChangeHandler {
+public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
 
     private LoginSession loginSession;
     private Map<java.lang.String,java.util.List<java.lang.String>> params;
@@ -135,7 +135,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler {
      * This method is called whenever the application's history changes, and 
      * we use it to track application state. 
      */
-    public void onValueChange(ValueChangeEvent event) {
+    public void onValueChange(ValueChangeEvent<String> event) {
         Object historyToken = event.getValue();
         
         if (historyToken.equals("about")) {

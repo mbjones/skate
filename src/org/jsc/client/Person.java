@@ -1,12 +1,6 @@
 package org.jsc.client;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-
-import org.jsc.client.event.RosterChangeEvent;
-
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * An encapsulation of a Person, with fields giving their basic demographic and

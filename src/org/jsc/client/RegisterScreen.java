@@ -3,13 +3,7 @@ package org.jsc.client;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.TreeMap;
-
-import org.jsc.client.event.RosterChangeEvent;
-import org.jsc.client.event.RosterChangeHandler;
-import org.jsc.client.event.SkatingClassChangeEvent;
-import org.jsc.client.event.SkatingClassChangeHandler;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -37,7 +31,7 @@ import com.google.gwt.user.client.ui.Widget;
  * needed for registration, and then redirects the user to PayPal for payment.
  * @author Matt Jones
  */
-public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
+public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boolean> {
 
 //    private static final String MERCHANT_ID = "339U3JVK2X4E6"; // sandbox testing merchantid
     private static final String MERCHANT_ID = "4STDKBE3NBV64"; // real JSC account merchantid
@@ -158,7 +152,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
         bsRadio = new RadioButton("BSorFSGroup", "Basic Skills Classes");
         bsRadio.addValueChangeHandler(this);
         bsRadio.setValue(true);
-        fsRadio = new RadioButton("BSorFSGroup", "Figure Skating Classes");
+        fsRadio = new RadioButton("BSorFSGroup", "Figure Skating Classes (graduates of Basic Skills <b>only</b>");
         fsRadio.addValueChangeHandler(this);
         outerVerticalPanel.add(bsRadio);
         outerVerticalPanel.add(fsRadio);
@@ -561,7 +555,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler {
      * Listen for change events when the radio buttons on the registration form
      * are selected and deselected.
      */
-    public void onValueChange(ValueChangeEvent event) {
+    public void onValueChange(ValueChangeEvent<Boolean> event) {
         Widget sender = (Widget) event.getSource();
 
         if (sender == bsRadio) {

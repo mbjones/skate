@@ -1,7 +1,6 @@
 package org.jsc.client;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.jsc.client.event.LoginSessionChangeEvent;
 import org.jsc.client.event.LoginSessionChangeHandler;
@@ -105,14 +104,6 @@ public class ClassListModel {
      */
     public int size() {
         return classList.size();
-    }
-    
-    /**
-     * Get an iterator for this list of classes to step over all elements.
-     * @return iterator across all elements
-     */
-    public Iterator iterator() {
-        return classList.iterator();
     }
 
     /**

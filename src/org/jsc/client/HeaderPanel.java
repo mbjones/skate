@@ -24,7 +24,6 @@ public class HeaderPanel extends VerticalPanel {
     private Hyperlink manageLink;
     private Hyperlink settingsLink;
     private Hyperlink signoutLink;
-    private Hyperlink aboutLink;
     private String currentMessage;
     private Label message;
 
@@ -68,9 +67,6 @@ public class HeaderPanel extends VerticalPanel {
         this.addStyleName("jsc-header");
         
         HorizontalPanel leftLinks = new HorizontalPanel(); 
-//        aboutLink = new Hyperlink("About...", "about");
-//        leftLinks.add(aboutLink);
-//        leftLinks.add(createSeparatorLabel());
         classesLink = new Hyperlink("My Classes", "myclasses");
         leftLinks.add(classesLink);
         leftLinks.add(createSeparatorLabel());

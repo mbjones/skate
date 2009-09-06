@@ -120,7 +120,7 @@ public class SettingsScreen extends BaseScreen {
         lnameField = new TextBox();
         addToLeftGrid("Skater's Last Name*:", lnameField);
         emailField = new TextBox();
-        addToLeftGrid("Skater's Email*:", emailField);
+        addToLeftGrid("Contact Email*:", emailField);
         birthdayField = new TextBox();
         addToLeftGrid("Skater's Birthdate*:", birthdayField);
         

@@ -3,7 +3,6 @@ package org.jsc.client.event;
 import java.util.List;
 
 import org.jsc.client.RosterEntry;
-import org.jsc.client.SessionSkatingClass;
 
 import com.google.gwt.event.shared.GwtEvent;
 

@@ -1,10 +1,8 @@
 package org.jsc.client;
 
-import java.util.Iterator;
+import junit.framework.TestCase;
 
 import com.google.gwt.event.shared.HandlerManager;
-
-import junit.framework.TestCase;
 
 public class ClassListModelTest extends TestCase {
 
@@ -40,15 +38,5 @@ public class ClassListModelTest extends TestCase {
     public void testAddClass() {
         cm.addSkatingClass(c);
         assertTrue(cm.size() == 1);
-    }
-
-    public void testIterator() {
-        cm.refreshClassList();
-        Iterator it = cm.iterator();
-        assertTrue(it != null);
-        while (it.hasNext()) {
-            Object o = it.next();
-            assertTrue(o instanceof SessionSkatingClass);
-        }        
     }
 }

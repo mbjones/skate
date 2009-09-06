@@ -630,25 +630,6 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     }
     
     /**
-     * Check the credentials for the person, determining if their email and
-     * password match a similar row in the database.
-     * @param person the person whose credentials are to be authenticated
-     * @return true if valid credentials, false if otherwise
-     */
-    private boolean checkCredentials(Person person) {
-        boolean isAuthenticated = false;
-        if (person.getEmail() != null && person.getPassword() != null) {
-            int validpid = checkPassword(person.getEmail(), person.getPassword());
-            if (validpid > 0 || validpid == person.getPid()) {
-                // The password matches, returns a person's id, which matches
-                // the person originally requesting auth
-                isAuthenticated = true;
-            }
-        }
-        return isAuthenticated;
-    }
-    
-    /**
      * Check if the user is in the database, and if the given password matches
      * @param username the username of the person who is signing in
      * @param password the password of the person who is signing in
