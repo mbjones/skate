@@ -152,7 +152,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         bsRadio = new RadioButton("BSorFSGroup", "Basic Skills Classes");
         bsRadio.addValueChangeHandler(this);
         bsRadio.setValue(true);
-        fsRadio = new RadioButton("BSorFSGroup", "Figure Skating Classes (graduates of Basic Skills <b>only</b>");
+        fsRadio = new RadioButton("BSorFSGroup", "Figure Skating Classes (graduates of Basic Skills only)");
         fsRadio.addValueChangeHandler(this);
         outerVerticalPanel.add(bsRadio);
         outerVerticalPanel.add(fsRadio);
