@@ -33,25 +33,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boolean> {
 
-//    private static final String MERCHANT_ID = "339U3JVK2X4E6"; // sandbox testing merchantid
-    private static final String MERCHANT_ID = "4STDKBE3NBV64"; // real JSC account merchantid
-    
-//    private static final String PAYPAL_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr";
-    private static final String PAYPAL_URL = "https://www.paypal.com/cgi-bin/webscr";
-
-    private static final String PAYPAL_HEADER_IMAGE = "http://juneauskatingclub.org/sites/all/themes/jsc/images/salamander1/jsc-header-bkg-paypal.png";
-    private static final String PAYPAL_RETURN_URL = "http://reg.juneauskatingclub.org";
-    private static final String PAYPAL_CANCEL_URL = "http://reg.juneauskatingclub.org";
-    private static final String PAYMENT_DATA_ID = "U7fGZVYSiD6KerUAg_PhVMlmWIkK1MM2WazdncZQz_v4Dx4HIpre8iyz92e";
-    private static final int EARLY_PRICE_GRACE_DAYS = 2;
-    private static final double MILLISECS_PER_DAY = 24*60*60*1000;
-    private static final double EARLY_PRICE = 70.00;
-    private static final double STANDARD_PRICE = 80.00;
-    private static final double FS_PRICE = 80.00;
-    private static final double MEMBERSHIP_PRICE = 60.00;
-    private static final double MEMBERSHIP_DISCOUNT = 5.00;
-
-    private static final String DISCOUNT_EXPLANATION = "<p class=\"jsc-text\">Because it helps with planning our class sizes, <b>we offer a discount for those who register early</b> (more than " + EARLY_PRICE_GRACE_DAYS + " days before the session starts).</p>";
+    private static final String DISCOUNT_EXPLANATION = "<p class=\"jsc-text\">Because it helps with planning our class sizes, <b>we offer a discount for those who register early</b> (more than " + AppConstants.EARLY_PRICE_GRACE_DAYS + " days before the session starts).</p>";
     private static final String PRICE_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p>" + DISCOUNT_EXPLANATION + "</div>";
     private static final String PAYPAL_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">You must make your payment using PayPal by clicking on the button below.  <b>Your registration is <em>not complete</em></b> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
     private static final String BS_EXPLANATION = "Basic Skills is our Learn to Skate program. These group lessons are based on the United States Figure Skating's (USFSA) Basic Skills Program. This is a nationwide, skills-based, graduated series of instruction for youth and adult skaters. This program is designed to teach all skaters the fundamentals of skating.";
@@ -61,9 +43,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
     private static final String STEP_2 = "Step 2: Process payment";
     
     private ClassListModel sessionClassList;
-    // sessionClassLabels has the same data as sessionClassList but is keyed on 
-    // the classid for ease of lookup of the label associated with a class
-    private TreeMap<String, String> sessionClassLabels;
     private RosterModel studentRoster;
     
     private HorizontalPanel screen;
@@ -103,7 +82,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
     public RegisterScreen(LoginSession loginSession, HandlerManager eventBus, ClassListModel sessionClassList, RosterModel studentRoster) {
         super(loginSession, eventBus);
         this.sessionClassList = sessionClassList;
-        sessionClassLabels = new TreeMap<String, String>();
+//        sessionClassLabels = new TreeMap<String, String>();
         this.studentRoster = studentRoster;
         numfmt = NumberFormat.getFormat("$#,##0.00");
         fsClassesToRegister = new HashSet<String>();
@@ -328,7 +307,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         
         // Clear the list of basic skills classes to reflect the new data
         classField.clear();
-        sessionClassLabels = new TreeMap<String, String>();
         
         // Clear the set of fsClasses to be registered, and the form totals
         fsClassesToRegister.clear();
@@ -350,7 +328,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             for (SessionSkatingClass curClass : list) {
                 GWT.log("SessionClass: " + (new Long(curClass.getClassId()).toString()) + " " + curClass.getClassType(), null);
                 String classLabel = curClass.formatClassLabel();
-                sessionClassLabels.put(new Long(curClass.getClassId()).toString(), classLabel);    
 
                 // If it starts with "FS " it is a figure skating class
                 if (curClass.getClassType().startsWith("FS ")) {
@@ -403,10 +380,16 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
      */
     private void recalculateAndDisplayBasicSkillsTotal() {
         // Update the cost discount, and total fields on the BS Form
-        feeLabel.setText(numfmt.format(STANDARD_PRICE));
-        double bsDiscount = calculateDiscount();
+        feeLabel.setText(numfmt.format(AppConstants.STANDARD_PRICE));
+        String sessionStart = sessionClassList.getClassList().get(0).getStartDate();
+        Date startDate = null;
+        if (sessionStart != null) {
+            DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
+            startDate = fmt.parse(sessionStart);
+        }
+        double bsDiscount = calculateBSDiscount(startDate);
         bsDiscountLabel.setText(numfmt.format(bsDiscount));
-        double bsTotal = STANDARD_PRICE - bsDiscount;
+        double bsTotal = AppConstants.STANDARD_PRICE - bsDiscount;
         bsTotalLabel.setText(numfmt.format(bsTotal));
     }
 
@@ -429,7 +412,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
                 RosterEntry entry = new RosterEntry();
                 entry.setClassid(new Long(selectedClassId).longValue());
                 entry.setPid(registrant.getPid());
-                entry.setPayment_amount(STANDARD_PRICE);
+                entry.setPayment_amount(AppConstants.STANDARD_PRICE);
                 entryList.add(entry);
                 
             // Otherwise gather information from the Figure Skating form if it is selected
@@ -444,7 +427,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
                     RosterEntry entry = new RosterEntry();
                     entry.setClassid(new Long(selectedClassId).longValue());
                     entry.setPid(registrant.getPid());
-                    entry.setPayment_amount(FS_PRICE);
+                    entry.setPayment_amount(AppConstants.FS_PRICE);
                     entryList.add(entry);
                 }
             } else {
@@ -476,47 +459,24 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
                         return;
                     } else {
                         studentRoster.refreshRoster();
-                        StringBuffer ppCart = new StringBuffer();
-                        ppCart.append("<form id=\"wizard\" action=\""+ PAYPAL_URL + "\" method=\"post\">");
-                        ppCart.append("<input type=\"hidden\" name=\"cmd\" value=\"_cart\">");
-                        ppCart.append("<input type=\"hidden\" name=\"upload\" value=\"1\">");
-                        ppCart.append("<input type=\"hidden\" name=\"business\" value=\"" + MERCHANT_ID + "\">");
-                        ppCart.append("<input type=\"hidden\" name=\"currency_code\" value=\"USD\">");
-                        ppCart.append("<input type=\"hidden\" name=\"no_note\" value=\"1\">");
-                        ppCart.append("<input type=\"hidden\" name=\"no_shipping\" value=\"1\">");
-                        ppCart.append("<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ PAYPAL_HEADER_IMAGE + "\">");
-                        ppCart.append("<input type=\"hidden\" name=\"item_name\" value=\""+ "Registration Invoice" + "\">");
-                        ppCart.append("<input type=\"hidden\" name=\"invoice\" value=\""+ results.getPaymentId() + "\">");
-
-                        int i = 0;
-                        for (RosterEntry newEntry : newEntryList) {
-                            i++;
-                            ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"" + sessionClassLabels.get(new Long(newEntry.getClassid()).toString()) + "\">");
-                            ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\""+ newEntry.getRosterid() +"\">");
-                            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + STANDARD_PRICE + "\">");
-                        }
-                        
-                        // Handle membership payment by creating form items as needed
                         if (results.isMembershipCreated()) {
                             loginSession.getPerson().setMember(true);
                             loginSession.getPerson().setMembershipId(results.getMembershipId());
-                            double dues = MEMBERSHIP_PRICE;
-                            i++;
-                            String season = SessionSkatingClass.calculateSeason();
-                            ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"Membership dues for " + season + " season\">");
-                            ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\"" + results.getMembershipId() +"\">");
-                            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + MEMBERSHIP_PRICE + "\">");
                         }
-                        
-                        ppCart.append("<input type=\"hidden\" name=\"discount_amount_cart\" value=\"" + calculateDiscount() + "\">");
-                        
-                        ppCart.append("<input type=\"hidden\" name=\"return\" value=\"" + PAYPAL_RETURN_URL + "\">");
-                        ppCart.append("<input type=\"hidden\" name=\"cancel_return\" value=\"" + PAYPAL_CANCEL_URL + "\">");
-                        ppCart.append("<input type=\"submit\" name=\"Pay Now\" value=\"Complete Payment Now\">");
-
-                        //ppCart.append("<input type=\"image\" src=\"https://www.sandbox.paypal.com/en_US/i/btn/btn_paynow_LG.gif\" border=\"0\" name=\"submit\" alt=\"PayPal - The safer, easier way to pay online!\">");
-                        //ppCart.append("<img alt=\"\" border=\"0\" src=\"https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif\" width=\"1\" height=\"1\">");
-                        ppCart.append("</form>");
+                        double discount = 0;
+                        if (bsRadio.getValue()) {
+                            Date startDate = null;
+                            String sessionStart = sessionClassList.getClassList().get(0).getStartDate();
+                            if (sessionStart != null) {
+                                DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
+                                startDate = fmt.parse(sessionStart);
+                            }
+                            discount = calculateBSDiscount(startDate);
+                        } else {
+                            boolean isMember = results.isMembershipCreated() || loginSession.getPerson().isMember();
+                            discount = calculateFSDiscount(results.getEntriesCreated().size(), isMember);
+                        }
+                        StringBuffer ppCart = createPayPalForm(results, sessionClassList, discount);
                         
                         registerButton.setVisible(false);
                         ArrayList<Long> entriesFailed = results.getEntriesNotCreated();
@@ -552,6 +512,56 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
     }
 
     /**
+     * Create the paypal form by iterating across the registration roster entries and
+     * membership information and serializing an appropriate HTML form to request payment
+     * for the items.
+     * @param results the results of the registration step listing registration items
+     * @return a StringBuffer containing the HTML form to be displayed
+     */
+    protected static StringBuffer createPayPalForm(RegistrationResults results, ClassListModel sessionClassList, double discount) {
+        ArrayList<RosterEntry> newEntryList = results.getEntriesCreated();
+        StringBuffer ppCart = new StringBuffer();
+        ppCart.append("<form id=\"wizard\" action=\""+ AppConstants.PAYPAL_URL + "\" method=\"post\">");
+        ppCart.append("<input type=\"hidden\" name=\"cmd\" value=\"_cart\">");
+        ppCart.append("<input type=\"hidden\" name=\"upload\" value=\"1\">");
+        ppCart.append("<input type=\"hidden\" name=\"business\" value=\"" + AppConstants.MERCHANT_ID + "\">");
+        ppCart.append("<input type=\"hidden\" name=\"currency_code\" value=\"USD\">");
+        ppCart.append("<input type=\"hidden\" name=\"no_note\" value=\"1\">");
+        ppCart.append("<input type=\"hidden\" name=\"no_shipping\" value=\"1\">");
+        ppCart.append("<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ AppConstants.PAYPAL_HEADER_IMAGE + "\">");
+        ppCart.append("<input type=\"hidden\" name=\"item_name\" value=\""+ "Registration Invoice" + "\">");
+        ppCart.append("<input type=\"hidden\" name=\"invoice\" value=\""+ results.getPaymentId() + "\">");
+
+        int i = 0;
+        for (RosterEntry newEntry : newEntryList) {
+            i++;
+            ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"" + sessionClassList.getSkatingClass(newEntry.getClassid()).formatClassLabel() + "\">");
+            ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\""+ newEntry.getRosterid() +"\">");
+            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + AppConstants.STANDARD_PRICE + "\">");
+        }
+        
+        // Handle membership payment by creating form items as needed
+        if (results.isMembershipCreated()) {
+            double dues = AppConstants.MEMBERSHIP_PRICE;
+            i++;
+            String season = SessionSkatingClass.calculateSeason();
+            ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"Membership dues for " + season + " season\">");
+            ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\"" + results.getMembershipId() +"\">");
+            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + AppConstants.MEMBERSHIP_PRICE + "\">");
+        }
+        ppCart.append("<input type=\"hidden\" name=\"discount_amount_cart\" value=\"" + discount + "\">");
+        
+        ppCart.append("<input type=\"hidden\" name=\"return\" value=\"" + AppConstants.PAYPAL_RETURN_URL + "\">");
+        ppCart.append("<input type=\"hidden\" name=\"cancel_return\" value=\"" + AppConstants.PAYPAL_CANCEL_URL + "\">");
+        ppCart.append("<input type=\"submit\" name=\"Pay Now\" value=\"Complete Payment Now\">");
+
+        //ppCart.append("<input type=\"image\" src=\"https://www.sandbox.paypal.com/en_US/i/btn/btn_paynow_LG.gif\" border=\"0\" name=\"submit\" alt=\"PayPal - The safer, easier way to pay online!\">");
+        //ppCart.append("<img alt=\"\" border=\"0\" src=\"https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif\" width=\"1\" height=\"1\">");
+        ppCart.append("</form>");
+        return ppCart;
+    }
+    
+    /**
      * Listen for change events when the radio buttons on the registration form
      * are selected and deselected.
      */
@@ -572,11 +582,11 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             GWT.log("memberCheckbox clicked", null);
             double dues = 0;
             if (memberCheckbox.getValue() == true &! loginSession.getPerson().isMember()) {
-                dues = MEMBERSHIP_PRICE;
-                totalFSCost += MEMBERSHIP_PRICE;
+                dues = AppConstants.MEMBERSHIP_PRICE;
+                totalFSCost += AppConstants.MEMBERSHIP_PRICE;
             } else {
                 dues = 0;
-                totalFSCost -= MEMBERSHIP_PRICE;
+                totalFSCost -= AppConstants.MEMBERSHIP_PRICE;
             }
             String duesString = numfmt.format(dues);
             memberDues.setText(duesString);
@@ -585,11 +595,11 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             FSClassCheckBox sendercb = (FSClassCheckBox)sender;
             GWT.log( "Checked class: " + sendercb.getName(), null);
             if (sendercb.getValue() == true) {
-                totalFSCost += FS_PRICE;
+                totalFSCost += AppConstants.FS_PRICE;
                 fsClassesToRegister.add(sendercb.getName());
-                sendercb.setClassPrice(FS_PRICE);
+                sendercb.setClassPrice(AppConstants.FS_PRICE);
             } else {
-                totalFSCost -= FS_PRICE;
+                totalFSCost -= AppConstants.FS_PRICE;
                 fsClassesToRegister.remove(sendercb.getName());
                 sendercb.setClassPrice(0);
             }
@@ -602,7 +612,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
      * screen to reflect the totals.
      */
     private void recalculateAndDisplayTotals() {
-        double discount = calculateDiscount();
+        boolean isMember = loginSession.getPerson().isMember() || memberCheckbox.getValue();
+        double discount = calculateFSDiscount(fsClassesToRegister.size(), isMember);
         discountLabel.setText(numfmt.format(discount));
         total = totalFSCost - discount;
         totalCostLabel.setText(numfmt.format(total));
@@ -613,47 +624,52 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
      * for which the user registers and whether or not they are a member of
      * the club.  Hard coding this algorithm is painful, but there are so many
      * possible variants it seems that some aspect will be hardcoded.
+     * @param numclasses the number of classes for which they are registering
+     * @param isMember boolean set to true if they are a club member
      * @return the amount of the discount
      */
-    private double calculateDiscount() {
+    protected static double calculateFSDiscount(int numclasses, boolean isMember) {
         double multiclassDiscount = 0;        
         // TODO: determine how to externalize this algorithm for discounting
-        if (fsClassesToRegister.size() == 3) {
+        if (numclasses == 3) {
             multiclassDiscount = 10;
-        } else if (fsClassesToRegister.size() == 4) {
+        } else if (numclasses == 4) {
             multiclassDiscount = 25;
-        } else if (fsClassesToRegister.size() >= 5) {
+        } else if (numclasses >= 5) {
             multiclassDiscount = 50;
         }
         
         // If the person is already a member, or if they have checked the 
         // membership box, then include the membership discount
         double membershipDiscount = 0;
-        if (loginSession.getPerson().isMember() || memberCheckbox.getValue()) {
-            membershipDiscount = fsClassesToRegister.size()*MEMBERSHIP_DISCOUNT;
+        if (isMember) {
+            membershipDiscount = numclasses*AppConstants.MEMBERSHIP_DISCOUNT;
         }
         
+        return multiclassDiscount + membershipDiscount;
+    }
+    
+    /**
+     * Calculate the registration discount based on comparing the current date
+     * to the start date of the session.  If the current date is before the session
+     * start date by at least the number of grace days, then the basic skills discount applies.
+     * @param startDate the start date of the session
+     * @return the amount of the discount
+     */
+    protected static double calculateBSDiscount(Date startDate) {
+        double multiclassDiscount = 0;        
+        
         // Calculate the basic skills discount
-        ArrayList<SessionSkatingClass> list = sessionClassList.getClassList();
         double bsDiscount = 0;
-        String sessionStart = list.get(0).getStartDate();
-        DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
-        if (sessionStart != null) {
-            Date startDate = fmt.parse(sessionStart);
+        if (startDate != null) {
             Date today = new Date(System.currentTimeMillis());
             if (today.before(startDate) && 
-               (startDate.getTime() - today.getTime() > EARLY_PRICE_GRACE_DAYS*MILLISECS_PER_DAY)) {
-                bsDiscount = STANDARD_PRICE - EARLY_PRICE;
+               (startDate.getTime() - today.getTime() > AppConstants.EARLY_PRICE_GRACE_DAYS*AppConstants.MILLISECS_PER_DAY)) {
+                bsDiscount = AppConstants.STANDARD_PRICE - AppConstants.EARLY_PRICE;
             }
         }
         
-        // If the Basic Skills screen is active, return the bsDiscount
-        // Otherwise, return the figure skating discount    
-        if (bsRadio.getValue()) {
-            return bsDiscount;            
-        } else {
-            return multiclassDiscount + membershipDiscount;
-        }
+        return bsDiscount;            
     }
     
     /**
