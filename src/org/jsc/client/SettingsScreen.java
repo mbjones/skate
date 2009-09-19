@@ -372,6 +372,10 @@ public class SettingsScreen extends BaseScreen {
                     String uiMessage = "Wrong format for date. Please use MM-DD-YYYY.";
                     GWT.log(uiMessage, null);
                     setMessage(uiMessage);
+                } else {
+                    String uiMessage = "Unexpected error while creating account. Please contact registrar.";
+                    GWT.log(uiMessage, null);
+                    setMessage(uiMessage);
                 }
             }
 
