@@ -3,7 +3,6 @@ package org.jsc.client;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.TreeMap;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
