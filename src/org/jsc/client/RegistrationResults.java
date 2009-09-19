@@ -14,6 +14,7 @@ public class RegistrationResults implements Serializable {
     private String membershipErrorMessage;
     private long membershipId;
     private long paymentId;
+    private String membershipStatus;
     private ArrayList<RosterEntry> entriesCreated;
     private ArrayList<Long> entriesNotCreated;
     
@@ -91,6 +92,20 @@ public class RegistrationResults implements Serializable {
      */
     public long getPaymentId() {
         return paymentId;
+    }
+
+    /**
+     * @return the membershipStatus
+     */
+    public String getMembershipStatus() {
+        return membershipStatus;
+    }
+
+    /**
+     * @param membershipStatus the membershipStatus to set
+     */
+    public void setMembershipStatus(String membershipStatus) {
+        this.membershipStatus = membershipStatus;
     }
 
     /**

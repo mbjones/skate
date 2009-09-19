@@ -146,10 +146,17 @@ public class MyClassesScreen extends BaseScreen {
         }
         results.setEntriesCreated(entriesToBeInvoiced);
         
-        // TODO: look up the membership payment status if relevant for this paymentid,
+        // Look up the membership payment status if relevant for this paymentid,
         // and also add it to the results if needed
+        String status = loginSession.getPerson().getMembershipStatus();
+        if (status != null && status.equals("Pending")) {
+            GWT.log("Membership payment pending: " + loginSession.getPerson().getMembershipPaymentId(), null);
+            if (loginSession.getPerson().getMembershipPaymentId() == paymentid) {
+                results.setMembershipCreated(true);
+                results.setMembershipId(loginSession.getPerson().getMembershipId());
+            }
+        }
         return results;
-        
     }
 
     /**

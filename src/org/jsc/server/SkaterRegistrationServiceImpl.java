@@ -371,7 +371,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 // Now look up the membershipId that was generated
                 String season = SessionSkatingClass.calculateSeason();
                 StringBuffer msql = new StringBuffer();
-                msql.append("select mid, pid, paymentid, season from membership where ");
+                msql.append("select mid, pid, paymentid, season, paypal_status from memberstatus where ");
                 msql.append("pid = '").append(person.getPid()).append("'");
                 msql.append(" AND ");
                 msql.append("season LIKE '").append(season).append("'");
@@ -382,7 +382,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                     // if we found a matching record, the record was created
                     results.setMembershipId(rs.getLong(1));
                     results.setMembershipCreated(true);
-                    // TODO: set the paymentId in the results object
+                    results.setPaymentId(paymentId);
+                    results.setMembershipStatus(rs.getString(5));
                 }
                 stmt.close();
                 con.close();
@@ -588,7 +589,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             // If so, set their membership flag
             String season = SessionSkatingClass.calculateSeason();
             StringBuffer msql = new StringBuffer();
-            msql.append("select mid, pid, paymentid, season from membership where ");
+            msql.append("select mid, pid, paymentid, season, paypal_status from memberstatus where ");
             msql.append("pid = '").append(pid).append("'");
             msql.append(" AND ");
             msql.append("season LIKE '").append(season).append("'");
@@ -599,6 +600,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 // if we found a matching record, they have paid their membership
                 person.setMember(true);
                 person.setMembershipId(rs.getLong(1));
+                person.setMembershipPaymentId(rs.getLong(3));
+                person.setMembershipStatus(rs.getString(5));
+                // TODO: this status is only set on authentication -- need to send it back to client
+                // whenever the membership fields are updated so that payment can be tracked, especially
+                // in MyClasses screen
             }
             stmt.close();
             

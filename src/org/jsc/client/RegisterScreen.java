@@ -284,7 +284,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         fmt.addStyleName(newRow, 1,  "jsc-field");
         fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
     }
-    
+
     /**
      * Remove the current list of classes from the box and replace with the 
      * classes that are currently present in sessionClassList. Reset the 
@@ -371,7 +371,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         }
         
         recalculateAndDisplayBasicSkillsTotal();
-        recalculateAndDisplayTotals();
+        recalculateAndDisplayFSTotals();
     }
 
     /**
@@ -454,7 +454,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
                     
                     if ((newEntryList == null || newEntryList.size() == 0) && !results.isMembershipAttempted()) {
                         // Failure on the remote end.
-                        // Could still have membership created in this case
                         setMessage("Error registering... Have you are already registered for these classes? Check 'My Classes'.");
                         return;
                     } else {
@@ -462,6 +461,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
                         if (results.isMembershipCreated()) {
                             loginSession.getPerson().setMember(true);
                             loginSession.getPerson().setMembershipId(results.getMembershipId());
+                            loginSession.getPerson().setMembershipStatus(results.getMembershipStatus());
                         }
                         double discount = 0;
                         if (bsRadio.getValue()) {
@@ -575,7 +575,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             fsPanel.setVisible(false);
         } else if (sender == fsRadio) {
             GWT.log("fsRadio clicked", null);
-            recalculateAndDisplayTotals();
+            recalculateAndDisplayFSTotals();
             bsPanel.setVisible(false);
             fsPanel.setVisible(true);
         } else if (sender == memberCheckbox) {
@@ -590,7 +590,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             }
             String duesString = numfmt.format(dues);
             memberDues.setText(duesString);
-            recalculateAndDisplayTotals();        
+            recalculateAndDisplayFSTotals();        
         } else if (sender instanceof FSClassCheckBox) {
             FSClassCheckBox sendercb = (FSClassCheckBox)sender;
             GWT.log( "Checked class: " + sendercb.getName(), null);
@@ -603,7 +603,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
                 fsClassesToRegister.remove(sendercb.getName());
                 sendercb.setClassPrice(0);
             }
-            recalculateAndDisplayTotals();
+            recalculateAndDisplayFSTotals();
         }
     }
 
@@ -611,7 +611,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
      * Recalculate the total amount of the registration charges, and update the
      * screen to reflect the totals.
      */
-    private void recalculateAndDisplayTotals() {
+    private void recalculateAndDisplayFSTotals() {
         boolean isMember = loginSession.getPerson().isMember() || memberCheckbox.getValue();
         double discount = calculateFSDiscount(fsClassesToRegister.size(), isMember);
         discountLabel.setText(numfmt.format(discount));

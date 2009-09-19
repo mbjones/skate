@@ -37,6 +37,8 @@ public class Person implements Serializable {
     private String newEmail;
     private boolean isMember;
     private long mid;
+    private String membershipStatus;
+    private long membershipPaymentId;
     
     /**
      * Construct a new person object with no fields set.
@@ -446,5 +448,33 @@ public class Person implements Serializable {
      */
     public void setMembershipId(long mid) {
         this.mid = mid;
+    }
+
+    /**
+     * @return the membershipStatus
+     */
+    public String getMembershipStatus() {
+        return membershipStatus;
+    }
+
+    /**
+     * @param membershipStatus the membershipStatus to set
+     */
+    public void setMembershipStatus(String membershipStatus) {
+        this.membershipStatus = membershipStatus;
+    }
+
+    /**
+     * @return the membershipPaymentId
+     */
+    public long getMembershipPaymentId() {
+        return membershipPaymentId;
+    }
+
+    /**
+     * @param membershipPaymentId the membershipPaymentId to set
+     */
+    public void setMembershipPaymentId(long membershipPaymentId) {
+        this.membershipPaymentId = membershipPaymentId;
     }
 }
