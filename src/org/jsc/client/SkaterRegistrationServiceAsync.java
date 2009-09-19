@@ -20,6 +20,7 @@ public interface SkaterRegistrationServiceAsync {
   void getPerson(long pid, AsyncCallback<Person> callback);
   void getSessionClassList(LoginSession loginSession, Person person, AsyncCallback<ArrayList<SessionSkatingClass>> callback);
   void register(LoginSession loginSession, Person person, ArrayList<RosterEntry> newEntryList, boolean createMembership, AsyncCallback<RegistrationResults> callback);
+  void cancelInvoice(LoginSession loginSession, long paymentid, AsyncCallback<Boolean> callback);
   void getStudentRoster(LoginSession loginSession, Person person, AsyncCallback<ArrayList<RosterEntry>> callback);
   void getClassRoster(LoginSession loginSession, Person person, long classid, AsyncCallback<ArrayList<RosterEntry>> callback);
 }

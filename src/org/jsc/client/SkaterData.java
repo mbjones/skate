@@ -97,7 +97,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
         // Initialize application screens
         login = new LoginScreen(loginSession, eventBus);
         settings = new SettingsScreen(loginSession, eventBus);
-        myclasses = new MyClassesScreen(loginSession, eventBus, sessionClassList);
+        myclasses = new MyClassesScreen(loginSession, eventBus, sessionClassList, rosterModel);
         register = new RegisterScreen(loginSession, eventBus, sessionClassList, rosterModel);
         manage = new ManageScreen(loginSession, eventBus);
         confirm = new ConfirmScreen(loginSession, eventBus);

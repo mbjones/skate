@@ -449,6 +449,80 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         return results;
     }
     
+    public boolean cancelInvoice(LoginSession loginSession, long paymentid) {
+        // Check authentication credentials
+        if (!isSessionValid(loginSession)) {
+            return false;
+        }
+        
+        // Look up the paymentid and see if the pid matches, or if the login 
+        // person is authorized because they are a coach or administrator
+        boolean isAuthorized = false;
+        try {
+            
+            // TODO: First check if the person logged in is an admin, in which
+            // case we can delete the records regardless
+            
+            // Now check if the person logged in matches the registrant for the record
+            StringBuffer invoiceQuery = new StringBuffer();
+            invoiceQuery.append("select py.paymentid, py.paypal_status, r.rosterid, r.pid " +
+            		"from payment py, roster r " +
+            		"where py.paymentid = r.paymentid " +
+            		"and py.paymentid = ");
+            invoiceQuery.append(paymentid);
+            System.out.println(invoiceQuery.toString());
+            Connection con = getConnection();
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(invoiceQuery.toString());
+            if (rs.next()) {
+                long pid = rs.getLong(4);
+                // Check if the person who is logged in owns the invoice records
+                if (loginSession.getPerson().getPid() == pid) {
+                    isAuthorized = true;
+                }
+            }
+            stmt.close();
+            con.close();
+
+        } catch(SQLException ex) {
+            System.err.println("SQLException: " + ex.getMessage());
+        }
+        
+        // Delete the invoice, cascading to the membership and roster tables
+        Connection con = getConnection();
+        try {
+            con.setAutoCommit(false);
+            
+            String tables[] = {"membership", "roster", "payment"};
+            for (String table : tables) {
+                StringBuffer sql = new StringBuffer();
+                sql.append("DELETE from ");
+                sql.append(table);
+                sql.append(" where paymentid = ");
+                sql.append(paymentid);
+                System.out.println(sql.toString());
+                Statement stmt = con.createStatement();
+                int rowcount = stmt.executeUpdate(sql.toString());
+                System.out.println("Deleted " + rowcount + " rows from " + table + ".");
+                stmt.close(); 
+            }
+            con.commit();
+            con.close();
+
+        } catch(SQLException ex) {
+            try {
+                con.rollback();
+            } catch (SQLException e) {
+                System.out.println("Unable to rollback during invoice deletion." + e.getMessage());
+            }
+            System.err.println("SQLException: " + ex.getMessage());
+        }
+        
+        // Return information about the canceled invoice, the user, and their member status
+        
+        return isAuthorized;
+    }
+    
     /**
      * Look up the roster of classes for which this student has registered and
      * return it as an ArrayList.
@@ -602,9 +676,6 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 person.setMembershipId(rs.getLong(1));
                 person.setMembershipPaymentId(rs.getLong(3));
                 person.setMembershipStatus(rs.getString(5));
-                // TODO: this status is only set on authentication -- need to send it back to client
-                // whenever the membership fields are updated so that payment can be tracked, especially
-                // in MyClasses screen
             }
             stmt.close();
             
