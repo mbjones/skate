@@ -367,8 +367,9 @@ public class SettingsScreen extends BaseScreen {
                     String uiMessage = "Username already exists. Please try a different username.";
                     GWT.log(uiMessage, null);
                     setMessage(uiMessage);
-                } else if (caught.getMessage().contains("invalid input syntax for type date")) {
-                    String uiMessage = "Wrong format for date. Please use DD-MM-YYYY.";
+                } else if (caught.getMessage().contains("invalid input syntax for type date") ||
+                        caught.getMessage().contains("date/time field value out of range")) {
+                    String uiMessage = "Wrong format for date. Please use MM-DD-YYYY.";
                     GWT.log(uiMessage, null);
                     setMessage(uiMessage);
                 }
