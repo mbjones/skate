@@ -79,13 +79,14 @@ public class PaypalIPNServlet extends HttpServlet {
             in.close();
 
             //check notification validation
-            if (res.equals("VERIFIED")) {
+            if (res != null && res.equals("VERIFIED")) {
                 recordTransaction(request);
-            } else if (res.equals("INVALID")) {
+            } else if (res != null && res.equals("INVALID")) {
                 System.out.println("Invalid IPN connection");
                 // TODO: log for investigation
             } else {
                 // TODO: error
+                System.out.println("IPN server returned unexpected value or null.");
             }
         } catch (MalformedURLException e) {
             // TODO Auto-generated catch block
@@ -97,6 +98,7 @@ public class PaypalIPNServlet extends HttpServlet {
     }
     
     private void recordTransaction(HttpServletRequest request) {
+        System.out.println("Starting to record IPN transaction...");
         // assign posted variables to local variables
         String txnId = request.getParameter("txn_id");
         long paymentId = new Long(request.getParameter("invoice")).longValue();
