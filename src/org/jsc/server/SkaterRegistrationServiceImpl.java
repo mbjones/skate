@@ -29,8 +29,8 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         implements SkaterRegistrationService {
 
-//    private static final String JDBC_URL = "jdbc:postgresql://localhost/jscdb";
-    private static final String JDBC_URL = "jdbc:postgresql://localhost/jscdbtest";
+    private static final String JDBC_URL = "jdbc:postgresql://localhost/jscdb";
+//    private static final String JDBC_URL = "jdbc:postgresql://localhost/jscdbtest";
     private static final String JDBC_USER = "jscdb";
     private static final String JDBC_PASS = "1skate2";
     private static final String JDBC_DRIVER = "org.postgresql.Driver";
