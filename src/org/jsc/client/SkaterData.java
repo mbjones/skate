@@ -60,8 +60,6 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
 
         // Create a login session, which initially is not logged in
         loginSession = new LoginSession();
-        sessionClassList = new ClassListModel(eventBus, loginSession);
-        rosterModel = new RosterModel(eventBus, loginSession);
         
         // Check for a cookie to see if we have a previously valid session
         String sessionId = Cookies.getCookie("jscSession");
@@ -74,9 +72,13 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
             person.setPid(new Long(savedPid).longValue());
             loginSession.setPerson(person);
             refreshLoginSessionPerson(person.getPid());
+            // TODO: need to get hold of the Person and set it too (maybe look it up on the server?
         } else {
             GWT.log("SessionId not found in onModuleLoad.", null);
         }
+        
+        sessionClassList = new ClassListModel(eventBus, loginSession);
+        rosterModel = new RosterModel(eventBus, loginSession);
 
         // Create our header with internal toolbar
         header = new HeaderPanel(loginSession, eventBus);
@@ -202,11 +204,36 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
      * instead use the previous session to validate.  
      */
     private void refreshLoginSessionPerson(long pid) {
-        
-        loginSession.getPerson().refreshPersonDetails();
-        rosterModel.refreshRoster();
-        LoginSessionChangeEvent event = new LoginSessionChangeEvent();
-        eventBus.fireEvent(event);
+        // Initialize the service proxy.
+        if (regService == null) {
+            regService = GWT.create(SkaterRegistrationService.class);
+        }
+
+        // Set up the callback object.
+        AsyncCallback<Person> callback = new AsyncCallback<Person>() {
+            public void onFailure(Throwable caught) {
+                // TODO: Do something with errors.
+                GWT.log("Failed to refresh the person record.", caught);
+            }
+
+            public void onSuccess(Person newPerson) {
+                if (newPerson == null) {
+                    // Failure on the remote end.
+                    GWT.log("Error refreshing the person's attributes.", null);
+                    return;
+                } else {
+                    // Update the loginSession to contain the newly looked up Person
+                    loginSession.setPerson(newPerson);
+                    //sessionClassList.refreshClassList();
+                    rosterModel.refreshRoster();
+                    LoginSessionChangeEvent event = new LoginSessionChangeEvent();
+                    eventBus.fireEvent(event);
+                }
+            }
+        };
+
+        // Make the call to the registration service.
+        regService.getPerson(pid, callback);
     }
     
     /**
