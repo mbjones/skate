@@ -36,7 +36,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
     private static final String PRICE_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p>" + DISCOUNT_EXPLANATION + "</div>";
     private static final String PAYPAL_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">You must make your payment using PayPal by clicking on the button below.  <b>Your registration is <em>not complete</em></b> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
     private static final String BS_EXPLANATION = "Basic Skills is our Learn to Skate program. These group lessons are based on the United States Figure Skating's (USFSA) Basic Skills Program. This is a nationwide, skills-based, graduated series of instruction for youth and adult skaters. This program is designed to teach all skaters the fundamentals of skating.";
-    private static final String FS_EXPLANATION = "Figure Skating is a one- to five-day-a-week program for skaters that have completed all of the Basic Skills Levels (8) or Adult Levels (4). Students work individually with their coach to develop their skills. Please only sign up for Figure Skating Classes if you have graduated from the Basic Skills program.";
+    private static final String FS_EXPLANATION = "Figure Skating is a one- to five-day-a-week program for skaters that have completed all of the Basic Skills Levels (8) or Adult Levels (4). Students work individually with their coach to develop their skills. Please only sign up for Figure Skating Classes only if you have permission from the Figure Skating Coordinator.";
 
     private static final String STEP_1 = "Step 1: Choose a class";
     private static final String STEP_2 = "Step 2: Process payment";
@@ -130,7 +130,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         bsRadio = new RadioButton("BSorFSGroup", "Basic Skills Classes");
         bsRadio.addValueChangeHandler(this);
         bsRadio.setValue(true);
-        fsRadio = new RadioButton("BSorFSGroup", "Figure Skating Classes (graduates of Basic Skills only)");
+        fsRadio = new RadioButton("BSorFSGroup", "Figure Skating Classes (only by permission of the Figure Skating Coordinator)");
         fsRadio.addValueChangeHandler(this);
         outerVerticalPanel.add(bsRadio);
         outerVerticalPanel.add(fsRadio);
