@@ -358,12 +358,14 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         // Update the membership checkbox status based on the Person logged in
         if (loginSession.getPerson().isMember()) {
             memberCheckboxLabel.setText("Membership dues already paid. Discount applies.");
+            memberCheckbox.setValue(false);
             memberCheckbox.setEnabled(false);
             double dues = 0;
             String duesString = numfmt.format(dues);
             memberDues.setText(duesString);
         } else {
             memberCheckboxLabel.setText("Pay membership dues");
+            memberCheckbox.setValue(false);
             memberCheckbox.setEnabled(true);
             //String duesString = numfmt.format(MEMBERSHIP_PRICE);
             //memberDues.setText(duesString);

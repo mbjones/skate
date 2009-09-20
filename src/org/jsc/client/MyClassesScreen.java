@@ -269,6 +269,7 @@ public class MyClassesScreen extends BaseScreen implements ClickHandler {
                 GWT.log("Cancel invoice returned: " + resultFlag, null);
                 if (resultFlag) {
                     rosterModel.refreshRoster();
+                    loginSession.refreshPersonDetails();
                 }
             }
         };

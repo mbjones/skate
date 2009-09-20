@@ -2,6 +2,9 @@ package org.jsc.client;
 
 import java.io.Serializable;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+
 /**
  * An encapsulation of a Person, with fields giving their basic demographic and
  * contact information.
@@ -39,7 +42,7 @@ public class Person implements Serializable {
     private long mid;
     private String membershipStatus;
     private long membershipPaymentId;
-    
+        
     /**
      * Construct a new person object with no fields set.
      */
@@ -476,5 +479,67 @@ public class Person implements Serializable {
      */
     public void setMembershipPaymentId(long membershipPaymentId) {
         this.membershipPaymentId = membershipPaymentId;
+    }
+
+    /**
+     * Look up properties for this Person instance from the database and refresh those
+     * details in this instance.
+     */
+    public void refreshPersonDetails() {
+        
+        // Set up the callback object.
+        AsyncCallback<Person> callback = new AsyncCallback<Person>() {
+            public void onFailure(Throwable caught) {
+                // TODO: Do something with errors.
+                GWT.log("Failed to refresh the person record.", caught);
+            }
+
+            public void onSuccess(Person newPerson) {
+                if (newPerson == null) {
+                    // Failure on the remote end.
+                    GWT.log("Error refreshing the person's attributes.", null);
+                    return;
+                } else {
+                    updateFields(newPerson);
+                }
+            }
+        };
+
+        // Initialize the service proxy and make the call to the registration service.
+        SkaterRegistrationServiceAsync regService = GWT.create(SkaterRegistrationService.class);
+        regService.getPerson(this.getPid(), callback);
+    }
+    
+    /**
+     * Replace the properties of the current person with properties from a new
+     * person passed in.  This is used to update fields after a database update.
+     * @param p the new person used to update the field data
+     */
+    private void updateFields(Person p) {
+        setLname(p.getLname());
+        setFname(p.getFname());
+        setMname(p.getMname());
+        setSuffix(p.getSuffix());
+        setEmail(p.getEmail());
+        setEmailValid(p.isEmailValid());
+        setBday(p.getBday());
+        setRole(p.getRole());
+        setHomephone(p.getHomephone());
+        setWorkphone(p.getWorkphone());
+        setCellphone(p.getCellphone());
+        setStreet1(p.getStreet1());
+        setStreet2(p.getStreet2());
+        setCity(p.getCity());
+        setState(p.getState());
+        setZip(p.getZip());
+        setUsfsaid(p.getUsfsaid());
+        setParentLastname(p.getParentLastname());
+        setParentFirstname(p.getParentFirstname());
+        setParentEmail(p.getParentEmail());
+        setUsername(p.getUsername());
+        setMember(p.isMember());
+        setMembershipId(p.getMembershipId());
+        setMembershipStatus(p.getMembershipStatus());
+        setMembershipPaymentId(p.getMembershipPaymentId());        
     }
 }

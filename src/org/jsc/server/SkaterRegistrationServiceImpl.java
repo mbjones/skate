@@ -449,6 +449,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         return results;
     }
     
+    /**
+     * Cancel the registration entries and membership entries associated with a
+     * payment invoice.  The method checks that the person removing the entry is
+     * the person who submitted it, and that it is in Pending status.
+     */
     public boolean cancelInvoice(LoginSession loginSession, long paymentid) {
         // Check authentication credentials
         if (!isSessionValid(loginSession)) {
@@ -464,10 +469,12 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             // case we can delete the records regardless
             
             // Now check if the person logged in matches the registrant for the record
+            // and that the payment is actually pending
             StringBuffer invoiceQuery = new StringBuffer();
             invoiceQuery.append("select py.paymentid, py.paypal_status, r.rosterid, r.pid " +
             		"from payment py, roster r " +
             		"where py.paymentid = r.paymentid " +
+            		"and py.paypal_status = 'Pending' " +
             		"and py.paymentid = ");
             invoiceQuery.append(paymentid);
             System.out.println(invoiceQuery.toString());
@@ -518,7 +525,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             System.err.println("SQLException: " + ex.getMessage());
         }
         
-        // Return information about the canceled invoice, the user, and their member status
+        // Return information about the user member status
         
         return isAuthorized;
     }
@@ -676,6 +683,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 person.setMembershipId(rs.getLong(1));
                 person.setMembershipPaymentId(rs.getLong(3));
                 person.setMembershipStatus(rs.getString(5));
+            } else {
+                person.setMember(false);
+                person.setMembershipId(0);
+                person.setMembershipPaymentId(0);
+                person.setMembershipStatus("Unpaid");
             }
             stmt.close();
             

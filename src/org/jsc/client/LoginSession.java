@@ -70,4 +70,12 @@ public class LoginSession implements Serializable {
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
+
+    /**
+     * Update the details of this person by looking them up in the remote data
+     * store again.  Details sometimes change when membership payments are made.
+     */
+    public void refreshPersonDetails() {
+        getPerson().refreshPersonDetails();
+    }
 }
