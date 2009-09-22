@@ -522,14 +522,14 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
     protected static StringBuffer createPayPalForm(RegistrationResults results, ClassListModel sessionClassList, double discount) {
         ArrayList<RosterEntry> newEntryList = results.getEntriesCreated();
         StringBuffer ppCart = new StringBuffer();
-        ppCart.append("<form id=\"wizard\" action=\""+ AppConstants.PAYPAL_URL + "\" method=\"post\">");
+        ppCart.append("<form id=\"wizard\" action=\""+ ClientConstants.getString("CLIENT_PAYPAL_URL") + "\" method=\"post\">");
         ppCart.append("<input type=\"hidden\" name=\"cmd\" value=\"_cart\">");
         ppCart.append("<input type=\"hidden\" name=\"upload\" value=\"1\">");
-        ppCart.append("<input type=\"hidden\" name=\"business\" value=\"" + AppConstants.MERCHANT_ID + "\">");
+        ppCart.append("<input type=\"hidden\" name=\"business\" value=\"" + ClientConstants.getString("CLIENT_MERCHANT_ID") + "\">");
         ppCart.append("<input type=\"hidden\" name=\"currency_code\" value=\"USD\">");
         ppCart.append("<input type=\"hidden\" name=\"no_note\" value=\"1\">");
         ppCart.append("<input type=\"hidden\" name=\"no_shipping\" value=\"1\">");
-        ppCart.append("<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ AppConstants.PAYPAL_HEADER_IMAGE + "\">");
+        ppCart.append("<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ ClientConstants.getString("CLIENT_PAYPAL_HEADER_IMAGE") + "\">");
         ppCart.append("<input type=\"hidden\" name=\"item_name\" value=\""+ "Registration Invoice" + "\">");
         ppCart.append("<input type=\"hidden\" name=\"invoice\" value=\""+ results.getPaymentId() + "\">");
 
@@ -552,8 +552,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         }
         ppCart.append("<input type=\"hidden\" name=\"discount_amount_cart\" value=\"" + discount + "\">");
         
-        ppCart.append("<input type=\"hidden\" name=\"return\" value=\"" + AppConstants.PAYPAL_RETURN_URL + "\">");
-        ppCart.append("<input type=\"hidden\" name=\"cancel_return\" value=\"" + AppConstants.PAYPAL_CANCEL_URL + "\">");
+        ppCart.append("<input type=\"hidden\" name=\"return\" value=\"" + ClientConstants.getString("CLIENT_PAYPAL_RETURN_URL") + "\">");
+        ppCart.append("<input type=\"hidden\" name=\"cancel_return\" value=\"" + ClientConstants.getString("CLIENT_PAYPAL_CANCEL_URL") + "\">");
         ppCart.append("<input type=\"submit\" name=\"Pay Now\" value=\"Complete Payment Now\">");
 
         //ppCart.append("<input type=\"image\" src=\"https://www.sandbox.paypal.com/en_US/i/btn/btn_paynow_LG.gif\" border=\"0\" name=\"submit\" alt=\"PayPal - The safer, easier way to pay online!\">");
