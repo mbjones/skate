@@ -15,9 +15,8 @@ SELECT ppl.surname, ppl.givenname, m.season, p.paypal_status
    AND season = '2009-2010'
  ORDER BY p.paypal_status, ppl.surname, ppl.givenname;
 
- --SELECT p.surname||','|| p.givenname||','||p.email||','||sc.classtype||','||sc.day||','||y.paypal_status
-
- SELECT p.surname, p.givenname, p.email, sc.classtype, sc.day, y.paypal_status
+ --SELECT p.surname, p.givenname, p.email, sc.classtype, sc.day, y.paypal_status
+ SELECT p.surname||','|| p.givenname||','||p.email||','||sc.classtype||','||sc.day||','||y.paypal_status
    FROM roster r, people p, payment y, sessionclasses sc
   WHERE r.pid = p.pid 
     AND r.paymentid = y.paymentid

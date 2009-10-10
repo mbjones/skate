@@ -24,6 +24,7 @@ public class SessionSkatingClass implements Serializable {
     private String instructorGivenName;
     private double cost;
     private String otherinstructors;
+    private boolean activeSession;
     
     /**
      * Construct a new session, using accessors to set all fields after construction.
@@ -247,6 +248,20 @@ public class SessionSkatingClass implements Serializable {
     }
 
     /**
+     * @param activeSession the activeSession to set
+     */
+    public void setActiveSession(boolean activeSession) {
+        this.activeSession = activeSession;
+    }
+
+    /**
+     * @return the activeSession
+     */
+    public boolean isActiveSession() {
+        return activeSession;
+    }
+
+    /**
      * Create a string that can be used to represent this class, including session
      * information and schedule information.
      * @return the String label representing the class
@@ -285,5 +300,20 @@ public class SessionSkatingClass implements Serializable {
         }
         
         return season;
+    }
+    
+    public static String calculateCurrentSession() {
+        String sessionName = "";
+        // TODO: determine which session we are currently in by comparing to the database
+        // and returning the first matching result
+        return sessionName;
+    }
+    
+    public static String calculateActiveSession() {
+        String sessionName = "";
+        // TODO: determine which session is active for registration based on
+        // either a midpoint algorithm or by marking active sessions in the database
+        // Prefer the latter!
+        return sessionName;
     }
 }

@@ -245,9 +245,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         
         // Query the database to get the list of classes
         StringBuffer sql = new StringBuffer();
-        sql.append("select sid, sessionname, season, startdate, enddate, "); //$NON-NLS-1$
-        sql.append("classid, classtype, day, timeslot, instructorid, "); //$NON-NLS-1$
-        sql.append("otherinstructors, surname, givenname from sessionclasses"); //$NON-NLS-1$
+        sql.append("select sid, sessionname, season, startdate, enddate, "); 
+        sql.append("classid, classtype, day, timeslot, instructorid, "); 
+        sql.append("otherinstructors, surname, givenname, activesession from sessionclasses");
         System.out.println(sql.toString());
         
         try {
@@ -269,6 +269,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 sc.setOtherinstructors(rs.getString(11));
                 sc.setInstructorSurName(rs.getString(12));
                 sc.setInstructorGivenName(rs.getString(13));
+                sc.setActiveSession(rs.getBoolean(14));
                 classList.add(sc);
             }
             stmt.close();

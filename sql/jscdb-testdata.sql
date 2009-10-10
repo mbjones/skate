@@ -122,3 +122,55 @@ INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost,
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
     (5000, 'FS Club Ice', 'Sunday', '9:15-10:15am', 1004, 75.00, '');
+
+-- Session 2 classes
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'Snowplow Sam', 'Saturday', '11:45am-12:45pm', 1009, 80.00, 'Alex');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'Beginner Youth', 'Friday', '6:30-7:30pm', 1007, 80.00, 'Alex');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'Beginner Youth', 'Saturday', '11:45am-12:45pm', 1005, 80.00, 'Kim');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'Intermediate Youth', 'Friday', '6:30-7:30pm', 1010, 80.00, '');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'Intermediate Youth', 'Saturday', '11:45am-12:45pm', 1005, 80.00, '');    
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'Advanced Youth', 'Friday', '6:30-7:30pm', 1002, 80.00, '');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost,
+    otherinstructors) VALUES
+    (5001, 'Beginner Adult', 'Friday', '6:30-7:30pm', 1003, 80.00, '');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost,
+    otherinstructors) VALUES
+    (5001, 'Beginner Adult', 'Saturday', '11:45am-12:45pm', 1008, 80.00, '');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'Advanced Adult', 'Friday', '6:30-7:30pm', 1003, 80.00, '');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'Hockey Skating Skills', 'Sunday', '10:30-11:30am', 1006, 80.00, '');
+
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'FS Moves in the Field', 'Monday', '5:15-6:15pm', 1005, 75.00, '');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'FS Artistry', 'Tuesday', '6:15-7:15am', 1002, 75.00, '');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'FS Club Ice', 'Wednesday', '5:15-6:15pm', 1004, 75.00, '');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'FS Club Ice', 'Friday', '5:15-6:15pm', 1004, 75.00, '');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'FS Synchro', 'Sunday', '9:15-10:15am', 1005, 75.00, '');
+INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
+    otherinstructors) VALUES
+    (5001, 'FS Club Ice', 'Sunday', '9:15-10:15am', 1004, 75.00, '');
+    

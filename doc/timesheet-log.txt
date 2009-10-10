@@ -1,0 +1,16 @@
+Hours worked on the JSC registration data system
+------------------------------------------------
+
+3/18/2009,3.25,design mockups
+3/21/2009,3,design mockups
+3/22/2009,4,design mockups
+4/19/2009,3.75,design mockups
+4/24/2009,5,Initial sql tables
+5/16/2009,3,refined mockups
+8/20/2009,27,Initial GWT framework
+9/1/2009,35,Initial screens implementation
+9/8/2009,30,Initial alpha 1 release
+9/15/2009,16,Add complete and cancel functions, release beta 1 release
+10/10/2009,1,Filter out all classes but activeSession from reg page
+
+

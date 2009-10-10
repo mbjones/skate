@@ -45,6 +45,7 @@ CREATE TABLE sessions (
     season VARCHAR(20),       -- the name of the season (e.g., '2008-2009')
 	startdate DATE,           -- the date the session starts
 	enddate DATE,             -- the date the session ends
+	activesession BOOLEAN,    -- flag indicating whether this is the active session for registration
    CONSTRAINT session_pk PRIMARY KEY (sid)
 );
 
@@ -79,7 +80,7 @@ CREATE TABLE skatingclass (
 
 -- Sessionclasses -- a view over the session and skatingclass tables joined
 CREATE OR REPLACE VIEW sessionclasses AS 
- SELECT s.sid, s.sessionname, s.season, s.startdate, s.enddate, c.classid, 
+ SELECT s.sid, s.sessionname, s.season, s.startdate, s.enddate, s.activesession, c.classid, 
         c.classtype, c.day, c.timeslot, c.instructorid, c.cost, 
         c.otherinstructors, p.surname, p.givenname
    FROM sessions s, skatingclass c, people p
@@ -118,6 +119,7 @@ CREATE TABLE roster (
     pid INT8,                -- the id of the person enrolled
     paymentid INT8,          -- the id of the payment for this roster entry
     payment_amount FLOAT8,   -- the amount paid for this single roster entry, excluding discounts
+    section VARCHAR(8),      -- the section designator for this entry
     levelPassed VARCHAR(20), -- the ASFS Level passed during testing
    	date_updated TIMESTAMP default CURRENT_TIMESTAMP, -- the date the record was last updated
    CONSTRAINT roster_pk PRIMARY KEY (rosterid),
@@ -129,8 +131,9 @@ CREATE TABLE roster (
 
 -- rosterpeople -- a view over the roster and person tables joined showing selected fields
 CREATE OR REPLACE VIEW rosterpeople AS 
- SELECT r.rosterid, r.classid, r.pid, r.levelPassed, r.paymentid, r.payment_amount, y.paypal_status,
-        r.date_updated, p.surname, p.givenname
+ SELECT r.rosterid, r.classid, r.pid, r.levelPassed, r.paymentid, 
+        r.payment_amount, y.paypal_status, r.section, r.date_updated, 
+        p.surname, p.givenname
    FROM roster r, people p, payment y
   WHERE r.pid = p.pid
     AND r.paymentid = y.paymentid;

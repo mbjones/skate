@@ -327,9 +327,10 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             for (SessionSkatingClass curClass : list) {
                 GWT.log("SessionClass: " + (new Long(curClass.getClassId()).toString()) + " " + curClass.getClassType(), null);
                 String classLabel = curClass.formatClassLabel();
-
+                
                 // If it starts with "FS " it is a figure skating class
-                if (curClass.getClassType().startsWith("FS ")) {
+                // Only include the active session in the dropdown list
+                if (curClass.isActiveSession() && curClass.getClassType().startsWith("FS ")) {
                     FSClassCheckBox checkbox = new FSClassCheckBox();
                     checkbox.setValue(false, false);
                     checkbox.setName(Long.toString(curClass.getClassId()));
@@ -342,8 +343,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
                         checkbox.setEnabled(false);
                     }
                     
-                // Otherwise it is a Basic Skills class
-                } else {
+                // Otherwise it is a Basic Skills class, but on include if its the active session
+                } else if (curClass.isActiveSession()) {
                     // Only add item to list if student is not registered
                     if (studentRoster.contains(loginSession.getPerson().getPid(),
                             curClass.getClassId())) {
