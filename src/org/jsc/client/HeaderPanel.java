@@ -21,6 +21,7 @@ public class HeaderPanel extends VerticalPanel {
     private LoginSession loginSession;
     private Hyperlink regLink;
     private Hyperlink classesLink;
+    private Label manageSeparator;
     private Hyperlink manageLink;
     private Hyperlink settingsLink;
     private Hyperlink signoutLink;
@@ -73,7 +74,9 @@ public class HeaderPanel extends VerticalPanel {
         regLink = new Hyperlink("Register for a Class", "register");
         leftLinks.add(regLink);
         
-        //leftLinks.add(createSeparatorLabel());
+        manageSeparator = createSeparatorLabel();
+        leftLinks.add(manageSeparator);
+        manageSeparator.setVisible(false);
         manageLink = new Hyperlink("Manage Classes", "manage");
         leftLinks.add(manageLink);
         leftLinks.addStyleName("jsc-toolbar");
@@ -133,11 +136,18 @@ public class HeaderPanel extends VerticalPanel {
             statusLabel.setText(loginSession.getPerson().getFname() + " " + 
                     loginSession.getPerson().getLname());
             signoutLink.setText("Sign Out");
+            GWT.log("LoginSession Person Role is: " + loginSession.getPerson().getRole(), null);
+            if (loginSession.getPerson().getRole() >= Person.COACH) {
+                manageSeparator.setVisible(true);
+                manageLink.setVisible(true);
+            }
             //regLink.setVisible(true);
             //classesLink.setVisible(true);
         } else {
             statusLabel.setText(" ");
             signoutLink.setText("Sign In");
+            manageSeparator.setVisible(false);
+            manageLink.setVisible(false);
             //regLink.setVisible(false);
             //classesLink.setVisible(false);
         }
