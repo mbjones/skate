@@ -20,7 +20,7 @@ public class Person implements Serializable {
     private String email;
     private boolean isEmailValid;
     private String bday;
-    private String role;
+    private int role;
     private String homephone;
     private String workphone;
     private String cellphone;
@@ -42,7 +42,14 @@ public class Person implements Serializable {
     private long mid;
     private String membershipStatus;
     private long membershipPaymentId;
-        
+    
+    // Predefined roles used in the application
+    // Roles are cumulative (higher roles have all privileges of lower roles)
+    public static int SKATER = 0;
+    public static int COACH = 1;
+    public static int BOARD = 2;
+    public static int ADMIN = 3;
+    
     /**
      * Construct a new person object with no fields set.
      */
@@ -330,13 +337,13 @@ public class Person implements Serializable {
     /**
      * @return the role
      */
-    public String getRole() {
+    public int getRole() {
         return role;
     }
     /**
      * @param role the role to set
      */
-    public void setRole(String role) {
+    public void setRole(int role) {
         this.role = role;
     }
     /**

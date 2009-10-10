@@ -631,10 +631,10 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     private Person lookupPerson(long pid) {
 
         StringBuffer sql = new StringBuffer();           
-        sql.append("select pid, surname, givenname, middlename, email, birthdate, home_phone, " + //$NON-NLS-1$
-        		"cell_phone, work_phone, street1, street2, city, state, zipcode, parentfirstname, " + //$NON-NLS-1$
-        		"parentsurname, parentemail, username, password from people where "); //$NON-NLS-1$
-        sql.append("pid = '").append(pid).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+        sql.append("select pid, surname, givenname, middlename, email, birthdate, home_phone, " +
+        		"cell_phone, work_phone, street1, street2, city, state, zipcode, parentfirstname, " + 
+        		"parentsurname, parentemail, username, password, role from people where "); 
+        sql.append("pid = '").append(pid).append("'");
         System.out.println(sql.toString());
         
         Person person = null;
@@ -662,6 +662,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 person.setParentLastname(rs.getString(16));
                 person.setParentEmail(rs.getString(17));
                 person.setUsername(rs.getString(18));
+                person.setRole(rs.getInt(20));
                 person.setPassword(null);
                 person.setMember(false);
             }
