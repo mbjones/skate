@@ -99,7 +99,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
         settings = new SettingsScreen(loginSession, eventBus);
         myclasses = new MyClassesScreen(loginSession, eventBus, sessionClassList, rosterModel);
         register = new RegisterScreen(loginSession, eventBus, sessionClassList, rosterModel);
-        manage = new ManageScreen(loginSession, eventBus);
+        manage = new ManageScreen(loginSession, eventBus, sessionClassList);
         confirm = new ConfirmScreen(loginSession, eventBus);
         
         // Set the default view screen to be login

@@ -1,170 +1,143 @@
 package org.jsc.client;
 
-import java.util.Date;
+import org.jsc.client.event.SkatingClassChangeEvent;
+import org.jsc.client.event.SkatingClassChangeHandler;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
-public class ManageScreen extends BaseScreen {
-
-    private static final long DURATION = 1000 * 60 * 30;
+public class ManageScreen extends BaseScreen implements SkatingClassChangeHandler {
 
     private HorizontalPanel screen;
-    private VerticalPanel loginPanel;
-    private VerticalPanel introPanel;
-    private TextBox username;
-    private TextBox password;
-    private Button signinButton;
+    private VerticalPanel classesPanel;
+    private VerticalPanel rosterPanel;
+    private ClassListModel sessionClassList;
+    private Grid classesGrid;
     private SkaterRegistrationServiceAsync regService;
 
-    public ManageScreen(LoginSession loginSession, HandlerManager eventBus) {
+    /**
+     * Create the Management screen for managing class rosters and levels 
+     * passed. This screen is only accessed by coaches and administrators.
+     * @param loginSession
+     * @param eventBus
+     * @param sessionClassList
+     */
+    public ManageScreen(LoginSession loginSession, HandlerManager eventBus, ClassListModel sessionClassList) {
         super(loginSession, eventBus);
+        this.sessionClassList = sessionClassList;
+        
         this.setScreenTitle("Manage Classes");
         layoutScreen();
         this.setContentPanel(screen);
+        
+        // Register as a handler for Skating class changes, and handle those changes
+        eventBus.addHandler(SkatingClassChangeEvent.TYPE, this);
     }
     
     /**
      * Lay out the user interface widgets on the screen.
      */
     private void layoutScreen() {
-        this.setScreenTitle("Sign In");
+        this.setScreenTitle("Manage Classes");
         this.setStyleName("jsc-twopanel-screen");
         
         screen = new HorizontalPanel();
         
-        createLoginPanel();
+        createClassListPanel();
         Label spacer = new Label("");
         spacer.addStyleName("jsc-spacer");
-        createIntroPanel();
-        Hyperlink aboutLink = new Hyperlink("About Skate...", "about");
-        aboutLink.addStyleName("jsc-about-link");
-        screen.add(loginPanel);
+        createRosterPanel();
+        screen.add(classesPanel);
         screen.add(spacer);
-        screen.add(introPanel);
-        screen.add(aboutLink);
+        screen.add(rosterPanel);
     }
     
     /**
      * Fill in the GUI for the Login screen
      */
-    private void createLoginPanel() {
-        loginPanel = new VerticalPanel();
-        loginPanel.addStyleName("jsc-leftpanel");
-        Label signin = new Label("Sign In");
-        signin.addStyleName("jsc-screentitle");
-        Label usernameLabel = new Label("Username:");
-        loginPanel.add(usernameLabel);
-        usernameLabel.addStyleName("jsc-fieldlabel-left");
-        username = new TextBox();
-        username.addStyleName("jsc-field");
-        loginPanel.add(username);
-        Label pwLabel = new Label("Password:");
-        loginPanel.add(pwLabel);
-        pwLabel.addStyleName("jsc-fieldlabel-left");
-        password = new PasswordTextBox();
-        password.addStyleName("jsc-field");
-        loginPanel.add(password);
-        loginPanel.add(new Label(" "));
-        signinButton = new Button("Sign In");
-        signinButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                authenticate();
-            }
-        });
-        signinButton.addStyleName("jsc-button-right");
-        loginPanel.add(signinButton);
+    private void createClassListPanel() {
+        classesPanel = new VerticalPanel();
+        classesPanel.addStyleName("jsc-leftpanel");
         
-        Hyperlink newAccountLink = new Hyperlink("Need a New Account?", "settings");
-        newAccountLink.addStyleName("jsc-link-right");
-        loginPanel.add(newAccountLink);
+        classesGrid = new Grid(0, 3);
         
-//        Hyperlink forgotPasswordLink = new Hyperlink("Forgot password?", "resetpass");
-//        forgotPasswordLink.addStyleName("jsc-link-right");
-//        loginPanel.add(forgotPasswordLink);
+        // Add a header row to the table
+        Label sessionLabel = new Label("Session");
+        Label classLabel = new Label("Class");
+        Label dayLabel = new Label("Day");
+        addToGrid(sessionLabel, classLabel, dayLabel);
+        
+        classesPanel.add(classesGrid);
     }
     
     /**
-     * Check the user credentials and set up the loginSession if valid.
+     * Add the given widget to the grid table. Four columns are set up, and
+     * each widget is assigned to one column and assigned a CSS style.
+     * @param widget0 the widget to display in column 0
+     * @param widget1 the widget to display in column 1
+     * @param widget2 the widget to display in column 2
      */
-    private void authenticate() {
-        // Initialize the service proxy.
-        if (regService == null) {
-            regService = GWT.create(SkaterRegistrationService.class);
+    private void addToGrid(Widget widget0, Widget widget1, Widget widget2) {
+        int newRow = classesGrid.insertRow(classesGrid.getRowCount());
+        classesGrid.setWidget(newRow, 0, widget0);
+        classesGrid.setWidget(newRow, 1, widget1);
+        classesGrid.setWidget(newRow, 2, widget2);
+
+        HTMLTable.CellFormatter fmt = classesGrid.getCellFormatter();
+        for (int i = 0; i < 3; i++) {
+            if (newRow == 0) {
+                // The header row has its own style
+                fmt.addStyleName(newRow, i,  "jsc-tablehead");
+            } else {
+                fmt.addStyleName(newRow, i,  "jsc-tablecell");
+            }
         }
+    }
 
-        // Set up the callback object.
-        AsyncCallback<LoginSession> callback = new AsyncCallback<LoginSession>() {
-            public void onFailure(Throwable caught) {
-                // TODO: Do something with errors.
-                loginSession.setAuthenticated(false);
-                loginSession.setSessionId("invalid");
-                GWT.log("Authentication failed to complete.", null);
-                password.setText("");
-            }
-
-            public void onSuccess(LoginSession newLoginSession) {
-                // Clear the password box
-                password.setText("");
-                
-                if (newLoginSession != null) {
-                    // Login succeeded
-                    loginSession.setPerson(newLoginSession.getPerson());
-                    loginSession.setSessionId(newLoginSession.getSessionId());
-                    loginSession.setAuthenticated(newLoginSession.isAuthenticated());
-                    Date expires = new Date(System.currentTimeMillis() + DURATION);
-                    Cookies.setCookie("jscSession", loginSession.getSessionId(), expires, null, "/", false);
-                    Cookies.setCookie("jscPid", Long.toString(loginSession.getPerson().getPid()), expires, null, "/", false);
-                    
-                    long pid = loginSession.getPerson().getPid();
-                    GWT.log("Login succeeded: " + pid, null);
-                    GWT.log(loginSession.getPerson().toString(), null);
-
-                    // Change our application state to the classes screen
-                    History.newItem("register");
-                } else {
-                    loginSession.setAuthenticated(false);
-                    setMessage("Incorrect username or password. Please check your Caps Lock key and try again.");
-                }
-            }
-        };
-
-        // Make the call to the registration service.
-        regService.authenticate(username.getText(), password.getText(), callback);
+    /**
+     * Set up the roster panel to display students in a selected class.
+     */
+    private void createRosterPanel() {
+        rosterPanel = new VerticalPanel();
+        rosterPanel.addStyleName("jsc-rightpanel");
+        StringBuffer intro = new StringBuffer();
+        intro.append("<p class=\"jsc-text\">Class roster goes here. Get from My Classes template.</p>");
+        HTMLPanel introHTML = new HTMLPanel(intro.toString());
+        rosterPanel.add(introHTML);
     }
     
-    /**
-     * Set up the Introductory dialog.
-     */
-    private void createIntroPanel() {
-        introPanel = new VerticalPanel();
-        introPanel.addStyleName("jsc-rightpanel");
-        StringBuffer intro = new StringBuffer();
-        intro.append("<p class=\"jsc-step\">Register for the <a href=\"http://juneauskatingclub.org\">Juneau Skating Club</a>!</p>");
-        intro.append("<p class=\"jsc-text\">This is our new web-based site for class registration and management. Using this site, you can register for new classes after you have created an account and signed in. Some of the functions available from this site include:</p>");
-        intro.append("<p class=\"jsc-text\"><ul><li>Register for classes</li><li>Pay registration fees</li><li>View registered classes</li></ul></p>");
+    private void updateClassListTable() {
+        // Remove all of the rows from the table, except the header row
+        int rows = classesGrid.getRowCount();
+        for (int i = rows-1; i > 0; i--) {
+            GWT.log("Removing table row: " + i, null);
+            classesGrid.removeRow(i);
+        }
         
-        intro.append("<p class=\"jsc-text\">Please note: you must create a <b>different account for each skater</b> that you wish to register.</p>");
-
-        intro.append("<p class=\"jsc-text\">If you do not have an account, you can create a <a href=\"/SkaterData.html#settings\">New Account</a>.</p>");
-        intro.append("<p class=\"jsc-text\">You can register for new classes after you have <a href=\"/SkaterData.html#signout\">Signed In</a>.</p>");
-        intro.append("<p class=\"jsc-text\"> </p>");
-        intro.append("<p class=\"jsc-text\">Need help?  Contact 'registrar@juneauskatingclub.org'</p>");
-
-        HTMLPanel introHTML = new HTMLPanel(intro.toString());
-        introPanel.add(introHTML);
+        // Add all of the new roster entries into the table
+        for (SessionSkatingClass curClass : sessionClassList.getClassList()) {
+            
+            if (curClass == null) {
+                GWT.log("Expected SessionSkatingClass was not found in model", null);
+                break;
+            }
+            Label sessionLabel = new Label(curClass.getSeason() + " (" +
+                    curClass.getSessionNum() + ")");
+            Label classLabel = new Label(curClass.getClassType());
+            Label dayLabel = new Label(curClass.getDay().substring(0, 3));           
+            addToGrid(sessionLabel, classLabel, dayLabel);
+        }
     }
+
+    public void onClassChange(SkatingClassChangeEvent event) {
+        updateClassListTable();
+    }
+    
 }
