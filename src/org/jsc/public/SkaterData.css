@@ -194,6 +194,11 @@ table.jsc-toolbar {
 	font-weight: bold;
 }
 
+.jsc-row-selected td {
+	background: darkblue;
+	color: white;
+}
+	
 .classes-ListHeader {
   background: #c1eec8 url(gradient.gif) repeat-x 0px -1px;
   font-weight: bold;
