@@ -1,6 +1,7 @@
 package org.jsc.client;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.jsc.client.event.RosterChangeEvent;
 import org.jsc.client.event.RosterChangeHandler;
@@ -11,6 +12,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable;
@@ -106,7 +110,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 if (row > 0) {
                     rf.addStyleName(row, "jsc-row-selected");
                 }
-                updateClassRoster(row);
+                refreshClassRoster(row);
                 GWT.log("Table was clicked on row: " + row, null);
             }
         });
@@ -204,9 +208,60 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
      * represents the row of the class listing table, which starts at 1.  
      * @param row
      */
-    private void updateClassRoster(int row) {
+    private void refreshClassRoster(int row) {
         ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList(); 
         SessionSkatingClass curClass = classes.get(row-1);
         classLabel.setText(curClass.formatClassLabel());
+        
+        // Initialize the service proxy.
+        if (regService == null) {
+            regService = GWT.create(SkaterRegistrationService.class);
+        }
+
+        // Set up the callback object.
+        AsyncCallback<ArrayList<RosterEntry>> callback = new AsyncCallback<ArrayList<RosterEntry>>() {
+            public void onFailure(Throwable caught) {
+                // TODO: Do something with errors.
+                GWT.log("Failed to get roster.", caught);
+            }
+
+            public void onSuccess(ArrayList<RosterEntry> newRoster) {
+                if (newRoster == null) {
+                    // Failure on the remote end.
+                    GWT.log("Error finding the roster.", null);
+                    return;
+                } else {
+                    updateRosterTable(newRoster);
+                }
+            }
+        };
+
+        // Make the call to the registration service.
+        regService.getClassRoster(loginSession, curClass.getClassId(), callback);
+    }
+    
+    private void updateRosterTable(ArrayList<RosterEntry> newRoster) {
+        
+        // Remove all of the rows from the table, except the header row
+        int rows = rosterGrid.getRowCount();
+        for (int i = rows-1; i > 0; i--) {
+            GWT.log("Removing table row: " + i, null);
+            rosterGrid.removeRow(i);
+        }
+        
+        // Add all of the new roster entries into the table
+        for (RosterEntry entry : newRoster) {
+            SessionSkatingClass curClass = sessionClassList.getSkatingClass(entry.getClassid());
+            if (curClass == null) {
+                GWT.log("Expected SessionSkatingClass was not found in model", null);
+                break;
+            }
+            Label skaterNameLabel = new Label(entry.getGivenname() + " " + entry.getSurname());
+            Label levelPassedLabel = new Label(entry.getLevelpassed());
+            Label paymentIdLabel = new Label(Long.toString(entry.getPaymentid()));
+            Label paymentStatusLabel = new Label(entry.getPaypal_status());
+            Widget[] widgets = {skaterNameLabel, levelPassedLabel, paymentIdLabel, paymentStatusLabel};
+            addRowToGrid(rosterGrid, widgets);
+        }
     }
 }

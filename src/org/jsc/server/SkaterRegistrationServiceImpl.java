@@ -541,37 +541,38 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         // Create the query string to find the roster membership
         StringBuffer sql = new StringBuffer();
         sql.append(ROSTER_QUERY);
-        sql.append(" WHERE pid = ").append(person.getPid()); //$NON-NLS-1$
+        sql.append(" WHERE pid = ").append(person.getPid());
         System.out.println(sql.toString());
         
-        return getRoster(loginSession, person, sql.toString());
+        return getRoster(loginSession, sql.toString());
     }
     
     /**
-     * Look up the roster of classes for which this student has registered and
+     * Look up the roster of students enrolled in a class and
      * return it as an ArrayList.
-     * @param person the person for whom the roster is compiled
+     * @param loginSession the session used to authenticate
+     * @param classId the identifier for the class reqeusted
      * @return an ArrayList of RosterEntry objects 
      */
-    public ArrayList<RosterEntry> getClassRoster(LoginSession loginSession, Person person, long classId) {
+    public ArrayList<RosterEntry> getClassRoster(LoginSession loginSession, long classId) {
         // Create the query string to find the roster membership
         StringBuffer sql = new StringBuffer();
         sql.append(ROSTER_QUERY);
-        sql.append(" WHERE classid = ").append(classId); //$NON-NLS-1$
+        sql.append(" WHERE classid = ").append(classId);
         System.out.println(sql.toString());
         
-        return getRoster(loginSession, person, sql.toString());
+        return getRoster(loginSession, sql.toString());
     }
     
     /**
      * Look up a roster of classes.  The exact roster looked up depends on the sql
      * that is passed into the class, sometimes for a particular student, sometimes
      * for a particular class.
-     * @param person the person used to authenticate the connection
+     * @param loginSession used to authenticate the session
      * @param rosterQuery the SQL query used to find the roster
      * @return and ArrayList of RosterEntry objects matching the query
      */
-    private ArrayList<RosterEntry> getRoster(LoginSession loginSession, Person person, String rosterQuery) {
+    private ArrayList<RosterEntry> getRoster(LoginSession loginSession, String rosterQuery) {
 
         ArrayList<RosterEntry> roster = new ArrayList<RosterEntry>();
         
