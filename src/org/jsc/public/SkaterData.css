@@ -1,11 +1,11 @@
 /** CSS styles for SkaterData. */
 
 body {
-	  background: white url(peak-lake-tall-30.png) no-repeat;
+	  background: #d7dce7 url(peak-lake-tall-30.png) no-repeat;
 }
 
 .jsc-root-window {
-	width: 1000px;
+	width: 100%;
 	height: 500px;
 }
 
