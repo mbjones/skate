@@ -21,6 +21,7 @@ public class RosterEntry implements Serializable {
     private Date date_updated;
     private String surname;
     private String givenname;
+    private String section;
     
     /**
      * Default constructor takes no parameters.
@@ -159,6 +160,20 @@ public class RosterEntry implements Serializable {
      */
     public void setGivenname(String givenname) {
         this.givenname = givenname;
+    }
+
+    /**
+     * @param section the section to set
+     */
+    public void setSection(String section) {
+        this.section = section;
+    }
+
+    /**
+     * @return the section
+     */
+    public String getSection() {
+        return section;
     }
     
 }

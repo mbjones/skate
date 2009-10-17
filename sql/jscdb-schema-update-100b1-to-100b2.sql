@@ -4,13 +4,14 @@ ALTER TABLE roster
 
 -- Add section to the rosterpeople view
 DROP VIEW rosterpeople;
-CREATE OR REPLACE VIEW rosterpeople AS
- SELECT r.rosterid, r.classid, r.pid, r.levelPassed, r.paymentid,
-r.payment_amount, y.paypal_status, r.section, r.date_updated,
-p.surname, p.givenname
+CREATE OR REPLACE VIEW rosterpeople AS 
+ SELECT r.rosterid, r.classid, r.pid, r.levelPassed, r.paymentid, 
+        r.payment_amount, y.paypal_status, r.section, r.date_updated, 
+        p.surname, p.givenname
    FROM roster r, people p, payment y
   WHERE r.pid = p.pid
-    AND r.paymentid = y.paymentid;
+    AND r.paymentid = y.paymentid
+  ORDER BY r.section, r.classid, p.surname, p.givenname;
 
 -- session -- add a new activeSession column
 ALTER TABLE sessions

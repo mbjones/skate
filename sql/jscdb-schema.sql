@@ -136,7 +136,8 @@ CREATE OR REPLACE VIEW rosterpeople AS
         p.surname, p.givenname
    FROM roster r, people p, payment y
   WHERE r.pid = p.pid
-    AND r.paymentid = y.paymentid;
+    AND r.paymentid = y.paymentid
+  ORDER BY r.section, r.classid, p.surname, p.givenname;
 
 -- membership -- table to store the memberships of students each season
 CREATE SEQUENCE membership_id_seq START 50000;

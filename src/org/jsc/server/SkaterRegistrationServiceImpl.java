@@ -34,7 +34,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     private static final String JDBC_USER = ServerConstants.getString("JDBC_USER"); //$NON-NLS-1$
     private static final String JDBC_PASS = ServerConstants.getString("JDBC_PASS"); //$NON-NLS-1$
     private static final String JDBC_DRIVER = ServerConstants.getString("JDBC_DRIVER"); //$NON-NLS-1$
-    private static final String ROSTER_QUERY = "SELECT rosterid, classid, pid, levelPassed, paymentid, payment_amount, paypal_status, date_updated, surname, givenname FROM rosterpeople"; //$NON-NLS-1$
+    private static final String ROSTER_QUERY = "SELECT rosterid, classid, pid, levelPassed, paymentid, payment_amount, paypal_status, date_updated, surname, givenname, section FROM rosterpeople"; //$NON-NLS-1$
     private static final int MAX_SESSION_INTERVAL = 60 * 30;
     
     /**
@@ -453,7 +453,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     /**
      * Cancel the registration entries and membership entries associated with a
      * payment invoice.  The method checks that the person removing the entry is
-     * the person who submitted it, and that it is in Pending status.
+     * the person who submitted it (or has role of COACH or ADMIN), 
+     * and that it is in Pending status.
      */
     public boolean cancelInvoice(LoginSession loginSession, long paymentid) {
         // Check authentication credentials
@@ -465,24 +466,22 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         // person is authorized because they are a coach or administrator
         boolean isAuthorized = false;
         try {
-            
-            // TODO: First check if the person logged in is an admin, in which
-            // case we can delete the records regardless
-            
             // Now check if the person logged in matches the registrant for the record
             // and that the payment is actually pending
+            boolean isPending = false;
             StringBuffer invoiceQuery = new StringBuffer();
-            invoiceQuery.append("select py.paymentid, py.paypal_status, r.rosterid, r.pid " + //$NON-NLS-1$
-            		"from payment py, roster r " + //$NON-NLS-1$
-            		"where py.paymentid = r.paymentid " + //$NON-NLS-1$
-            		"and py.paypal_status = 'Pending' " + //$NON-NLS-1$
-            		"and py.paymentid = "); //$NON-NLS-1$
+            invoiceQuery.append("select py.paymentid, py.paypal_status, r.rosterid, r.pid " +
+            		"from payment py, roster r " + 
+            		"where py.paymentid = r.paymentid " + 
+            		"and py.paypal_status = 'Pending' " + 
+            		"and py.paymentid = ");
             invoiceQuery.append(paymentid);
             System.out.println(invoiceQuery.toString());
             Connection con = getConnection();
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(invoiceQuery.toString());
             if (rs.next()) {
+                isPending = true;
                 long pid = rs.getLong(4);
                 // Check if the person who is logged in owns the invoice records
                 if (loginSession.getPerson().getPid() == pid) {
@@ -490,43 +489,113 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 }
             }
             stmt.close();
+            System.out.println("cancelAuth: " + isPending + " " + isAuthorized);
             con.close();
 
+            // if not yet authorized, but the record is pending, see if the
+            // loginSession represents a coach or admin, and if so authorize
+            if (!isAuthorized && isPending) {
+                long role = getRole(loginSession.getPerson().getPid());
+                if (role >= Person.COACH) {
+                    isAuthorized = true;
+                    System.out.println("cancelAuth role is: " + role);
+                }
+            }
+
         } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+            System.err.println("SQLException: " + ex.getMessage());
         }
         
-        // Delete the invoice, cascading to the membership and roster tables
-        Connection con = getConnection();
-        try {
-            con.setAutoCommit(false);
+        if (isAuthorized) {
             
-            String tables[] = {"membership", "roster", "payment"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            for (String table : tables) {
+            // Delete the invoice, cascading to the membership and roster tables
+            Connection con = getConnection();
+            try {
+                con.setAutoCommit(false);
+                
+                String tables[] = {"membership", "roster", "payment"}; 
+                for (String table : tables) {
+                    StringBuffer sql = new StringBuffer();
+                    sql.append("DELETE from "); 
+                    sql.append(table);
+                    sql.append(" where paymentid = ");
+                    sql.append(paymentid);
+                    System.out.println(sql.toString());
+                    Statement stmt = con.createStatement();
+                    int rowcount = stmt.executeUpdate(sql.toString());
+                    System.out.println("Deleted " + rowcount + " rows from " + table + ".");
+                    stmt.close(); 
+                }
+                con.commit();
+                con.close();
+    
+            } catch(SQLException ex) {
+                try {
+                    con.rollback();
+                    con.close();
+                } catch (SQLException e) {
+                    System.out.println("Unable to rollback during invoice deletion." + e.getMessage());
+                }
+                System.err.println("SQLException: " + ex.getMessage());
+                return false;
+            }
+        }
+        
+        // Return true if the entry was deleted successfully
+        return isAuthorized;
+    }
+    
+    /**
+     * Update the roster table with new section and levelpassed information.
+     * The method checks that the person removing the entry is
+     * a COACH or ADMIN role.
+     */
+    public boolean saveRoster(LoginSession loginSession, long rosterid, String newLevel, String newSection) {
+        // Check authentication credentials
+        if (!isSessionValid(loginSession)) {
+            return false;
+        }
+
+        // Check if person is authorized because they are a coach or administrator
+        boolean isAuthorized = false;
+        long role = getRole(loginSession.getPerson().getPid());
+        if (role >= Person.COACH) {
+            isAuthorized = true;
+            System.out.println("cancelAuth role is: " + role);
+        }
+        
+        if (isAuthorized) {
+            // Save the new information to the roster tables
+            Connection con = getConnection();
+            try {
+                con.setAutoCommit(false);            
                 StringBuffer sql = new StringBuffer();
-                sql.append("DELETE from "); //$NON-NLS-1$
-                sql.append(table);
-                sql.append(" where paymentid = "); //$NON-NLS-1$
-                sql.append(paymentid);
+                sql.append("UPDATE roster ");
+                sql.append("SET");
+                sql.append(" levelpassed = '").append(newLevel).append("'");
+                sql.append(", section = '").append(newSection).append("'");
+                sql.append(" where rosterid = ");
+                sql.append(rosterid);
                 System.out.println(sql.toString());
                 Statement stmt = con.createStatement();
                 int rowcount = stmt.executeUpdate(sql.toString());
-                System.out.println("Deleted " + rowcount + " rows from " + table + "."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                System.out.println("Updated " + rowcount + " rows in roster.");
                 stmt.close(); 
+                con.commit();
+                con.close();
+    
+            } catch(SQLException ex) {
+                try {
+                    con.rollback();
+                    con.close();
+                } catch (SQLException e) {
+                    System.out.println("Unable to rollback during invoice deletion." + e.getMessage());
+                    return false;
+                }
+                System.err.println("SQLException: " + ex.getMessage());
+                return false;
             }
-            con.commit();
-            con.close();
-
-        } catch(SQLException ex) {
-            try {
-                con.rollback();
-            } catch (SQLException e) {
-                System.out.println("Unable to rollback during invoice deletion." + e.getMessage()); //$NON-NLS-1$
-            }
-            System.err.println("SQLException: " + ex.getMessage()); //$NON-NLS-1$
         }
-        
-        // Return information about the user member status
         
         return isAuthorized;
     }
@@ -620,6 +689,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         entry.setDate_updated(rs.getDate(8));
         entry.setSurname(rs.getString(9));
         entry.setGivenname(rs.getString(10));
+        entry.setSection(rs.getString(11));
         return entry;
     }
     
@@ -703,6 +773,35 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         return person;
     }
 
+    /**
+     * Look up the role for a person, assuming the session is authorized already for this lookup
+     * @param pid the identifier of the person to look up
+     * @return the role for this person
+     */
+    private long getRole(long pid) {
+        long role = Person.SKATER;
+        StringBuffer roleQuery = new StringBuffer();
+        roleQuery.append("select p.pid, p.role " +
+                "from people p " + 
+                "where p.pid = ");
+        roleQuery.append(pid);
+        System.out.println(roleQuery.toString());
+        Connection con = getConnection();
+        try {
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(roleQuery.toString());
+            if (rs.next()) {
+                role = rs.getLong(2);
+            }
+            stmt.close();
+            con.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return role;
+    }
+    
     /**
      * Check the LoginSession to see if it is a valid session that corresponds
      * to the correct user and that it has not expired.

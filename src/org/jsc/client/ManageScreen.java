@@ -18,13 +18,15 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable;
+import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 
-public class ManageScreen extends BaseScreen implements SkatingClassChangeHandler {
+public class ManageScreen extends BaseScreen implements SkatingClassChangeHandler, ClickHandler {
 
     private HorizontalPanel screen;
     private VerticalPanel classesPanel;
@@ -35,6 +37,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     private int selectedClassRowIndex;
     private Grid rosterGrid;
     private Label classLabel;
+    private ArrayList<RosterEntry> currentRoster;
 
     /**
      * Create the Management screen for managing class rosters and levels 
@@ -157,20 +160,22 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     private void createRosterPanel() {
         rosterPanel = new VerticalPanel();
         rosterPanel.addStyleName("jsc-rightpanel");
-        StringBuffer intro = new StringBuffer();
-        intro.append("<p class=\"jsc-text\">Select a class from the list to see the class roster.</p>");
-        HTMLPanel introHTML = new HTMLPanel(intro.toString());
-        rosterPanel.add(introHTML);
-        classLabel = new Label(" ");
+        classLabel = new Label("Select a class from the list to see the class roster.");
+        classLabel.addStyleName("jsc-step");
         rosterPanel.add(classLabel);
-        rosterGrid = new Grid(0, 4);
+        rosterGrid = new Grid(0, 8);
         
         // Add a header row to the table
+        Label sectionLabel = new Label("Section");
         Label skaterNameLabel = new Label("Skater");
         Label levelPassedLabel = new Label("Level Passed");
-        Label paymentIdLabel = new Label("Invoice #");
         Label statusLabel = new Label("Payment Status");
-        Widget[] widgets = {skaterNameLabel, levelPassedLabel, paymentIdLabel, statusLabel};
+        Label saveLabel = new Label(" ");
+        Label cancelLabel = new Label(" ");
+        Label rosterIdLabel = new Label(" ");
+        Label paymentIdLabel = new Label(" ");
+
+        Widget[] widgets = {sectionLabel, skaterNameLabel, levelPassedLabel, statusLabel, saveLabel, cancelLabel, rosterIdLabel, paymentIdLabel};
         addRowToGrid(rosterGrid, widgets);
         rosterPanel.add(rosterGrid);
     }
@@ -231,6 +236,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                     GWT.log("Error finding the roster.", null);
                     return;
                 } else {
+                    currentRoster = newRoster;
                     updateRosterTable(newRoster);
                 }
             }
@@ -256,12 +262,141 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 GWT.log("Expected SessionSkatingClass was not found in model", null);
                 break;
             }
+            TextBox sectionBox = new TextBox();
+            sectionBox.setText(entry.getSection());
             Label skaterNameLabel = new Label(entry.getGivenname() + " " + entry.getSurname());
-            Label levelPassedLabel = new Label(entry.getLevelpassed());
-            Label paymentIdLabel = new Label(Long.toString(entry.getPaymentid()));
+            TextBox levelPassedBox = new TextBox();
+            levelPassedBox.setText(entry.getLevelpassed());
+            levelPassedBox.setMaxLength(3);
             Label paymentStatusLabel = new Label(entry.getPaypal_status());
-            Widget[] widgets = {skaterNameLabel, levelPassedLabel, paymentIdLabel, paymentStatusLabel};
+            
+            Button saveButton = new Button("Save");
+            final long currentRosterId = entry.getRosterid();
+            saveButton.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                    requestSaveRoster(currentRosterId, event);
+                }
+            });
+            saveButton.addStyleName("jsc-button-right");
+            
+            Widget cancelWidget;
+            if (entry.getPaypal_status().equals("Pending")) {
+                Button cancelButton = new Button("Delete");
+                final long currentPaymentId = entry.getPaymentid();
+                cancelButton.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        requestCancelInvoice(currentPaymentId);
+                    }
+                });
+                cancelButton.addStyleName("jsc-button-right");
+                cancelWidget = cancelButton;
+            } else {
+                cancelWidget = new Label(" ");
+            }
+
+            Label toolsLabel = new Label("Cancel");
+            Hidden rosterIdHidden = new Hidden(new Long(entry.getRosterid()).toString());
+            Hidden paymentIdHidden = new Hidden(Long.toString(entry.getPaymentid()));
+
+            Widget[] widgets = {sectionBox, skaterNameLabel, levelPassedBox, paymentStatusLabel, saveButton, cancelWidget, rosterIdHidden, paymentIdHidden};
             addRowToGrid(rosterGrid, widgets);
         }
+    }
+    
+    private void requestSaveRoster(long currentRosterId, ClickEvent event) {
+        Button source = (Button)event.getSource();
+        Grid rosterGrid = (Grid)source.getParent();
+        int row = rosterGrid.getCellForEvent(event).getRowIndex();
+        TextBox tb = (TextBox)rosterGrid.getWidget(row, 2);
+        String newLevel = tb.getValue();
+        tb = (TextBox)rosterGrid.getWidget(row, 0);
+        String newSection = tb.getValue();
+        GWT.log("Value is: " + newLevel + " " + newSection, null);
+        
+        // Initialize the service proxy.
+        if (regService == null) {
+            regService = GWT.create(SkaterRegistrationService.class);
+        }
+
+        // Set up the callback object.
+        AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+
+            public void onFailure(Throwable caught) {
+                // TODO: Do something with errors.
+                GWT.log("Failed to save the roster changes.", caught);
+            }
+
+            public void onSuccess(Boolean resultFlag) {
+                GWT.log("Save roster returned: " + resultFlag, null);
+                if (!resultFlag) {
+                    //refreshClassRoster(selectedClassRowIndex);
+                    setMessage("Error saving changes. Please report this problem to the registrar.");
+                }
+            }
+        };
+
+        // Make the call to the registration service.
+        regService.saveRoster(loginSession, currentRosterId, newLevel, newSection, callback);
+    }
+    
+    private void requestCancelInvoice(long paymentid) {
+        // TODO Auto-generated method stub
+        GWT.log("CANCEL requested for invoice: " + paymentid, null);
+        String prompt = "Are you sure you want to delete " +
+                "all registration entries for invoice " +
+                paymentid + "?";
+        ConfirmDialog confirm = new ConfirmDialog(prompt, this);
+        confirm.setIdentifier(paymentid);
+        confirm.setModal(true);
+        confirm.center();
+        confirm.show();
+    }
+    
+    /**
+     * This handler method is a callback that is registered with the confirmation
+     * dialog and is called when one of the two buttons is pressed -- Yes or No.
+     */
+    public void onClick(ClickEvent event) {
+        Button source = (Button)event.getSource();
+        ConfirmDialog confirm = (ConfirmDialog)source.getParent().getParent().getParent().getParent();
+        if (source.getText().equals("Yes")) {
+            long paymentid = confirm.getIdentifier();
+            finishCancelInvoice(paymentid);
+        }
+        confirm.hide();
+    }
+    
+    /**
+     * After the user has confirmed that an invoice should be deleted, connect to
+     * the remote service and delete the entries from the membership, roster,
+     * and payment tables.
+     * @param paymentid the identifier of the invoice to be deleted
+     */
+    private void finishCancelInvoice(long paymentid) {
+        GWT.log("Cancel confirmed for invoice: " + paymentid, null);
+        
+        // Initialize the service proxy.
+        if (regService == null) {
+            regService = GWT.create(SkaterRegistrationService.class);
+        }
+
+        // Set up the callback object.
+        AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+
+            public void onFailure(Throwable caught) {
+                // TODO: Do something with errors.
+                GWT.log("Failed to cancel the invoice.", caught);
+            }
+
+            public void onSuccess(Boolean resultFlag) {
+                GWT.log("Cancel invoice returned: " + resultFlag, null);
+                if (resultFlag) {
+                    refreshClassRoster(selectedClassRowIndex);
+                }
+            }
+        };
+
+        // Make the call to the registration service.
+        regService.cancelInvoice(loginSession, paymentid, callback);
     }
 }
