@@ -214,6 +214,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
      * @param row
      */
     private void refreshClassRoster(int row) {
+        clearMessage();
         ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList(); 
         SessionSkatingClass curClass = classes.get(row-1);
         classLabel.setText(curClass.formatClassLabel());
@@ -264,10 +265,12 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             }
             TextBox sectionBox = new TextBox();
             sectionBox.setText(entry.getSection());
+            sectionBox.addStyleName("jsc-text-box-short");
             Label skaterNameLabel = new Label(entry.getGivenname() + " " + entry.getSurname());
             TextBox levelPassedBox = new TextBox();
             levelPassedBox.setText(entry.getLevelpassed());
             levelPassedBox.setMaxLength(3);
+            levelPassedBox.addStyleName("jsc-text-box-short");
             Label paymentStatusLabel = new Label(entry.getPaypal_status());
             
             Button saveButton = new Button("Save");
@@ -328,8 +331,10 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
 
             public void onSuccess(Boolean resultFlag) {
                 GWT.log("Save roster returned: " + resultFlag, null);
-                if (!resultFlag) {
+                if (resultFlag) {
+                    setMessage("Changes saved.");
                     //refreshClassRoster(selectedClassRowIndex);
+                } else {
                     setMessage("Error saving changes. Please report this problem to the registrar.");
                 }
             }

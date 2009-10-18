@@ -198,6 +198,10 @@ table.jsc-toolbar {
 	background: darkblue;
 	color: white;
 }
+
+.jsc-text-box-short {
+	width: 4em;
+}
 	
 .classes-ListHeader {
   background: #c1eec8 url(gradient.gif) repeat-x 0px -1px;

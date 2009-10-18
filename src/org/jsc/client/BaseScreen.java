@@ -74,6 +74,13 @@ public class BaseScreen extends VerticalPanel {
     }
     
     /**
+     * Clear the error message by posting an appropriate Notification event.
+     */
+    protected void clearMessage() {
+        eventBus.fireEvent(new NotificationEvent(true));
+    }
+    
+    /**
      * @param contentPanel the contentPanel to set
      */
     public void setContentPanel(Panel contentPanel) {
