@@ -1,6 +1,7 @@
 -- roster -- add the new section column to the roster table
 ALTER TABLE roster
     ADD COLUMN section VARCHAR(8),
+    ALTER COLUMN levelpassed SET DEFAULT '0',
     ADD CONSTRAINT roster_level_fk FOREIGN KEY (levelPassed) REFERENCES levels;
 
 -- Add section to the rosterpeople view

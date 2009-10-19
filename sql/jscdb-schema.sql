@@ -120,7 +120,7 @@ CREATE TABLE roster (
     paymentid INT8,          -- the id of the payment for this roster entry
     payment_amount FLOAT8,   -- the amount paid for this single roster entry, excluding discounts
     section VARCHAR(8),      -- the section designator for this entry
-    levelPassed VARCHAR(20), -- the ASFS Level passed during testing
+    levelPassed VARCHAR(20) default '0', -- the ASFS Level passed during testing
    	date_updated TIMESTAMP default CURRENT_TIMESTAMP, -- the date the record was last updated
    CONSTRAINT roster_pk PRIMARY KEY (rosterid),
    CONSTRAINT roster_uk UNIQUE (classid,pid),
