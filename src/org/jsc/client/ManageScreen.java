@@ -1,10 +1,7 @@
 package org.jsc.client;
 
 import java.util.ArrayList;
-import java.util.Date;
 
-import org.jsc.client.event.RosterChangeEvent;
-import org.jsc.client.event.RosterChangeHandler;
 import org.jsc.client.event.SkatingClassChangeEvent;
 import org.jsc.client.event.SkatingClassChangeHandler;
 
@@ -12,15 +9,14 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -83,8 +79,9 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     private void createClassListPanel() {
         classesPanel = new VerticalPanel();
         classesPanel.addStyleName("jsc-leftpanel");
-        
+                
         classesGrid = new Grid(0, 3);
+        classesGrid.addStyleName("jsc-pointer-cursor");
         
         // Add a header row to the table
         Label sessionLabel = new Label("Session");
@@ -93,7 +90,10 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         Widget[] labels= {sessionLabel, classLabel, dayLabel};
         addRowToGrid(classesGrid, labels);
         
-        classesPanel.add(classesGrid);
+        ScrollPanel scrollPanel = new ScrollPanel();
+        scrollPanel.addStyleName("jsc-classes-scroll");
+        scrollPanel.add(classesGrid);
+        classesPanel.add(scrollPanel);
         
         addClickHandler(classesGrid);
     }
@@ -163,19 +163,34 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         classLabel = new Label("Select a class from the list to see the class roster.");
         classLabel.addStyleName("jsc-step");
         rosterPanel.add(classLabel);
-        rosterGrid = new Grid(0, 8);
+        Button printButton = new Button("Print");
+        printButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                printRoster(event);
+            }
+        });
+        printButton.addStyleName("jsc-button-right");
+//        rosterPanel.add(printButton);
+        
+        rosterGrid = new Grid(0, 12);
         
         // Add a header row to the table
         Label sectionLabel = new Label("Section");
         Label skaterNameLabel = new Label("Skater");
-        Label levelPassedLabel = new Label("Level Passed");
-        Label statusLabel = new Label("Payment Status");
+        Label statusLabel = new Label("Payment");
+        Label week1Label = new Label("Wk 1");
+        Label week2Label = new Label("Wk 2");
+        Label week3Label = new Label("Wk 3");
+        Label week4Label = new Label("Wk 4");
+        Label week5Label = new Label("Wk 5");
+        Label week6Label = new Label("Wk 6");
+        Label levelPassedLabel = new Label("Level");
         Label saveLabel = new Label(" ");
         Label cancelLabel = new Label(" ");
-        Label rosterIdLabel = new Label(" ");
-        Label paymentIdLabel = new Label(" ");
-
-        Widget[] widgets = {sectionLabel, skaterNameLabel, levelPassedLabel, statusLabel, saveLabel, cancelLabel, rosterIdLabel, paymentIdLabel};
+        
+        Widget[] widgets = {sectionLabel, skaterNameLabel, statusLabel,  
+                week1Label, week2Label, week3Label, week4Label, week5Label, 
+                week6Label, levelPassedLabel, saveLabel, cancelLabel};
         addRowToGrid(rosterGrid, widgets);
         rosterPanel.add(rosterGrid);
     }
@@ -267,12 +282,20 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             sectionBox.setText(entry.getSection());
             sectionBox.addStyleName("jsc-text-box-short");
             Label skaterNameLabel = new Label(entry.getGivenname() + " " + entry.getSurname());
+            Label paymentStatusLabel = new Label(entry.getPaypal_status());
+
+            Label week1Label = new Label(" ");
+            Label week2Label = new Label(" ");
+            Label week3Label = new Label(" ");
+            Label week4Label = new Label(" ");
+            Label week5Label = new Label(" ");
+            Label week6Label = new Label(" ");
+            
             TextBox levelPassedBox = new TextBox();
             levelPassedBox.setText(entry.getLevelpassed());
             levelPassedBox.setMaxLength(3);
             levelPassedBox.addStyleName("jsc-text-box-short");
-            Label paymentStatusLabel = new Label(entry.getPaypal_status());
-            
+
             Button saveButton = new Button("Save");
             final long currentRosterId = entry.getRosterid();
             saveButton.addClickHandler(new ClickHandler() {
@@ -297,20 +320,27 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 cancelWidget = new Label(" ");
             }
 
-            Label toolsLabel = new Label("Cancel");
             Hidden rosterIdHidden = new Hidden(new Long(entry.getRosterid()).toString());
             Hidden paymentIdHidden = new Hidden(Long.toString(entry.getPaymentid()));
 
-            Widget[] widgets = {sectionBox, skaterNameLabel, levelPassedBox, paymentStatusLabel, saveButton, cancelWidget, rosterIdHidden, paymentIdHidden};
+            Widget[] widgets = {sectionBox, skaterNameLabel, paymentStatusLabel, 
+                    rosterIdHidden, paymentIdHidden, week3Label, week4Label, week5Label, 
+                    week6Label, levelPassedBox, saveButton, cancelWidget};
             addRowToGrid(rosterGrid, widgets);
         }
     }
     
+    /**
+     * Handle the request to save changes to a roster entry by calling the remote
+     * registration service and passing off the request data and login information.
+     * @param currentRosterId the roster entry to be changed
+     * @param event the event that was clicked, from which form field data can be retrieved
+     */
     private void requestSaveRoster(long currentRosterId, ClickEvent event) {
         Button source = (Button)event.getSource();
         Grid rosterGrid = (Grid)source.getParent();
         int row = rosterGrid.getCellForEvent(event).getRowIndex();
-        TextBox tb = (TextBox)rosterGrid.getWidget(row, 2);
+        TextBox tb = (TextBox)rosterGrid.getWidget(row, 9);
         String newLevel = tb.getValue();
         tb = (TextBox)rosterGrid.getWidget(row, 0);
         String newSection = tb.getValue();
@@ -333,9 +363,9 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 GWT.log("Save roster returned: " + resultFlag, null);
                 if (resultFlag) {
                     setMessage("Changes saved.");
-                    //refreshClassRoster(selectedClassRowIndex);
                 } else {
-                    setMessage("Error saving changes. Please report this problem to the registrar.");
+                    refreshClassRoster(selectedClassRowIndex);
+                    setMessage("Error saving changes. Please check that you provided a valid level code (e.g., BS1, BS2).");
                 }
             }
         };
@@ -344,8 +374,12 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         regService.saveRoster(loginSession, currentRosterId, newLevel, newSection, callback);
     }
     
+    /**
+     * Put up a confirmation dialog when a request to cancel a registration
+     * entry is made.
+     * @param paymentid the payment to be canceled
+     */
     private void requestCancelInvoice(long paymentid) {
-        // TODO Auto-generated method stub
         GWT.log("CANCEL requested for invoice: " + paymentid, null);
         String prompt = "Are you sure you want to delete " +
                 "all registration entries for invoice " +
@@ -384,15 +418,15 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         if (regService == null) {
             regService = GWT.create(SkaterRegistrationService.class);
         }
-
+    
         // Set up the callback object.
         AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
-
+    
             public void onFailure(Throwable caught) {
                 // TODO: Do something with errors.
                 GWT.log("Failed to cancel the invoice.", caught);
             }
-
+    
             public void onSuccess(Boolean resultFlag) {
                 GWT.log("Cancel invoice returned: " + resultFlag, null);
                 if (resultFlag) {
@@ -400,8 +434,15 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 }
             }
         };
-
+    
         // Make the call to the registration service.
         regService.cancelInvoice(loginSession, paymentid, callback);
+    }
+
+    protected void printRoster(ClickEvent event) {
+        GWT.log("Print roster rows: " + currentRoster.size(), null);
+        // TODO: Create a new screen by passing in the currentRoster to be displayed
+        // It should have the same structure as this roster table, minues a couple of columns
+        // so refactor to reuse layout code
     }
 }

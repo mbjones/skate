@@ -126,7 +126,8 @@ CREATE TABLE roster (
    CONSTRAINT roster_uk UNIQUE (classid,pid),
    CONSTRAINT roster_class_fk FOREIGN KEY (classid) REFERENCES skatingclass,
    CONSTRAINT roster_student_fk FOREIGN KEY (pid) REFERENCES people,
-   CONSTRAINT roster_payment_fk FOREIGN KEY (paymentid) REFERENCES payment
+   CONSTRAINT roster_payment_fk FOREIGN KEY (paymentid) REFERENCES payment,
+   CONSTRAINT roster_level_fk FOREIGN KEY (levelPassed) REFERENCES levels
 );
 
 -- rosterpeople -- a view over the roster and person tables joined showing selected fields

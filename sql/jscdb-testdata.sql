@@ -1,22 +1,22 @@
-INSERT INTO levels (levelcode, levelname) VALUES ('Snowplow Sam', 'SS1');
-INSERT INTO levels (levelcode, levelname) VALUES ('Basic Skills 1', 'BS1');
-INSERT INTO levels (levelcode, levelname) VALUES ('Basic Skills 2', 'BS2');
-INSERT INTO levels (levelcode, levelname) VALUES ('Basic Skills 3', 'BS3');
-INSERT INTO levels (levelcode, levelname) VALUES ('Basic Skills 4', 'BS4');
-INSERT INTO levels (levelcode, levelname) VALUES ('Basic Skills 5', 'BS5');
-INSERT INTO levels (levelcode, levelname) VALUES ('Basic Skills 6', 'BS6');
-INSERT INTO levels (levelcode, levelname) VALUES ('Basic Skills 7', 'BS7');
-INSERT INTO levels (levelcode, levelname) VALUES ('Basic Skills 8', 'BS8');
-INSERT INTO levels (levelcode, levelname) VALUES ('Adult 1', 'AD1');
-INSERT INTO levels (levelcode, levelname) VALUES ('Adult 2', 'AD2');
-INSERT INTO levels (levelcode, levelname) VALUES ('Adult 3', 'AD3');
-INSERT INTO levels (levelcode, levelname) VALUES ('Adult 4', 'AD4');
-INSERT INTO levels (levelcode, levelname) VALUES ('Free Skate 1', 'FS1');
-INSERT INTO levels (levelcode, levelname) VALUES ('Free Skate 2', 'FS2');
-INSERT INTO levels (levelcode, levelname) VALUES ('Free Skate 3', 'FS3');
-INSERT INTO levels (levelcode, levelname) VALUES ('Free Skate 4', 'FS4');
-INSERT INTO levels (levelcode, levelname) VALUES ('Free Skate 5', 'FS5');
-INSERT INTO levels (levelcode, levelname) VALUES ('Free Skate 6', 'FS6');
+INSERT INTO levels (levelname, levelcode) VALUES ('Snowplow Sam', 'SS1');
+INSERT INTO levels (levelname, levelcode) VALUES ('Basic Skills 1', 'BS1');
+INSERT INTO levels (levelname, levelcode) VALUES ('Basic Skills 2', 'BS2');
+INSERT INTO levels (levelname, levelcode) VALUES ('Basic Skills 3', 'BS3');
+INSERT INTO levels (levelname, levelcode) VALUES ('Basic Skills 4', 'BS4');
+INSERT INTO levels (levelname, levelcode) VALUES ('Basic Skills 5', 'BS5');
+INSERT INTO levels (levelname, levelcode) VALUES ('Basic Skills 6', 'BS6');
+INSERT INTO levels (levelname, levelcode) VALUES ('Basic Skills 7', 'BS7');
+INSERT INTO levels (levelname, levelcode) VALUES ('Basic Skills 8', 'BS8');
+INSERT INTO levels (levelname, levelcode) VALUES ('Adult 1', 'AD1');
+INSERT INTO levels (levelname, levelcode) VALUES ('Adult 2', 'AD2');
+INSERT INTO levels (levelname, levelcode) VALUES ('Adult 3', 'AD3');
+INSERT INTO levels (levelname, levelcode) VALUES ('Adult 4', 'AD4');
+INSERT INTO levels (levelname, levelcode) VALUES ('Free Skate 1', 'FS1');
+INSERT INTO levels (levelname, levelcode) VALUES ('Free Skate 2', 'FS2');
+INSERT INTO levels (levelname, levelcode) VALUES ('Free Skate 3', 'FS3');
+INSERT INTO levels (levelname, levelcode) VALUES ('Free Skate 4', 'FS4');
+INSERT INTO levels (levelname, levelcode) VALUES ('Free Skate 5', 'FS5');
+INSERT INTO levels (levelname, levelcode) VALUES ('Free Skate 6', 'FS6');
 
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('Beginner Youth','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('Intermediate Youth','TBD','SS1');
@@ -27,6 +27,7 @@ INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS 
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Moves in the Field','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Power and Artistry','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Synchro','TBD','SS1');
+INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('FS Ice Dance','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('Hockey','TBD','SS1');
 
 -- Default password is encrypted, original is 'sk8gr8t'
@@ -169,7 +170,7 @@ INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost,
     (5001, 'FS Club Ice', 'Friday', '5:15-6:15pm', 1004, 75.00, '');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
-    (5001, 'FS Synchro', 'Sunday', '9:15-10:15am', 1005, 75.00, '');
+    (5001, 'FS Ice Dance', 'Sunday', '9:15-10:15am', 1005, 75.00, '');
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES
     (5001, 'FS Club Ice', 'Sunday', '9:15-10:15am', 1004, 75.00, '');

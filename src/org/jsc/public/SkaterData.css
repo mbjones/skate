@@ -202,6 +202,15 @@ table.jsc-toolbar {
 .jsc-text-box-short {
 	width: 4em;
 }
+
+.jsc-classes-scroll {
+	width: 300px;
+	height: 500px;
+}
+
+.jsc-pointer-cursor {
+	cursor: pointer;
+}
 	
 .classes-ListHeader {
   background: #c1eec8 url(gradient.gif) repeat-x 0px -1px;
