@@ -125,13 +125,22 @@ public class MyClassesScreen extends BaseScreen implements ClickHandler {
                     discount = RegisterScreen.calculateFSDiscount(results.getEntriesCreated().size(), isMember);
                     
                 } else {
-                    Date startDate = null;
-                    String sessionStart = sessionClassList.getClassList().get(0).getStartDate();
-                    if (sessionStart != null) {
-                        DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
-                        startDate = fmt.parse(sessionStart);
+                    Date discountDate = null;
+                    ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList();
+                    String sessionDiscount = "";
+                    for (SessionSkatingClass currentClass : classes) {
+                        if (currentClass.isActiveSession()) {
+                            sessionDiscount = currentClass.getDiscountDate();
+                            break;
+                        }
                     }
-                    discount = RegisterScreen.calculateBSDiscount(startDate);
+                    
+                    if (sessionDiscount != null) {
+                        DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
+                        discountDate = fmt.parse(sessionDiscount);
+                    }
+                    GWT.log("Discount date is: " + discountDate, null);
+                    discount = RegisterScreen.calculateBSDiscount(discountDate);
                 }
                 StringBuffer form = RegisterScreen.createPayPalForm(results, sessionClassList, discount);
                 paymentFormButton = new HTMLPanel(form.toString());

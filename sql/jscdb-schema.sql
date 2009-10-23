@@ -46,6 +46,7 @@ CREATE TABLE sessions (
 	startdate DATE,           -- the date the session starts
 	enddate DATE,             -- the date the session ends
 	activesession BOOLEAN,    -- flag indicating whether this is the active session for registration
+	discountdate DATE,        -- date on which discounted registration expires
    CONSTRAINT session_pk PRIMARY KEY (sid)
 );
 
@@ -82,7 +83,7 @@ CREATE TABLE skatingclass (
 CREATE OR REPLACE VIEW sessionclasses AS 
  SELECT s.sid, s.sessionname, s.season, s.startdate, s.enddate, s.activesession, c.classid, 
         c.classtype, c.day, c.timeslot, c.instructorid, c.cost, 
-        c.otherinstructors, p.surname, p.givenname
+        c.otherinstructors, p.surname, p.givenname, s.discountdate
    FROM sessions s, skatingclass c, people p
   WHERE c.sid = s.sid
     AND p.pid = c.instructorid;

@@ -383,13 +383,21 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
     private void recalculateAndDisplayBasicSkillsTotal() {
         // Update the cost discount, and total fields on the BS Form
         feeLabel.setText(numfmt.format(AppConstants.STANDARD_PRICE));
-        String sessionStart = sessionClassList.getClassList().get(0).getStartDate();
-        Date startDate = null;
-        if (sessionStart != null) {
-            DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
-            startDate = fmt.parse(sessionStart);
+        ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList();
+        String sessionDiscount = "";
+        for (SessionSkatingClass curClass : classes) {
+            if (curClass.isActiveSession()) {
+                sessionDiscount = curClass.getDiscountDate();
+                break;
+            }
         }
-        double bsDiscount = calculateBSDiscount(startDate);
+        Date discountDate = null;
+        if (sessionDiscount != null) {
+            DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
+            discountDate = fmt.parse(sessionDiscount);
+        }
+        GWT.log("Discount date is: " + discountDate, null);
+        double bsDiscount = calculateBSDiscount(discountDate);
         bsDiscountLabel.setText(numfmt.format(bsDiscount));
         double bsTotal = AppConstants.STANDARD_PRICE - bsDiscount;
         bsTotalLabel.setText(numfmt.format(bsTotal));
@@ -467,13 +475,21 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
                         }
                         double discount = 0;
                         if (bsRadio.getValue()) {
-                            Date startDate = null;
-                            String sessionStart = sessionClassList.getClassList().get(0).getStartDate();
-                            if (sessionStart != null) {
-                                DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
-                                startDate = fmt.parse(sessionStart);
+                            Date discountDate = null;
+                            ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList();
+                            String sessionDiscount = "";
+                            for (SessionSkatingClass curClass : classes) {
+                                if (curClass.isActiveSession()) {
+                                    sessionDiscount = curClass.getDiscountDate();
+                                    break;
+                                }
                             }
-                            discount = calculateBSDiscount(startDate);
+                            if (sessionDiscount != null) {
+                                DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
+                                discountDate = fmt.parse(sessionDiscount);
+                            }
+                            GWT.log("Discount date is: " + discountDate, null);
+                            discount = calculateBSDiscount(discountDate);
                         } else {
                             boolean isMember = results.isMembershipCreated() || loginSession.getPerson().isMember();
                             discount = calculateFSDiscount(results.getEntriesCreated().size(), isMember);
@@ -655,18 +671,16 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
      * Calculate the registration discount based on comparing the current date
      * to the start date of the session.  If the current date is before the session
      * start date by at least the number of grace days, then the basic skills discount applies.
-     * @param startDate the start date of the session
+     * @param discountDate the date on which discounted registration expires
      * @return the amount of the discount
      */
-    protected static double calculateBSDiscount(Date startDate) {
+    protected static double calculateBSDiscount(Date discountDate) {
         double multiclassDiscount = 0;        
-        
         // Calculate the basic skills discount
         double bsDiscount = 0;
-        if (startDate != null) {
+        if (discountDate != null) {
             Date today = new Date(System.currentTimeMillis());
-            if (today.before(startDate) && 
-               (startDate.getTime() - today.getTime() > AppConstants.EARLY_PRICE_GRACE_DAYS*AppConstants.MILLISECS_PER_DAY)) {
+            if (today.before(discountDate)) {
                 bsDiscount = AppConstants.STANDARD_PRICE - AppConstants.EARLY_PRICE;
             }
         }
