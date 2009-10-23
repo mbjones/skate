@@ -247,7 +247,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         StringBuffer sql = new StringBuffer();
         sql.append("select sid, sessionname, season, startdate, enddate, "); 
         sql.append("classid, classtype, day, timeslot, instructorid, "); 
-        sql.append("otherinstructors, surname, givenname, activesession from sessionclasses");
+        sql.append("otherinstructors, surname, givenname, activesession, discountDate from sessionclasses");
         System.out.println(sql.toString());
         
         try {
@@ -270,6 +270,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 sc.setInstructorSurName(rs.getString(12));
                 sc.setInstructorGivenName(rs.getString(13));
                 sc.setActiveSession(rs.getBoolean(14));
+                sc.setDiscountDate(rs.getString(15));
                 classList.add(sc);
             }
             stmt.close();

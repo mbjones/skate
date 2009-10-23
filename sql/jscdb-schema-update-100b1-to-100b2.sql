@@ -17,14 +17,15 @@ CREATE OR REPLACE VIEW rosterpeople AS
 
 -- session -- add a new activeSession column
 ALTER TABLE sessions
-    ADD COLUMN 	activesession BOOLEAN;
+    ADD COLUMN activesession BOOLEAN,
+    ADD COLUMN discountdate DATE;
     
 -- Update the view of classes to include activeSession
 DROP VIEW sessionclasses;
 CREATE OR REPLACE VIEW sessionclasses AS 
  SELECT s.sid, s.sessionname, s.season, s.startdate, s.enddate, s.activesession, c.classid, 
         c.classtype, c.day, c.timeslot, c.instructorid, c.cost, 
-        c.otherinstructors, p.surname, p.givenname
+        c.otherinstructors, p.surname, p.givenname, s.discountdate
    FROM sessions s, skatingclass c, people p
   WHERE c.sid = s.sid
     AND p.pid = c.instructorid;

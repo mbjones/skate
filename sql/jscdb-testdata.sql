@@ -65,14 +65,14 @@ INSERT INTO people (surname, givenname, middlename, password, role, email, home_
      VALUES ('Sargent','Alex', '', '$2a$10$1JBlWZRkefGrhAVoxFo3UOflKZtzcW4LwiRIPjGCvSXUKrpWs2xLK', 
      1, 'alaskangrl_87@hotmail.com', '', 'asargent');
      
-INSERT INTO sessions (sessionname, season, startdate, enddate)
-     VALUES ('1', '2009-2010', '2009-09-21', '2009-11-01');
-INSERT INTO sessions (sessionname, season, startdate, enddate)
-     VALUES ('2', '2009-2010', '2009-11-09', '2009-12-20');
-INSERT INTO sessions (sessionname, season, startdate, enddate)
-     VALUES ('3', '2009-2010', '2010-01-11', '2010-02-21');
-INSERT INTO sessions (sessionname, season, startdate, enddate)
-     VALUES ('4', '2009-2010', '2010-03-01', '2010-04-11');
+INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, discountdate)
+     VALUES ('1', '2009-2010', '2009-09-21', '2009-11-01', 'f', '2009-09-21');
+INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, discountdate)
+     VALUES ('2', '2009-2010', '2009-11-09', '2009-12-20', 't', '2009-11-13');
+INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, discountdate)
+     VALUES ('3', '2009-2010', '2010-01-11', '2010-02-21', 'f', '2010-01-15');
+INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, discountdate)
+     VALUES ('4', '2009-2010', '2010-03-01', '2010-04-11', 'f', '2009-03-05');
 
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 
     otherinstructors) VALUES

@@ -25,6 +25,7 @@ public class SessionSkatingClass implements Serializable {
     private double cost;
     private String otherinstructors;
     private boolean activeSession;
+    private String discountDate;
     
     /**
      * Construct a new session, using accessors to set all fields after construction.
@@ -259,6 +260,20 @@ public class SessionSkatingClass implements Serializable {
      */
     public boolean isActiveSession() {
         return activeSession;
+    }
+
+    /**
+     * @param discountDate the discountDate to set
+     */
+    public void setDiscountDate(String discountDate) {
+        this.discountDate = discountDate;
+    }
+
+    /**
+     * @return the discountDate
+     */
+    public String getDiscountDate() {
+        return discountDate;
     }
 
     /**
