@@ -1,3 +1,4 @@
+INSERT INTO levels (levelname, levelcode) VALUES ('0', '0');
 INSERT INTO levels (levelname, levelcode) VALUES ('Snowplow Sam', 'SS1');
 INSERT INTO levels (levelname, levelcode) VALUES ('Basic Skills 1', 'BS1');
 INSERT INTO levels (levelname, levelcode) VALUES ('Basic Skills 2', 'BS2');
