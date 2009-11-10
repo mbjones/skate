@@ -19,7 +19,7 @@ public class MailManager {
         session = Session.getInstance(sessionProps);
     }
     
-    private void sendMessage(String subject, String body, String recipient, String sender) {
+    public void sendMessage(String subject, String body, String recipient, String sender) {
         Message message = new MimeMessage(session);
         try {
             message.setFrom(new InternetAddress(sender));

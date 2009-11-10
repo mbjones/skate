@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -213,30 +214,48 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         return true;
     }
     
+    /**
+     * Given a username string, look it up in the database to find the associated
+     * person and their email, change their password to a new random value, and
+     * email the new password to the email account on file for them.
+     */
     public boolean resetPassword(String username) {
         boolean successFlag = false;
-        Person person = null;
-        LoginSession loginSession = null;
         
         if (username != null) {
 
-            // TODO: Look up the username in the DB to find the email address
-            String email = lookupUsername(username);
-            System.out.println("Found email: " + email);
-            
-            // TODO: Reset the password
-            
-            // TODO: Email the new password to the user
-            
-            if (email != null) {
+            // Look up the username in the DB to find the email address
+            AccountInfo acctInfo = lookupUsername(username);
+            if (acctInfo != null) {
                 successFlag = true;
+                System.out.println("Found email: " + acctInfo.email);
+            }
+            
+            String newPassword = "";
+            if (successFlag) {
+                // Reset the password
+                Random random = new Random();
+                long r1 = random.nextLong();
+                newPassword = Long.toHexString(r1).substring(0, 8);
+                successFlag = updatePassword(acctInfo.pid, newPassword);
+            }
+            
+            if (successFlag) {
+                // Email the new password to the user
+                MailManager manager = new MailManager();
+                String subject = "Password reset completed";
+                String body = "Your password has been reset. Your new password is: "
+                        + newPassword;
+                String sender = "registrar@juneauskatingclub.org";
+                manager.sendMessage(subject, body, acctInfo.email, sender);
             }
         }
         
         return successFlag;
     }
     
-    private String lookupUsername(String username) {
+    private AccountInfo lookupUsername(String username) {
+        AccountInfo acctInfo = null;
         String email = "";
         // Query the database to get the list of emails
         StringBuffer sql = new StringBuffer();
@@ -253,20 +272,68 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             if (rs.next()) {
                 SessionSkatingClass sc = new SessionSkatingClass();
                 long pid = rs.getLong(1);
-                String uname = rs.getString(2);
+                String[] uname = new String[1];
+                uname[0] = rs.getString(2);
                 email = rs.getString(3);
+                acctInfo = new AccountInfo(pid, uname, email);
             }
             stmt.close();
             con.close();
 
         } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+            System.err.println("SQLException: " + ex.getMessage());
         }
         
-        // TODO: need to return the pid too for more processing
-        return email;
+        return acctInfo;
     }
 
+    /**
+     * A class that encapsulates account information to be passed to local methods.
+     */
+    private class AccountInfo {
+        protected final long pid;
+        protected final String[] usernames;
+        protected final String email;
+        
+        public AccountInfo(long pid, String[] usernames, String email) {
+            this.pid = pid;
+            this.usernames = usernames;
+            this.email = email;
+        }
+    }
+    
+    /**
+     * Update the database with new encrypted password for the person identified by pid.
+     */
+    private boolean updatePassword(long pid, String newPassword) {
+        boolean successFlag = false;
+        
+        StringBuffer sql = new StringBuffer();
+        sql.append("update people set ");
+        // Hash the password before insertion into the database
+        String hashed = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+        sql.append("password='").append(hashed).append("' ");
+        sql.append("where pid=").append(pid);
+        System.out.println(sql.toString());
+
+        try {
+            Connection con = getConnection();
+            Statement stmt = con.createStatement();
+            stmt.executeUpdate(sql.toString());
+            stmt.close();
+            con.close();
+            successFlag = true;
+        } catch(SQLException ex) {
+            System.err.println("SQLException: " + ex.getMessage());
+        }
+        return successFlag;
+    }
+
+    /**
+     * Look up all of the account usernames associated with a given email address,
+     * and then email those usernames to the email address, assuming it matches
+     * what is in the database.
+     */
     public boolean findUsername(String email) {
         boolean successFlag = false;
         Person person = null;

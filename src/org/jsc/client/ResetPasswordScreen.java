@@ -26,7 +26,7 @@ public class ResetPasswordScreen extends BaseScreen {
     private VerticalPanel resetPanel;
     private VerticalPanel introPanel;
     private TextBox username;
-    private TextBox password;
+    private TextBox email;
     private Button resetButton;
     private SkaterRegistrationServiceAsync regService;
     
@@ -80,15 +80,22 @@ public class ResetPasswordScreen extends BaseScreen {
         });
         resetButton.addStyleName("jsc-button-right");
         resetPanel.add(resetButton);
-        
-        Label pwLabel = new Label("Password:");
-        resetPanel.add(pwLabel);
-        pwLabel.addStyleName("jsc-fieldlabel-left");
-        password = new PasswordTextBox();
-        password.addStyleName("jsc-field");
-        resetPanel.add(password);
         resetPanel.add(new Label(" "));
 
+        Label emailLabel = new Label("\nEmail:");
+        resetPanel.add(emailLabel);
+        emailLabel.addStyleName("jsc-fieldlabel-left");
+        email = new PasswordTextBox();
+        email.addStyleName("jsc-field");
+        resetPanel.add(email);
+        Button findAccountButton = new Button("Find Username");
+        findAccountButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                //findUsername();
+            }
+        });
+        findAccountButton.addStyleName("jsc-button-right");
+        resetPanel.add(findAccountButton);
         
         Hyperlink newAccountLink = new Hyperlink("Need a New Account?", "settings");
         newAccountLink.addStyleName("jsc-link-right");
@@ -96,7 +103,7 @@ public class ResetPasswordScreen extends BaseScreen {
     }
     
     /**
-     * Check the user credentials and set up the loginSession if valid.
+     * Request that the servlet change the password to a random value.
      */
     private void resetPassword() {
         // Initialize the service proxy.
@@ -118,8 +125,9 @@ public class ResetPasswordScreen extends BaseScreen {
 
                     // Change our application state to the classes screen
                     History.newItem("login");
+                    setMessage("Password reset succeeded. Check your email for the new password, then sign in here.");
                 } else {
-                    setMessage("Resetting password failed.");
+                    setMessage("Sorry, resetting password failed.");
                 }
             }
         };
