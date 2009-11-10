@@ -25,4 +25,8 @@ SELECT ppl.surname, ppl.givenname, m.season, p.paypal_status
     AND sc.sessionname = '1'
   ORDER BY y.paypal_status, sc.classtype, p.surname, p.givenname;
 
-   
+-- Query to create a mailing list
+SELECT givenname|| ' ' || surname || ' <' || email || '>' from people
+UNION
+SELECT parentfirstname|| ' ' || parentsurname || ' <' || parentemail || '>' from people;
+

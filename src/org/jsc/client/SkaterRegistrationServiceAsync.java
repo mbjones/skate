@@ -24,4 +24,6 @@ public interface SkaterRegistrationServiceAsync {
   void saveRoster(LoginSession loginSession, long rosterid, String newLevel, String newSection, AsyncCallback<Boolean> callback);  
   void getStudentRoster(LoginSession loginSession, Person person, AsyncCallback<ArrayList<RosterEntry>> callback);
   void getClassRoster(LoginSession loginSession, long classid, AsyncCallback<ArrayList<RosterEntry>> callback);
+  void resetPassword(String username, AsyncCallback<Boolean> callback);
+  void findUsername(String email, AsyncCallback<Boolean> callback);
 }

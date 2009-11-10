@@ -35,6 +35,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
     private HeaderPanel header;
     private ContentPanel content;
     private LoginScreen login;
+    private ResetPasswordScreen reset;
     private SettingsScreen settings;
     private MyClassesScreen myclasses;
     private RegisterScreen register;
@@ -96,6 +97,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
         
         // Initialize application screens
         login = new LoginScreen(loginSession, eventBus);
+        reset = new ResetPasswordScreen(loginSession, eventBus);
         settings = new SettingsScreen(loginSession, eventBus);
         myclasses = new MyClassesScreen(loginSession, eventBus, sessionClassList, rosterModel);
         register = new RegisterScreen(loginSession, eventBus, sessionClassList, rosterModel);
@@ -155,7 +157,8 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
         }
         
         if (!loginSession.isAuthenticated() &! historyToken.equals("settings")
-                &! historyToken.equals("confirm") &! historyToken.equals("cancel")) {
+                &! historyToken.equals("confirm") &! historyToken.equals("cancel")
+                &! historyToken.equals("reset")) {
             historyToken = "signin";
         }
         
@@ -166,6 +169,9 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
         } else if (historyToken.equals("signout")) {
             logout();
             content.setScreen(login);
+            clearMessage();
+        } else if (historyToken.equals("reset")) {
+            content.setScreen(reset);
             clearMessage();
         } else if (historyToken.equals("signin")) {
             content.setScreen(login);

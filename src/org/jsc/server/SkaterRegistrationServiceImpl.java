@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.jsc.client.AppConstants;
 import org.jsc.client.LoginSession;
 import org.jsc.client.Person;
 import org.jsc.client.RegistrationResults;
@@ -189,7 +188,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             HttpServletRequest request = this.getThreadLocalRequest();
             HttpSession session = request.getSession();
             session.setMaxInactiveInterval(MAX_SESSION_INTERVAL);
-            System.out.println("Servlet got session with id: " + session.getId()); //$NON-NLS-1$
+            System.out.println("Servlet got session with id: " + session.getId());
             String sessionId = session.getId();
             
             int pid = checkPassword(username, password);
@@ -212,6 +211,77 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         HttpSession session = request.getSession();
         session.invalidate();
         return true;
+    }
+    
+    public boolean resetPassword(String username) {
+        boolean successFlag = false;
+        Person person = null;
+        LoginSession loginSession = null;
+        
+        if (username != null) {
+
+            // TODO: Look up the username in the DB to find the email address
+            String email = lookupUsername(username);
+            System.out.println("Found email: " + email);
+            
+            // TODO: Reset the password
+            
+            // TODO: Email the new password to the user
+            
+            if (email != null) {
+                successFlag = true;
+            }
+        }
+        
+        return successFlag;
+    }
+    
+    private String lookupUsername(String username) {
+        String email = "";
+        // Query the database to get the list of emails
+        StringBuffer sql = new StringBuffer();
+        sql.append("select pid, username, email "); 
+        sql.append("from people "); 
+        sql.append("where username = '");
+        sql.append(username).append("';");
+        System.out.println(sql.toString());
+        
+        try {
+            Connection con = getConnection();
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql.toString());
+            if (rs.next()) {
+                SessionSkatingClass sc = new SessionSkatingClass();
+                long pid = rs.getLong(1);
+                String uname = rs.getString(2);
+                email = rs.getString(3);
+            }
+            stmt.close();
+            con.close();
+
+        } catch(SQLException ex) {
+            System.err.println("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+        }
+        
+        // TODO: need to return the pid too for more processing
+        return email;
+    }
+
+    public boolean findUsername(String email) {
+        boolean successFlag = false;
+        Person person = null;
+        LoginSession loginSession = null;
+        
+        if (email != null) {
+
+            // TODO: Look up the email in the DB to find the usernames
+                        
+            // TODO: Email the list of usernames to the user's registered email
+            
+            successFlag = true;
+        }
+        
+        return successFlag;
     }
     
     /**

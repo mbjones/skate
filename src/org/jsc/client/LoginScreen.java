@@ -101,9 +101,9 @@ public class LoginScreen extends BaseScreen {
         newAccountLink.addStyleName("jsc-link-right");
         loginPanel.add(newAccountLink);
         
-//        Hyperlink forgotPasswordLink = new Hyperlink("Forgot password?", "resetpass");
-//        forgotPasswordLink.addStyleName("jsc-link-right");
-//        loginPanel.add(forgotPasswordLink);
+        Hyperlink forgotPasswordLink = new Hyperlink("Forgot password?", "reset");
+        forgotPasswordLink.addStyleName("jsc-link-right");
+        loginPanel.add(forgotPasswordLink);
     }
     
     /**

@@ -9,7 +9,7 @@ import java.util.ResourceBundle;
  *
  */
 public class ServerConstants {
-    private static final String BUNDLE_NAME = "org.jsc.server.jscdb-server"; //$NON-NLS-1$
+    private static final String BUNDLE_NAME = "org.jsc.server.jscdb-server";
 
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle
             .getBundle(BUNDLE_NAME);
