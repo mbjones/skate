@@ -11,6 +11,7 @@ import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.jsc.client.ClientConstants;
 import org.jsc.client.LoginSession;
 import org.jsc.client.Person;
 import org.jsc.client.RegistrationResults;
@@ -30,12 +31,13 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         implements SkaterRegistrationService {
 
-    private static final String JDBC_URL = ServerConstants.getString("JDBC_URL"); //$NON-NLS-1$
-    private static final String JDBC_USER = ServerConstants.getString("JDBC_USER"); //$NON-NLS-1$
-    private static final String JDBC_PASS = ServerConstants.getString("JDBC_PASS"); //$NON-NLS-1$
-    private static final String JDBC_DRIVER = ServerConstants.getString("JDBC_DRIVER"); //$NON-NLS-1$
-    private static final String ROSTER_QUERY = "SELECT rosterid, classid, pid, levelPassed, paymentid, payment_amount, paypal_status, date_updated, surname, givenname, section FROM rosterpeople"; //$NON-NLS-1$
+    private static final String JDBC_URL = ServerConstants.getString("JDBC_URL");
+    private static final String JDBC_USER = ServerConstants.getString("JDBC_USER");
+    private static final String JDBC_PASS = ServerConstants.getString("JDBC_PASS");
+    private static final String JDBC_DRIVER = ServerConstants.getString("JDBC_DRIVER");
+    private static final String ROSTER_QUERY = "SELECT rosterid, classid, pid, levelPassed, paymentid, payment_amount, paypal_status, date_updated, surname, givenname, section FROM rosterpeople";
     private static final int MAX_SESSION_INTERVAL = 60 * 30;
+    private static Random random = new Random();
     
     /**
      * Create a new person entry in the backing relational database, or update
@@ -56,7 +58,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             // Look up the pid to be used for this insert
             long newPid = 0;
             StringBuffer idsql = new StringBuffer();
-            idsql.append("SELECT NEXTVAL(\'\"person_id_seq\"\')"); //$NON-NLS-1$
+            idsql.append("SELECT NEXTVAL(\'\"person_id_seq\"\')"); 
             System.out.println(idsql.toString());
             Statement stmt;
             try {
@@ -70,38 +72,38 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 }
                 stmt.close();
             } catch (SQLException e) {
-                System.err.println("SQLException: " + e.getMessage()); //$NON-NLS-1$
+                System.err.println("SQLException: " + e.getMessage());
                 return null;
             }
             
             // Create the SQL INSERT statement
-            sql.append("insert into people"); //$NON-NLS-1$
-            sql.append(" (pid, surname, givenname, middlename, email, birthdate, home_phone, cell_phone, work_phone," + //$NON-NLS-1$
-            		"street1, street2, city, state, zipcode, parentfirstname, parentsurname, parentemail, username, password) "); //$NON-NLS-1$
-            sql.append("values ("); //$NON-NLS-1$
-            sql.append(newPid).append(",'"); //$NON-NLS-1$
-            sql.append(person.getLname()).append("','"); //$NON-NLS-1$
-            sql.append(person.getFname()).append("','"); //$NON-NLS-1$
-            sql.append(person.getMname()).append("','"); //$NON-NLS-1$
-            sql.append(person.getEmail()).append("','"); //$NON-NLS-1$
-            sql.append(person.getBday()).append("','"); //$NON-NLS-1$
-            sql.append(person.getHomephone()).append("','"); //$NON-NLS-1$
-            sql.append(person.getCellphone()).append("','"); //$NON-NLS-1$
-            sql.append(person.getWorkphone()).append("','"); //$NON-NLS-1$
-            sql.append(person.getStreet1()).append("','"); //$NON-NLS-1$
-            sql.append(person.getStreet2()).append("','"); //$NON-NLS-1$
-            sql.append(person.getCity()).append("','"); //$NON-NLS-1$
-            sql.append(person.getState()).append("','"); //$NON-NLS-1$
-            sql.append(person.getZip()).append("','"); //$NON-NLS-1$
-            sql.append(person.getParentFirstname()).append("','"); //$NON-NLS-1$
-            sql.append(person.getParentLastname()).append("','"); //$NON-NLS-1$
-            sql.append(person.getParentEmail()).append("','"); //$NON-NLS-1$
-            sql.append(person.getUsername()).append("','"); //$NON-NLS-1$
+            sql.append("insert into people");
+            sql.append(" (pid, surname, givenname, middlename, email, birthdate, home_phone, cell_phone, work_phone," + 
+            		"street1, street2, city, state, zipcode, parentfirstname, parentsurname, parentemail, username, password) ");
+            sql.append("values (");
+            sql.append(newPid).append(",'");
+            sql.append(person.getLname()).append("','");
+            sql.append(person.getFname()).append("','");
+            sql.append(person.getMname()).append("','");
+            sql.append(person.getEmail()).append("','");
+            sql.append(person.getBday()).append("','");
+            sql.append(person.getHomephone()).append("','");
+            sql.append(person.getCellphone()).append("','");
+            sql.append(person.getWorkphone()).append("','");
+            sql.append(person.getStreet1()).append("','");
+            sql.append(person.getStreet2()).append("','");
+            sql.append(person.getCity()).append("','");
+            sql.append(person.getState()).append("','");
+            sql.append(person.getZip()).append("','");
+            sql.append(person.getParentFirstname()).append("','");
+            sql.append(person.getParentLastname()).append("','");
+            sql.append(person.getParentEmail()).append("','");
+            sql.append(person.getUsername()).append("','");
 
             // Hash the password before insertion into the database
             String hashed = BCrypt.hashpw(person.getNewPassword(), BCrypt.gensalt());
-            sql.append(hashed).append("'"); //$NON-NLS-1$
-            sql.append(")"); //$NON-NLS-1$
+            sql.append(hashed).append("'");
+            sql.append(")");
             
         } else {
             // Verify that the session is valid before allowing an update
@@ -109,36 +111,36 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             if (!isAuthentic) {
                 return null;
             }
-            sql.append("update people set "); //$NON-NLS-1$
-            sql.append("surname='").append(person.getLname()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("givenname='").append(person.getFname()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("middlename='").append(person.getMname()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("email='").append(person.getEmail()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("birthdate='").append(person.getBday()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("home_phone='").append(person.getHomephone()).append("',");   //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("cell_phone='").append(person.getCellphone()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("work_phone='").append(person.getWorkphone()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("street1='").append(person.getStreet1()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("street2='").append(person.getStreet2()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("city='").append(person.getCity()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("state='").append(person.getState()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("zipcode='").append(person.getZip()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("parentfirstname='").append(person.getParentFirstname()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("parentsurname='").append(person.getParentLastname()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
-            sql.append("parentemail='").append(person.getParentEmail()).append("',"); //$NON-NLS-1$ //$NON-NLS-2$
+            sql.append("update people set ");
+            sql.append("surname='").append(person.getLname()).append("',");
+            sql.append("givenname='").append(person.getFname()).append("',");
+            sql.append("middlename='").append(person.getMname()).append("',");
+            sql.append("email='").append(person.getEmail()).append("',");
+            sql.append("birthdate='").append(person.getBday()).append("',");
+            sql.append("home_phone='").append(person.getHomephone()).append("',");
+            sql.append("cell_phone='").append(person.getCellphone()).append("',");
+            sql.append("work_phone='").append(person.getWorkphone()).append("',");
+            sql.append("street1='").append(person.getStreet1()).append("',");
+            sql.append("street2='").append(person.getStreet2()).append("',");
+            sql.append("city='").append(person.getCity()).append("',");
+            sql.append("state='").append(person.getState()).append("',");
+            sql.append("zipcode='").append(person.getZip()).append("',");
+            sql.append("parentfirstname='").append(person.getParentFirstname()).append("',");
+            sql.append("parentsurname='").append(person.getParentLastname()).append("',");
+            sql.append("parentemail='").append(person.getParentEmail()).append("',");
 
             if (person.getNewUsername() != null && person.getNewUsername().length() > 0 && 
                     !person.getUsername().equals(person.getNewUsername())) {
-                sql.append("username='").append(person.getNewUsername()).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+                sql.append("username='").append(person.getNewUsername()).append("'");
             } else {
-                sql.append("username='").append(person.getUsername()).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+                sql.append("username='").append(person.getUsername()).append("'");
             }
             if (person.getNewPassword() != null && person.getNewPassword().length() > 0) {
                 // Hash the password before insertion into the database
                 String hashed = BCrypt.hashpw(person.getNewPassword(), BCrypt.gensalt());
-                sql.append(",password='").append(hashed).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+                sql.append(",password='").append(hashed).append("'");
             }
-            sql.append(" where pid=").append(person.getPid()); //$NON-NLS-1$
+            sql.append(" where pid=").append(person.getPid());
         }
 
         System.out.println(sql.toString());
@@ -152,8 +154,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 // This is an INSERT, so look up the new PID for the new record
                 stmt = con.createStatement();
                 ResultSet rs = stmt.executeQuery(
-                        "SELECT max(pid) from people where email LIKE '" +  //$NON-NLS-1$
-                        person.getEmail() + "'"); //$NON-NLS-1$
+                        "SELECT max(pid) from people where email LIKE '" +
+                        person.getEmail() + "'");
                 if (rs.next()) {
                     pid = rs.getInt(1);
                 } else {
@@ -167,7 +169,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             con.close();
 
         } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+            System.err.println("SQLException: " + ex.getMessage());
             throw new SQLRecordException(ex);
         }
         
@@ -225,7 +227,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         if (username != null) {
 
             // Look up the username in the DB to find the email address
-            AccountInfo acctInfo = lookupUsername(username);
+            AccountInfo acctInfo = lookupAccountByUsername(username);
             if (acctInfo != null) {
                 successFlag = true;
                 System.out.println("Found email: " + acctInfo.email);
@@ -234,7 +236,6 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             String newPassword = "";
             if (successFlag) {
                 // Reset the password
-                Random random = new Random();
                 long r1 = random.nextLong();
                 newPassword = Long.toHexString(r1).substring(0, 8);
                 successFlag = updatePassword(acctInfo.pid, newPassword);
@@ -254,81 +255,6 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         return successFlag;
     }
     
-    private AccountInfo lookupUsername(String username) {
-        AccountInfo acctInfo = null;
-        String email = "";
-        // Query the database to get the list of emails
-        StringBuffer sql = new StringBuffer();
-        sql.append("select pid, username, email "); 
-        sql.append("from people "); 
-        sql.append("where username = '");
-        sql.append(username).append("';");
-        System.out.println(sql.toString());
-        
-        try {
-            Connection con = getConnection();
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(sql.toString());
-            if (rs.next()) {
-                SessionSkatingClass sc = new SessionSkatingClass();
-                long pid = rs.getLong(1);
-                String[] uname = new String[1];
-                uname[0] = rs.getString(2);
-                email = rs.getString(3);
-                acctInfo = new AccountInfo(pid, uname, email);
-            }
-            stmt.close();
-            con.close();
-
-        } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage());
-        }
-        
-        return acctInfo;
-    }
-
-    /**
-     * A class that encapsulates account information to be passed to local methods.
-     */
-    private class AccountInfo {
-        protected final long pid;
-        protected final String[] usernames;
-        protected final String email;
-        
-        public AccountInfo(long pid, String[] usernames, String email) {
-            this.pid = pid;
-            this.usernames = usernames;
-            this.email = email;
-        }
-    }
-    
-    /**
-     * Update the database with new encrypted password for the person identified by pid.
-     */
-    private boolean updatePassword(long pid, String newPassword) {
-        boolean successFlag = false;
-        
-        StringBuffer sql = new StringBuffer();
-        sql.append("update people set ");
-        // Hash the password before insertion into the database
-        String hashed = BCrypt.hashpw(newPassword, BCrypt.gensalt());
-        sql.append("password='").append(hashed).append("' ");
-        sql.append("where pid=").append(pid);
-        System.out.println(sql.toString());
-
-        try {
-            Connection con = getConnection();
-            Statement stmt = con.createStatement();
-            stmt.executeUpdate(sql.toString());
-            stmt.close();
-            con.close();
-            successFlag = true;
-        } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage());
-        }
-        return successFlag;
-    }
-
     /**
      * Look up all of the account usernames associated with a given email address,
      * and then email those usernames to the email address, assuming it matches
@@ -342,8 +268,23 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         if (email != null) {
 
             // TODO: Look up the email in the DB to find the usernames
-                        
+            AccountInfo acctInfo = lookupAccountByEmail(email);
+            
             // TODO: Email the list of usernames to the user's registered email
+            MailManager manager = new MailManager();
+            String subject = "JSC username information";
+            String sender = "registrar@juneauskatingclub.org";
+            StringBuffer body = new StringBuffer("You have JSC accounts with the following registered usernames:\n ");
+            for (String username : acctInfo.usernames) {
+                body.append("    ");
+                body.append(username);
+                body.append("\n");
+            }
+            body.append("\nReturn to the JSC registration site to log in or reset your password if you have forgotten it.\n");
+            body.append("    ");
+            body.append(ClientConstants.getString("CLIENT_PAYPAL_RETURN_URL"));
+            manager.sendMessage(subject, body.toString(), acctInfo.email, sender);
+            body.append("\n");
             
             successFlag = true;
         }
@@ -414,7 +355,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             con.close();
 
         } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+            System.err.println("SQLException: " + ex.getMessage());
         }
 
         return classList;
@@ -459,7 +400,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             
             // Look up the paymentId to be used for this insert
             StringBuffer idsql = new StringBuffer();
-            idsql.append("SELECT NEXTVAL(\'\"payment_id_seq\"\')"); //$NON-NLS-1$
+            idsql.append("SELECT NEXTVAL(\'\"payment_id_seq\"\')");
             System.out.println(idsql.toString());
             Statement stmt = con.createStatement();
             stmt = con.createStatement();
@@ -472,8 +413,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             
             // Execute the INSERT to create the new payment table entry
             StringBuffer psql = new StringBuffer();
-            psql.append("insert into payment (paymentId, paypal_status) VALUES ("  //$NON-NLS-1$
-                    + paymentId + ", 'Pending')"); //$NON-NLS-1$
+            psql.append("insert into payment (paymentId, paypal_status) VALUES ("
+                    + paymentId + ", 'Pending')");
             System.out.println(psql.toString());
    
             stmt = con.createStatement();
@@ -483,9 +424,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             results.setPaymentId(paymentId);
             
         } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+            System.err.println("SQLException: " + ex.getMessage());
             results.setMembershipCreated(false);
-            results.setMembershipErrorMessage("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+            results.setMembershipErrorMessage("SQLException: " + ex.getMessage());
         }
         
         // Check if a membership entry should be created, and do so
@@ -493,11 +434,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             results.setMembershipAttempted(true);
             // Create the SQL INSERT statement
             StringBuffer sql = new StringBuffer();
-            sql.append("insert into membership (pid, paymentid, season) VALUES ('"); //$NON-NLS-1$
-            sql.append(person.getPid()).append("','"); //$NON-NLS-1$
-            sql.append(paymentId).append("','"); //$NON-NLS-1$
+            sql.append("insert into membership (pid, paymentid, season) VALUES ('");
+            sql.append(person.getPid()).append("','");
+            sql.append(paymentId).append("','");
             sql.append(SessionSkatingClass.calculateSeason());
-            sql.append("')"); //$NON-NLS-1$
+            sql.append("')");
             System.out.println(sql.toString());
     
             // Execute the INSERT to create the new membership table entry
@@ -510,10 +451,10 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 // Now look up the membershipId that was generated
                 String season = SessionSkatingClass.calculateSeason();
                 StringBuffer msql = new StringBuffer();
-                msql.append("select mid, pid, paymentid, season, paypal_status from memberstatus where "); //$NON-NLS-1$
-                msql.append("pid = '").append(person.getPid()).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
-                msql.append(" AND "); //$NON-NLS-1$
-                msql.append("season LIKE '").append(season).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+                msql.append("select mid, pid, paymentid, season, paypal_status from memberstatus where ");
+                msql.append("pid = '").append(person.getPid()).append("'");
+                msql.append(" AND ");
+                msql.append("season LIKE '").append(season).append("'");
                 System.out.println(msql.toString());
                 stmt = con.createStatement();
                 ResultSet rs = stmt.executeQuery(msql.toString());
@@ -528,9 +469,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 con.close();
 
             } catch(SQLException ex) {
-                System.err.println("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+                System.err.println("SQLException: " + ex.getMessage());
                 results.setMembershipCreated(false);
-                results.setMembershipErrorMessage("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+                results.setMembershipErrorMessage("SQLException: " + ex.getMessage());
             }
         }
         
@@ -543,11 +484,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             
             // Create the SQL INSERT statement
             StringBuffer sql = new StringBuffer();
-            sql.append("insert into roster (classid, pid, paymentId) values ('"); //$NON-NLS-1$
-            sql.append(entry.getClassid()).append("','"); //$NON-NLS-1$
-            sql.append(entry.getPid()).append("',"); //$NON-NLS-1$
+            sql.append("insert into roster (classid, pid, paymentId) values ('");
+            sql.append(entry.getClassid()).append("','");
+            sql.append(entry.getPid()).append("',");
             sql.append(paymentId);
-            sql.append(")"); //$NON-NLS-1$
+            sql.append(")");
             System.out.println(sql.toString());
     
             // Execute the INSERT to create the new roster table entry
@@ -561,9 +502,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 stmt = con.createStatement();
                 StringBuffer rsql = new StringBuffer();
                 rsql.append(ROSTER_QUERY);
-                rsql.append(" WHERE classid = '").append(entry.getClassid()).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
-                rsql.append(" AND "); //$NON-NLS-1$
-                rsql.append("pid = '").append(entry.getPid()).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+                rsql.append(" WHERE classid = '").append(entry.getClassid()).append("'");
+                rsql.append(" AND ");
+                rsql.append("pid = '").append(entry.getPid()).append("'");
                 System.out.println(rsql.toString());
                 
                 ResultSet rs = stmt.executeQuery(rsql.toString());
@@ -577,7 +518,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 con.close();
     
             } catch(SQLException ex) {
-                System.err.println("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+                System.err.println("SQLException: " + ex.getMessage());
                 entriesFailed.add(new Long(entry.getClassid()));
             }
         }
@@ -801,7 +742,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             con.close();
 
         } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+            System.err.println("SQLException: " + ex.getMessage());
         }
 
         return roster;
@@ -881,10 +822,10 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             // If so, set their membership flag
             String season = SessionSkatingClass.calculateSeason();
             StringBuffer msql = new StringBuffer();
-            msql.append("select mid, pid, paymentid, season, paypal_status from memberstatus where "); //$NON-NLS-1$
-            msql.append("pid = '").append(pid).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
-            msql.append(" AND "); //$NON-NLS-1$
-            msql.append("season LIKE '").append(season).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+            msql.append("select mid, pid, paymentid, season, paypal_status from memberstatus where ");
+            msql.append("pid = '").append(pid).append("'");
+            msql.append(" AND ");
+            msql.append("season LIKE '").append(season).append("'");
             System.out.println(msql.toString());
             stmt = con.createStatement();
             rs = stmt.executeQuery(msql.toString());
@@ -898,14 +839,14 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 person.setMember(false);
                 person.setMembershipId(0);
                 person.setMembershipPaymentId(0);
-                person.setMembershipStatus("Unpaid"); //$NON-NLS-1$
+                person.setMembershipStatus("Unpaid");
             }
             stmt.close();
             
             con.close();
 
         } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+            System.err.println("SQLException: " + ex.getMessage());
         }
         
         return person;
@@ -940,6 +881,89 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         return role;
     }
     
+    private AccountInfo lookupAccountByUsername(String username) {
+        
+        // Query the database to get the list of emails for username
+        StringBuffer sql = new StringBuffer();
+        sql.append("select pid, username, email "); 
+        sql.append("from people "); 
+        sql.append("where username = '");
+        sql.append(username).append("';");
+        System.out.println(sql.toString());
+        
+        AccountInfo acctInfo = lookupAccount(sql);
+        
+        return acctInfo;
+    }
+    
+    private AccountInfo lookupAccountByEmail(String email) {
+        
+        // Query the database to get the list of usernames for email
+        StringBuffer sql = new StringBuffer();
+        sql.append("select pid, username, email "); 
+        sql.append("from people "); 
+        sql.append("where email = '");
+        sql.append(email).append("' ");
+        sql.append("OR parentemail = '");
+        sql.append(email).append("';");
+        System.out.println(sql.toString());
+        
+        AccountInfo acctInfo = lookupAccount(sql);
+        
+        return acctInfo;
+    }
+    
+    private AccountInfo lookupAccount(StringBuffer sql) {
+        AccountInfo acctInfo = null;
+        try {
+            Connection con = getConnection();
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql.toString());
+            long pid = 0;
+            ArrayList<String> usernames = new ArrayList<String>();
+            String email = "";
+            while (rs.next()) {
+                pid = rs.getLong(1);
+                usernames.add(rs.getString(2));
+                email = rs.getString(3);
+            }
+            acctInfo = new AccountInfo(pid, usernames, email);
+            stmt.close();
+            con.close();
+    
+        } catch(SQLException ex) {
+            System.err.println("SQLException: " + ex.getMessage());
+        }
+        return acctInfo;
+    }
+
+    /**
+     * Update the database with new encrypted password for the person identified by pid.
+     */
+    private boolean updatePassword(long pid, String newPassword) {
+        boolean successFlag = false;
+        
+        StringBuffer sql = new StringBuffer();
+        sql.append("update people set ");
+        // Hash the password before insertion into the database
+        String hashed = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+        sql.append("password='").append(hashed).append("' ");
+        sql.append("where pid=").append(pid);
+        System.out.println(sql.toString());
+    
+        try {
+            Connection con = getConnection();
+            Statement stmt = con.createStatement();
+            stmt.executeUpdate(sql.toString());
+            stmt.close();
+            con.close();
+            successFlag = true;
+        } catch(SQLException ex) {
+            System.err.println("SQLException: " + ex.getMessage());
+        }
+        return successFlag;
+    }
+
     /**
      * Check the LoginSession to see if it is a valid session that corresponds
      * to the correct user and that it has not expired.
@@ -969,8 +993,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         int pid = 0;
 
         StringBuffer sql = new StringBuffer();
-        sql.append("select pid,password from people where "); //$NON-NLS-1$
-        sql.append("username LIKE '").append(username).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+        sql.append("select pid,password from people where ");
+        sql.append("username LIKE '").append(username).append("'");
         System.out.println(sql.toString());
 
         try {
@@ -983,7 +1007,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 // Check that an unencrypted password matches one that has
                 // previously been hashed
                 if (!BCrypt.checkpw(password, hashed)) {
-                    System.out.println("It does not match"); //$NON-NLS-1$
+                    System.out.println("It does not match");
                     pid = 0;
                 }
             }
@@ -991,7 +1015,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             con.close();
 
         } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+            System.err.println("SQLException: " + ex.getMessage());
         }
         
         return pid;
@@ -1006,16 +1030,31 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         try {
             Class.forName(JDBC_DRIVER);
         } catch(java.lang.ClassNotFoundException e) {
-            System.err.print("ClassNotFoundException: "); //$NON-NLS-1$
+            System.err.print("ClassNotFoundException: ");
             System.err.println(e.getMessage());
         }
 
         try {
             con = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
         } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage()); //$NON-NLS-1$
+            System.err.println("SQLException: " + ex.getMessage());
         }
         
         return con;
+    }
+
+    /**
+     * A class that encapsulates account information to be passed to local methods.
+     */
+    private class AccountInfo {
+        protected final long pid;
+        protected final ArrayList<String> usernames;
+        protected final String email;
+        
+        public AccountInfo(long pid, ArrayList<String> usernames, String email) {
+            this.pid = pid;
+            this.usernames = usernames;
+            this.email = email;
+        }
     }
 }

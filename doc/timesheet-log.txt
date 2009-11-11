@@ -15,4 +15,5 @@ Hours worked on the JSC registration data system
 10/17/2009,4,Add new Manage Classes screen and level editing ability
 10/19/2009,2,Completed Manage Classes function, debug and test
 10/23/2009,2,Change discount calculation to be based on fixed date, release beta 2 release
-11/9/2009,0.5,Add query for mailing list generation
+11/9/2009,3.5,Add query for mailing list generation, initial support for password reset
+11/11/2009,2,Finished support for emailing usernames and resetting passwords

@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -81,17 +80,24 @@ public class ResetPasswordScreen extends BaseScreen {
         resetButton.addStyleName("jsc-button-right");
         resetPanel.add(resetButton);
         resetPanel.add(new Label(" "));
-
-        Label emailLabel = new Label("\nEmail:");
+        
+        Label orLabel = new Label("OR");
+        orLabel.addStyleName("jsc-fieldlabel-left");
+        resetPanel.add(orLabel);
+        Label instructLabel = new Label("Lookup username:");
+        instructLabel.addStyleName("jsc-fieldlabel-left");
+        resetPanel.add(instructLabel);
+        
+        Label emailLabel = new Label("Email:");
         resetPanel.add(emailLabel);
         emailLabel.addStyleName("jsc-fieldlabel-left");
-        email = new PasswordTextBox();
+        email = new TextBox();
         email.addStyleName("jsc-field");
         resetPanel.add(email);
         Button findAccountButton = new Button("Find Username");
         findAccountButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                //findUsername();
+                findUsername();
             }
         });
         findAccountButton.addStyleName("jsc-button-right");
@@ -134,6 +140,39 @@ public class ResetPasswordScreen extends BaseScreen {
 
         // Make the call to the registration service.
         regService.resetPassword(username.getText(), callback);
+    }
+    /**
+     * Search for account usernames matching the provided email address.
+     */
+    private void findUsername() {
+        // Initialize the service proxy.
+        if (regService == null) {
+            regService = GWT.create(SkaterRegistrationService.class);
+        }
+
+        // Set up the callback object.
+        AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+            public void onFailure(Throwable caught) {
+                // TODO: Do something with errors.
+                GWT.log("Username lookup failed to complete.", caught);
+            }
+
+            public void onSuccess(Boolean successFlag) {                
+                if (successFlag) {
+                    // The username search succeeded
+                    GWT.log("Username search succeeded.", null);
+
+                    // Change our application state to the classes screen
+                    History.newItem("login");
+                    setMessage("Username lookup succeeded. Check your email for the list of usernames, then sign in here.");
+                } else {
+                    setMessage("Sorry, no accounts found matching that email address.");
+                }
+            }
+        };
+
+        // Make the call to the registration service.
+        regService.findUsername(email.getText(), callback);
     }
     
     /**
