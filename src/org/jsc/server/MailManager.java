@@ -16,6 +16,8 @@ public class MailManager {
     public MailManager() {
         Properties sessionProps = new Properties();
         sessionProps.put("mail.smtp.host", ServerConstants.getString("SMTP_SERVER"));
+        sessionProps.put("mail.smtp.auth", true);
+
         session = Session.getInstance(sessionProps);
     }
     
@@ -28,12 +30,17 @@ public class MailManager {
             message.setRecipients(Message.RecipientType.TO, to);
             message.setSubject(subject);
             message.setContent(body, "text/plain");
-            Transport.send(message);        
+
+            Transport tr = session.getTransport("smtp");
+            tr.connect(ServerConstants.getString("SMTP_SERVER"), 
+                    ServerConstants.getString("SMTP_USER"),
+                    ServerConstants.getString("SMTP_PASS"));
+            message.saveChanges();
+            tr.sendMessage(message, message.getAllRecipients());
+            tr.close();
         } catch (AddressException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (MessagingException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -45,5 +52,6 @@ public class MailManager {
         String recipient = "mbjones.89@gmail.com";
         String sender = "registrar@juneauskatingclub.org";
         manager.sendMessage(subject, body, recipient, sender);
+        System.out.println("Message sent.");
     }
 }

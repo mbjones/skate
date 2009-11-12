@@ -247,7 +247,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 String subject = "Password reset completed";
                 String body = "Your password has been reset. Your new password is: "
                         + newPassword;
-                String sender = "registrar@juneauskatingclub.org";
+                String sender = ServerConstants.getString("SMTP_USER");
                 manager.sendMessage(subject, body, acctInfo.email, sender);
             }
         }
@@ -267,13 +267,13 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         
         if (email != null) {
 
-            // TODO: Look up the email in the DB to find the usernames
+            // Look up the email in the DB to find the usernames
             AccountInfo acctInfo = lookupAccountByEmail(email);
             
-            // TODO: Email the list of usernames to the user's registered email
+            // Email the list of usernames to the user's registered email
             MailManager manager = new MailManager();
             String subject = "JSC username information";
-            String sender = "registrar@juneauskatingclub.org";
+            String sender = ServerConstants.getString("SMTP_USER");
             StringBuffer body = new StringBuffer("You have JSC accounts with the following registered usernames:\n ");
             for (String username : acctInfo.usernames) {
                 body.append("    ");
