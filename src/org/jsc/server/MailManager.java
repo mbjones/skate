@@ -10,9 +10,19 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+/**
+ * Manage Mail that is to be sent out on behalf of the application by setting up
+ * needed mail transport and connections.
+ * 
+ * @author Matt Jones
+ *
+ */
 public class MailManager {
     private Session session;
     
+    /**
+     * Construct a new MailManager with server information set from the properties file.
+     */
     public MailManager() {
         Properties sessionProps = new Properties();
         sessionProps.put("mail.smtp.host", ServerConstants.getString("SMTP_SERVER"));
@@ -21,6 +31,13 @@ public class MailManager {
         session = Session.getInstance(sessionProps);
     }
     
+    /**
+     * Send a message over SMTP.
+     * @param subject subject of the message to be sent
+     * @param body text of the body of the message
+     * @param recipient recipient email address
+     * @param sender sender email address
+     */
     public void sendMessage(String subject, String body, String recipient, String sender) {
         Message message = new MimeMessage(session);
         try {
@@ -45,6 +62,10 @@ public class MailManager {
         }
     }
     
+    /**
+     * Mail method used for testing only.
+     * @param args none for this method
+     */
     public static void main(String[] args) {
         MailManager manager = new MailManager();
         String subject = "Test email to be sent";
