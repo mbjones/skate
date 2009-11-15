@@ -39,3 +39,16 @@ SELECT givenname|| ' ' || surname || ' <' || email || '>' from people
 UNION
 SELECT parentfirstname|| ' ' || parentsurname || ' <' || parentemail || '>' from people;
 
+-- Update query to batch correct the maxlevel field for people based on the hishest level
+-- they have passed in any of their classes
+UPDATE people
+  SET maxlevel =
+      (SELECT levelcode
+         FROM peoplelevel
+        WHERE peoplelevel.pid = people.pid)
+  WHERE EXISTS
+      (SELECT peoplelevel.pid
+         FROM peoplelevel
+        WHERE peoplelevel.pid = people.pid
+          AND peoplelevel.levelorder > 0);
+
