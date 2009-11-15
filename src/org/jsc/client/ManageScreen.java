@@ -67,6 +67,11 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         eventBus.addHandler(SkatingClassChangeEvent.TYPE, this);
     }
     
+    /**
+     * Constructor that is used when building the RosterScreen.
+     * @param loginSession
+     * @param eventBus
+     */
     public ManageScreen(LoginSession loginSession, HandlerManager eventBus) {
         super(loginSession, eventBus);
         this.layoutForPrinting = true;
@@ -422,7 +427,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         String newLevel = tb.getValue();
         tb = (TextBox)rosterGrid.getWidget(row, 0);
         String newSection = tb.getValue();
-        GWT.log("Value is: " + newLevel + " " + newSection, null);
+        GWT.log("Section value is: " + newLevel + " " + newSection, null);
         
         // Initialize the service proxy.
         if (regService == null) {
@@ -440,6 +445,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             public void onSuccess(Boolean resultFlag) {
                 GWT.log("Save roster returned: " + resultFlag, null);
                 if (resultFlag) {
+                    refreshClassRoster(selectedClassRowIndex);
                     setMessage("Changes saved.");
                 } else {
                     refreshClassRoster(selectedClassRowIndex);
