@@ -185,7 +185,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         classLabel = new Label("Select a class from the list to see the class roster.");
         classLabel.addStyleName("jsc-step");
         rosterPanel.add(classLabel);
-        Button printButton = new Button("Print");
+        Button printButton = new Button("Print Roster");
         printButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 printRoster();

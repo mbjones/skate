@@ -675,10 +675,24 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 }
                 stmt.close();
                 
+                // Look up the highest level for this person now
+                sql = new StringBuffer();
+                sql.append("SELECT levelcode from peoplelevel WHERE pid = ");
+                sql.append(pid);
+                System.out.println(sql.toString());
+                stmt = con.createStatement();
+                String maxLevel = "0";
+                rs = stmt.executeQuery(sql.toString());
+                if (rs.next()) {
+                    maxLevel = rs.getString(1);
+                }
+                stmt.close();
+                
+                // Update the people table with this highest level value
                 sql = new StringBuffer();
                 sql.append("UPDATE people ");
                 sql.append("SET");
-                sql.append(" maxlevel = '").append(newLevel).append("'");
+                sql.append(" maxlevel = '").append(maxLevel).append("'");
                 sql.append(" where pid = ");
                 sql.append(pid);
                 System.out.println(sql.toString());
