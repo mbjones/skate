@@ -191,9 +191,9 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             rosterPanel.add(printButton);
         }
         
-        int columns = 12;
+        int columns = 8;
         if (layoutForPrinting) {
-            columns -= 2;
+            columns += 2;
         }
         rosterGrid = new Grid(0, columns);
         
@@ -201,25 +201,34 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         Label sectionLabel = new Label("Section");
         Label skaterNameLabel = new Label("Skater");
         Label statusLabel = new Label("Payment");
-        Label week1Label = new Label("Wk 1");
-        Label week2Label = new Label("Wk 2");
-        Label week3Label = new Label("Wk 3");
-        Label week4Label = new Label("Wk 4");
-        Label week5Label = new Label("Wk 5");
-        Label week6Label = new Label("Wk 6");
+        Widget w1, w2, w3, w4, w5, w6;
+        if (layoutForPrinting) {
+            w1 = new Label("Wk 1");
+            w2 = new Label("Wk 2");
+            w3 = new Label("Wk 3");
+            w4 = new Label("Wk 4");
+            w5 = new Label("Wk 5");
+            w6 = new Label("Wk 6");
+        } else {
+            w1 = new Hidden("rosterid");
+            w2 = new Hidden("paymentid");
+            w3 = new Hidden(" ");
+            w4 = new Hidden(" ");
+            w5 = new Hidden(" ");
+            w6 = new Hidden(" ");
+        }
+   
         Label levelPassedLabel = new Label("Level");
         Label saveLabel = new Label(" ");
         Label cancelLabel = new Label(" ");
         
         if (layoutForPrinting) {
             Widget[] widgets = {sectionLabel, skaterNameLabel, statusLabel,  
-                    week1Label, week2Label, week3Label, week4Label, week5Label, 
-                    week6Label, levelPassedLabel};
+                    w1, w2, w3, w4, w5, w6, levelPassedLabel};
             addRowToGrid(rosterGrid, widgets);
         } else {
             Widget[] widgets = {sectionLabel, skaterNameLabel, statusLabel,  
-                    week1Label, week2Label, week3Label, week4Label, week5Label, 
-                    week6Label, levelPassedLabel, saveLabel, cancelLabel};
+                    w1, w2, levelPassedLabel, saveLabel, cancelLabel};
             addRowToGrid(rosterGrid, widgets);
         }
         rosterPanel.add(rosterGrid);
@@ -385,8 +394,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 addRowToGrid(rosterGrid, widgets);
             } else {
                 Widget[] widgets = {sectionBox, skaterNameLabel, paymentStatusLabel, 
-                        rosterIdWidget, paymentIdWidget, week3Label, week4Label, week5Label, 
-                        week6Label, levelPassedBox, saveWidget, cancelWidget};
+                        rosterIdWidget, paymentIdWidget, levelPassedBox, saveWidget, cancelWidget};
                 addRowToGrid(rosterGrid, widgets);
 
             }
@@ -403,7 +411,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         Button source = (Button)event.getSource();
         Grid rosterGrid = (Grid)source.getParent();
         int row = rosterGrid.getCellForEvent(event).getRowIndex();
-        TextBox tb = (TextBox)rosterGrid.getWidget(row, 9);
+        TextBox tb = (TextBox)rosterGrid.getWidget(row, 5);
         String newLevel = tb.getValue();
         tb = (TextBox)rosterGrid.getWidget(row, 0);
         String newSection = tb.getValue();
