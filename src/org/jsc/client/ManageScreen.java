@@ -9,6 +9,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
@@ -22,18 +23,25 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 
+/**
+ * A screen that is used by coaches and administrators to manage class rosters, 
+ * and to mark student level passed, and sections.
+ * 
+ * @author Matt Jones
+ */
 public class ManageScreen extends BaseScreen implements SkatingClassChangeHandler, ClickHandler {
 
-    private HorizontalPanel screen;
+    protected HorizontalPanel screen;
     private VerticalPanel classesPanel;
-    private VerticalPanel rosterPanel;
+    protected VerticalPanel rosterPanel;
     private ClassListModel sessionClassList;
     private Grid classesGrid;
     private SkaterRegistrationServiceAsync regService;
     private int selectedClassRowIndex;
     private Grid rosterGrid;
     private Label classLabel;
-    private ArrayList<RosterEntry> currentRoster;
+    protected ArrayList<RosterEntry> currentRoster;
+    private RosterScreen roster;
 
     /**
      * Create the Management screen for managing class rosters and levels 
@@ -42,9 +50,11 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
      * @param eventBus
      * @param sessionClassList
      */
-    public ManageScreen(LoginSession loginSession, HandlerManager eventBus, ClassListModel sessionClassList) {
-        super(loginSession, eventBus);
+    public ManageScreen(LoginSession loginSession, HandlerManager eventBus, 
+            ClassListModel sessionClassList, RosterScreen roster) {
+        this(loginSession, eventBus);
         this.sessionClassList = sessionClassList;
+        this.roster = roster;
         selectedClassRowIndex = 0;
         
         this.setScreenTitle("Manage Classes");
@@ -55,10 +65,14 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         eventBus.addHandler(SkatingClassChangeEvent.TYPE, this);
     }
     
+    public ManageScreen(LoginSession loginSession, HandlerManager eventBus) {
+        super(loginSession, eventBus);
+    }
+    
     /**
      * Lay out the user interface widgets on the screen.
      */
-    private void layoutScreen() {
+    protected void layoutScreen() {
         this.setScreenTitle("Manage Classes");
         this.setStyleName("jsc-twopanel-screen");
         
@@ -157,7 +171,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     /**
      * Set up the roster panel to display students in a selected class.
      */
-    private void createRosterPanel() {
+    protected void createRosterPanel() {
         rosterPanel = new VerticalPanel();
         rosterPanel.addStyleName("jsc-rightpanel");
         classLabel = new Label("Select a class from the list to see the class roster.");
@@ -170,7 +184,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             }
         });
         printButton.addStyleName("jsc-button-right");
-//        rosterPanel.add(printButton);
+        rosterPanel.add(printButton);
         
         rosterGrid = new Grid(0, 12);
         
@@ -231,8 +245,8 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     private void refreshClassRoster(int row) {
         clearMessage();
         ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList(); 
-        SessionSkatingClass curClass = classes.get(row-1);
-        classLabel.setText(curClass.formatClassLabel());
+        final SessionSkatingClass curClass = classes.get(row-1);
+        //classLabel.setText(curClass.formatClassLabel());
         
         // Initialize the service proxy.
         if (regService == null) {
@@ -253,7 +267,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                     return;
                 } else {
                     currentRoster = newRoster;
-                    updateRosterTable(newRoster);
+                    updateRosterTable(newRoster, curClass);
                 }
             }
         };
@@ -262,8 +276,12 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         regService.getClassRoster(loginSession, curClass.getClassId(), callback);
     }
     
-    private void updateRosterTable(ArrayList<RosterEntry> newRoster) {
+    protected void updateRosterTable(ArrayList<RosterEntry> newRoster, 
+            SessionSkatingClass curClass) {
         
+        // Update the class label
+        classLabel.setText(curClass.formatClassLabel());
+
         // Remove all of the rows from the table, except the header row
         int rows = rosterGrid.getRowCount();
         for (int i = rows-1; i > 0; i--) {
@@ -273,11 +291,6 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         
         // Add all of the new roster entries into the table
         for (RosterEntry entry : newRoster) {
-            SessionSkatingClass curClass = sessionClassList.getSkatingClass(entry.getClassid());
-            if (curClass == null) {
-                GWT.log("Expected SessionSkatingClass was not found in model", null);
-                break;
-            }
             TextBox sectionBox = new TextBox();
             sectionBox.setText(entry.getSection());
             sectionBox.addStyleName("jsc-text-box-short");
@@ -442,7 +455,11 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     protected void printRoster(ClickEvent event) {
         GWT.log("Print roster rows: " + currentRoster.size(), null);
         // TODO: Create a new screen by passing in the currentRoster to be displayed
-        // It should have the same structure as this roster table, minues a couple of columns
+        // It should have the same structure as this roster table, minus a couple of columns
         // so refactor to reuse layout code
+        ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList();
+        SessionSkatingClass curClass = classes.get(selectedClassRowIndex-1);
+        roster.updateRosterTable(currentRoster, curClass);
+        History.newItem("roster");
     }
 }
