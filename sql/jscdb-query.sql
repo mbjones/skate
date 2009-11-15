@@ -25,6 +25,15 @@ SELECT ppl.surname, ppl.givenname, m.season, p.paypal_status
     AND sc.sessionname = '1'
   ORDER BY y.paypal_status, sc.classtype, p.surname, p.givenname;
 
+   SELECT p.surname||','|| p.givenname||','||p.levelpassed||','||sc.classtype||','||sc.day||','||y.paypal_status
+   FROM roster r, peoplelevel p, payment y, sessionclasses sc
+  WHERE r.pid = p.pid 
+    AND r.paymentid = y.paymentid
+    AND r.classid = sc.classid
+    AND sc.season = '2009-2010'
+    AND sc.sessionname = '1'
+  ORDER BY y.paypal_status, sc.classtype, p.surname, p.givenname;
+  
 -- Query to create a mailing list
 SELECT givenname|| ' ' || surname || ' <' || email || '>' from people
 UNION

@@ -42,6 +42,7 @@ public class Person implements Serializable {
     private long mid;
     private String membershipStatus;
     private long membershipPaymentId;
+    private String maxLevel;
     
     // Predefined roles used in the application
     // Roles are cumulative (higher roles have all privileges of lower roles)
@@ -489,6 +490,20 @@ public class Person implements Serializable {
     }
 
     /**
+     * @param maxLevel the maxLevel to set
+     */
+    public void setMaxLevel(String maxLevel) {
+        this.maxLevel = maxLevel;
+    }
+
+    /**
+     * @return the maxLevel
+     */
+    public String getMaxLevel() {
+        return maxLevel;
+    }
+
+    /**
      * Look up properties for this Person instance from the database and refresh those
      * details in this instance.
      */
@@ -547,6 +562,7 @@ public class Person implements Serializable {
         setMember(p.isMember());
         setMembershipId(p.getMembershipId());
         setMembershipStatus(p.getMembershipStatus());
-        setMembershipPaymentId(p.getMembershipPaymentId());        
+        setMembershipPaymentId(p.getMembershipPaymentId());  
+        setMaxLevel(p.getMaxLevel());
     }
 }

@@ -223,7 +223,12 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             w6 = new Hidden(" ");
         }
    
-        Label levelPassedLabel = new Label("Level");
+        Label levelPassedLabel = null;
+        if (layoutForPrinting) {
+            levelPassedLabel = new Label("Max Level");
+        } else {
+            levelPassedLabel = new Label("Level Passed");
+        }
         Label saveLabel = new Label(" ");
         Label cancelLabel = new Label(" ");
         
@@ -349,7 +354,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             
             Widget levelPassedBox = null;
             if (layoutForPrinting) {
-                levelPassedBox = new Label(entry.getLevelpassed());
+                levelPassedBox = new Label(entry.getMaxLevel());
             } else {
                 levelPassedBox = new TextBox();
                 ((TextBox)levelPassedBox).setText(entry.getLevelpassed());

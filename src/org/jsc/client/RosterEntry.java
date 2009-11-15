@@ -22,6 +22,7 @@ public class RosterEntry implements Serializable {
     private String surname;
     private String givenname;
     private String section;
+    private String maxlevel;
     
     /**
      * Default constructor takes no parameters.
@@ -174,6 +175,20 @@ public class RosterEntry implements Serializable {
      */
     public String getSection() {
         return section;
+    }
+
+    /**
+     * @param maxlevel the maxlevel to set
+     */
+    public void setMaxLevel(String maxlevel) {
+        this.maxlevel = maxlevel;
+    }
+
+    /**
+     * @return the maxlevel
+     */
+    public String getMaxLevel() {
+        return maxlevel;
     }
     
 }

@@ -35,7 +35,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     private static final String JDBC_USER = ServerConstants.getString("JDBC_USER");
     private static final String JDBC_PASS = ServerConstants.getString("JDBC_PASS");
     private static final String JDBC_DRIVER = ServerConstants.getString("JDBC_DRIVER");
-    private static final String ROSTER_QUERY = "SELECT rosterid, classid, pid, levelPassed, paymentid, payment_amount, paypal_status, date_updated, surname, givenname, section FROM rosterpeople";
+    private static final String ROSTER_QUERY = "SELECT rosterid, classid, pid, levelPassed, paymentid, payment_amount, paypal_status, date_updated, surname, givenname, section, maxlevel FROM rosterpeople";
     private static final int MAX_SESSION_INTERVAL = 60 * 30;
     private static Random random = new Random();
     
@@ -644,10 +644,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         }
         
         if (isAuthorized) {
-            // Save the new information to the roster tables
             Connection con = getConnection();
             try {
-                con.setAutoCommit(false);            
+                con.setAutoCommit(false); 
+                
+                // Save the new information to the roster table
                 StringBuffer sql = new StringBuffer();
                 sql.append("UPDATE roster ");
                 sql.append("SET");
@@ -659,7 +660,33 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 Statement stmt = con.createStatement();
                 int rowcount = stmt.executeUpdate(sql.toString());
                 System.out.println("Updated " + rowcount + " rows in roster.");
-                stmt.close(); 
+                stmt.close();
+                
+                // Look up the pid from the rosterid
+                sql = new StringBuffer();
+                sql.append("SELECT pid from roster WHERE rosterid = ");
+                sql.append(rosterid);
+                System.out.println(sql.toString());
+                stmt = con.createStatement();
+                long pid = -1;
+                ResultSet rs = stmt.executeQuery(sql.toString());
+                if (rs.next()) {
+                    pid = rs.getLong(1);
+                }
+                stmt.close();
+                
+                sql = new StringBuffer();
+                sql.append("UPDATE people ");
+                sql.append("SET");
+                sql.append(" maxlevel = '").append(newLevel).append("'");
+                sql.append(" where pid = ");
+                sql.append(pid);
+                System.out.println(sql.toString());
+                stmt = con.createStatement();
+                rowcount = stmt.executeUpdate(sql.toString());
+                System.out.println("Updated " + rowcount + " rows in people.");
+                stmt.close();
+                
                 con.commit();
                 con.close();
     
@@ -668,7 +695,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                     con.rollback();
                     con.close();
                 } catch (SQLException e) {
-                    System.out.println("Unable to rollback during invoice deletion." + e.getMessage());
+                    System.out.println("Unable to rollback during roster save." + e.getMessage());
                     return false;
                 }
                 System.err.println("SQLException: " + ex.getMessage());
@@ -769,6 +796,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         entry.setSurname(rs.getString(9));
         entry.setGivenname(rs.getString(10));
         entry.setSection(rs.getString(11));
+        entry.setMaxLevel(rs.getString(12));
         return entry;
     }
     
@@ -783,7 +811,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         StringBuffer sql = new StringBuffer();           
         sql.append("select pid, surname, givenname, middlename, email, birthdate, home_phone, " +
         		"cell_phone, work_phone, street1, street2, city, state, zipcode, parentfirstname, " + 
-        		"parentsurname, parentemail, username, password, role from people where "); 
+        		"parentsurname, parentemail, username, password, role, maxlevel from people where "); 
         sql.append("pid = '").append(pid).append("'");
         System.out.println(sql.toString());
         
@@ -813,6 +841,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 person.setParentEmail(rs.getString(17));
                 person.setUsername(rs.getString(18));
                 person.setRole(rs.getInt(20));
+                person.setMaxLevel(rs.getString(21));
                 person.setPassword(null);
                 person.setMember(false);
             }

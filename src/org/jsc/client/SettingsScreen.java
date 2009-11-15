@@ -52,6 +52,8 @@ public class SettingsScreen extends BaseScreen {
     private PasswordTextBox password2Field;
     
     private Label membershipLabel;
+    private Label maxLevelLabel;
+    
     private Button accountButton;
     private Grid leftGrid;
     private Grid rightGrid;
@@ -134,7 +136,8 @@ public class SettingsScreen extends BaseScreen {
         addToLeftGrid("Re-type Password:", password2Field);
         membershipLabel = new Label("false");
         addToLeftGrid("Membership paid:", membershipLabel);
-        
+        maxLevelLabel = new Label(" ");
+        addToLeftGrid("Highest Level:", maxLevelLabel);
     }
     
     private void layoutRightPanel() {
@@ -237,6 +240,7 @@ public class SettingsScreen extends BaseScreen {
             password1Field.setText("");
             password2Field.setText("");
             membershipLabel.setText(Boolean.toString(person.isMember()));
+            maxLevelLabel.setText(person.getMaxLevel());
 
         } else {
             fnameField.setText("");

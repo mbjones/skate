@@ -29,8 +29,10 @@ CREATE TABLE people (
     parentSurname VARCHAR(250), -- Last name of the parent
     parentFirstname VARCHAR(250), -- First name of the parent
     parentEmail VARCHAR(250), -- email of the parent
+    maxlevel VARCHAR(60),     -- highest level passed in any class
 	date_updated TIMESTAMP default CURRENT_TIMESTAMP, -- the date the record was last updated
    CONSTRAINT people_pk PRIMARY KEY (pid),
+   CONSTRAINT people_level_fk FOREIGN KEY (maxlevel) REFERENCES levels,
    CONSTRAINT username_uk UNIQUE (username)
 );
 
@@ -92,6 +94,7 @@ CREATE OR REPLACE VIEW sessionclasses AS
 CREATE TABLE levels (
 	levelcode VARCHAR(60),    -- the code for this level
     levelname VARCHAR(60),    -- the name for this level
+    levelorder INT8,          -- the numeric order of the levels
    CONSTRAINT levels_pk PRIMARY KEY (levelcode)
 );
 
@@ -135,7 +138,7 @@ CREATE TABLE roster (
 CREATE OR REPLACE VIEW rosterpeople AS 
  SELECT r.rosterid, r.classid, r.pid, r.levelPassed, r.paymentid, 
         r.payment_amount, y.paypal_status, r.section, r.date_updated, 
-        p.surname, p.givenname
+        p.surname, p.givenname, p.maxlevel
    FROM roster r, people p, payment y
   WHERE r.pid = p.pid
     AND r.paymentid = y.paymentid
@@ -159,3 +162,16 @@ CREATE OR REPLACE VIEW memberstatus AS
  SELECT m.mid, m.pid, m.paymentid, m.season, p.paypal_status
    FROM membership m, payment p
   WHERE m.paymentid = p.paymentid;
+  
+-- peoplelevel -- a view of people showing highest level passed 
+CREATE OR REPLACE VIEW peoplelevel AS
+ SELECT p.pid, l.levelcode, pl.levelorder
+   FROM people p, levels l,
+        (SELECT r.pid, max(l.levelorder) as levelorder
+           FROM roster r, levels l
+          WHERE r.levelpassed = l.levelcode
+          GROUP BY r.pid) AS pl
+  WHERE p.pid = pl.pid
+    AND l.levelorder = pl.levelorder;
+   
+ 
