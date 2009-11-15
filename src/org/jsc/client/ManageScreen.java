@@ -42,6 +42,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     private Label classLabel;
     protected ArrayList<RosterEntry> currentRoster;
     private RosterScreen roster;
+    private boolean layoutForPrinting;
 
     /**
      * Create the Management screen for managing class rosters and levels 
@@ -52,9 +53,10 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
      */
     public ManageScreen(LoginSession loginSession, HandlerManager eventBus, 
             ClassListModel sessionClassList, RosterScreen roster) {
-        this(loginSession, eventBus);
+        super(loginSession, eventBus);
         this.sessionClassList = sessionClassList;
         this.roster = roster;
+        this.layoutForPrinting = false;
         selectedClassRowIndex = 0;
         
         this.setScreenTitle("Manage Classes");
@@ -67,6 +69,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     
     public ManageScreen(LoginSession loginSession, HandlerManager eventBus) {
         super(loginSession, eventBus);
+        this.layoutForPrinting = true;
     }
     
     /**
@@ -184,9 +187,15 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             }
         });
         printButton.addStyleName("jsc-button-right");
-        rosterPanel.add(printButton);
+        if (!layoutForPrinting) {
+            rosterPanel.add(printButton);
+        }
         
-        rosterGrid = new Grid(0, 12);
+        int columns = 12;
+        if (layoutForPrinting) {
+            columns -= 2;
+        }
+        rosterGrid = new Grid(0, columns);
         
         // Add a header row to the table
         Label sectionLabel = new Label("Section");
@@ -202,10 +211,17 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         Label saveLabel = new Label(" ");
         Label cancelLabel = new Label(" ");
         
-        Widget[] widgets = {sectionLabel, skaterNameLabel, statusLabel,  
-                week1Label, week2Label, week3Label, week4Label, week5Label, 
-                week6Label, levelPassedLabel, saveLabel, cancelLabel};
-        addRowToGrid(rosterGrid, widgets);
+        if (layoutForPrinting) {
+            Widget[] widgets = {sectionLabel, skaterNameLabel, statusLabel,  
+                    week1Label, week2Label, week3Label, week4Label, week5Label, 
+                    week6Label, levelPassedLabel};
+            addRowToGrid(rosterGrid, widgets);
+        } else {
+            Widget[] widgets = {sectionLabel, skaterNameLabel, statusLabel,  
+                    week1Label, week2Label, week3Label, week4Label, week5Label, 
+                    week6Label, levelPassedLabel, saveLabel, cancelLabel};
+            addRowToGrid(rosterGrid, widgets);
+        }
         rosterPanel.add(rosterGrid);
     }
 
@@ -291,9 +307,15 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         
         // Add all of the new roster entries into the table
         for (RosterEntry entry : newRoster) {
-            TextBox sectionBox = new TextBox();
-            sectionBox.setText(entry.getSection());
-            sectionBox.addStyleName("jsc-text-box-short");
+            Widget sectionBox = null;
+            if (layoutForPrinting) {
+                sectionBox = new Label(entry.getSection());
+            } else {
+                sectionBox = new TextBox();
+                ((TextBox)sectionBox).setText(entry.getSection());
+                sectionBox.addStyleName("jsc-text-box-short");
+            }
+            
             Label skaterNameLabel = new Label(entry.getGivenname() + " " + entry.getSurname());
             Label paymentStatusLabel = new Label(entry.getPaypal_status());
 
@@ -304,22 +326,33 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             Label week5Label = new Label(" ");
             Label week6Label = new Label(" ");
             
-            TextBox levelPassedBox = new TextBox();
-            levelPassedBox.setText(entry.getLevelpassed());
-            levelPassedBox.setMaxLength(3);
-            levelPassedBox.addStyleName("jsc-text-box-short");
-
-            Button saveButton = new Button("Save");
-            final long currentRosterId = entry.getRosterid();
-            saveButton.addClickHandler(new ClickHandler() {
-                public void onClick(ClickEvent event) {
-                    requestSaveRoster(currentRosterId, event);
-                }
-            });
-            saveButton.addStyleName("jsc-button-right");
+            Widget levelPassedBox = null;
+            if (layoutForPrinting) {
+                levelPassedBox = new Label(entry.getLevelpassed());
+            } else {
+                levelPassedBox = new TextBox();
+                ((TextBox)levelPassedBox).setText(entry.getLevelpassed());
+                ((TextBox)levelPassedBox).setMaxLength(3);
+                levelPassedBox.addStyleName("jsc-text-box-short");    
+            }
+            
+            Widget saveWidget = null;
+            if (!layoutForPrinting) {
+                Button saveButton = new Button("Save");
+                final long currentRosterId = entry.getRosterid();
+                saveButton.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        requestSaveRoster(currentRosterId, event);
+                    }
+                });
+                saveButton.addStyleName("jsc-button-right");
+                saveWidget = saveButton;
+            } else {
+                saveWidget = new Label(" ");
+            }
             
             Widget cancelWidget;
-            if (entry.getPaypal_status().equals("Pending")) {
+            if (!layoutForPrinting && entry.getPaypal_status().equals("Pending")) {
                 Button cancelButton = new Button("Delete");
                 final long currentPaymentId = entry.getPaymentid();
                 cancelButton.addClickHandler(new ClickHandler() {
@@ -332,14 +365,31 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             } else {
                 cancelWidget = new Label(" ");
             }
+            
+            Widget rosterIdWidget = null;
+            Widget paymentIdWidget = null;
+            if (layoutForPrinting) {
+                rosterIdWidget = new Label(" ");
+                paymentIdWidget = new Label(" ");
+            } else {
+                Hidden rosterIdHidden = new Hidden(new Long(entry.getRosterid()).toString());
+                Hidden paymentIdHidden = new Hidden(Long.toString(entry.getPaymentid()));
+                rosterIdWidget = rosterIdHidden;
+                paymentIdWidget = paymentIdHidden;
+            }
 
-            Hidden rosterIdHidden = new Hidden(new Long(entry.getRosterid()).toString());
-            Hidden paymentIdHidden = new Hidden(Long.toString(entry.getPaymentid()));
+            if (layoutForPrinting) {
+                Widget[] widgets = {sectionBox, skaterNameLabel, paymentStatusLabel, 
+                        rosterIdWidget, paymentIdWidget, week3Label, week4Label, week5Label, 
+                        week6Label, levelPassedBox};
+                addRowToGrid(rosterGrid, widgets);
+            } else {
+                Widget[] widgets = {sectionBox, skaterNameLabel, paymentStatusLabel, 
+                        rosterIdWidget, paymentIdWidget, week3Label, week4Label, week5Label, 
+                        week6Label, levelPassedBox, saveWidget, cancelWidget};
+                addRowToGrid(rosterGrid, widgets);
 
-            Widget[] widgets = {sectionBox, skaterNameLabel, paymentStatusLabel, 
-                    rosterIdHidden, paymentIdHidden, week3Label, week4Label, week5Label, 
-                    week6Label, levelPassedBox, saveButton, cancelWidget};
-            addRowToGrid(rosterGrid, widgets);
+            }
         }
     }
     
