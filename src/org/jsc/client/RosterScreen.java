@@ -5,7 +5,10 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 
 /**
  * A screen used to display the roster for a class in a format that is suitable
- * for printing. Extends ManageScreen and depends on it for layout.
+ * for printing. Extends ManageScreen and depends extensively on it for layout to
+ * minimize code duplication.  RosterScreen calls a simplified constructor on
+ * its superclass ManageScreen that sets layoutForPrinting=true to modify the
+ * table layout for the roster tables.
  * 
  * @author Matt Jones
  */
