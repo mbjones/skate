@@ -183,7 +183,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         Button printButton = new Button("Print");
         printButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                printRoster(event);
+                printRoster();
             }
         });
         printButton.addStyleName("jsc-button-right");
@@ -235,10 +235,8 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     }
 
     /**
-     * Add the given widget to the grid table. Four columns are set up, and
-     * each widget is assigned to one column and assigned a CSS style.  The 
-     * number of widgets in the array should match the number of columns in the
-     * grid.
+     * Add the given set of widgets to the grid table. One column is set up for
+     * each widget, which is assigned to the column and assigned a CSS style.
      * 
      * @param grid the grid to which a row should be added
      * @param widgets the set of widgets to be added, one per grid column
@@ -265,7 +263,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     /**
      * Update the class roster display whenever a new row is selected. The row
      * represents the row of the class listing table, which starts at 1.  
-     * @param row
+     * @param row the index in the classesGrid indicating which roster to display
      */
     private void refreshClassRoster(int row) {
         clearMessage();
@@ -301,6 +299,15 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         regService.getClassRoster(loginSession, curClass.getClassId(), callback);
     }
     
+    /**
+     * Update the roster table to reflect a new class selection.  Whenever a new
+     * roster needs to be displayed (usually from the user clicking
+     * on a new class in the classes list), clear all of the roster rows of the 
+     * table, update the class label, and then populate the table with rows from
+     * the new roster.
+     * @param newRoster the array of RosterEntrys to be displayed
+     * @param curClass the SkatingSessionClass that is being displayed
+     */
     protected void updateRosterTable(ArrayList<RosterEntry> newRoster, 
             SessionSkatingClass curClass) {
         
@@ -510,11 +517,15 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         regService.cancelInvoice(loginSession, paymentid, callback);
     }
 
-    protected void printRoster(ClickEvent event) {
+    /**
+     * Switch to the screen for printing rosters after updating it by passing in
+     * the currently selected roster and class.
+     */
+    private void printRoster() {
         GWT.log("Print roster rows: " + currentRoster.size(), null);
-        // TODO: Create a new screen by passing in the currentRoster to be displayed
-        // It should have the same structure as this roster table, minus a couple of columns
-        // so refactor to reuse layout code
+        // Switch to the screen for printing rosters, but before doing so
+        // update it by passing in the currentRoster to be displayed along with 
+        // a reference to the current selected class to be displayed
         ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList();
         SessionSkatingClass curClass = classes.get(selectedClassRowIndex-1);
         roster.updateRosterTable(currentRoster, curClass);
