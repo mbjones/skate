@@ -19,6 +19,31 @@ INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Free Skate 4', 'F
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Free Skate 5', 'FS5', 45);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Free Skate 6', 'FS6', 46);
 
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('PPM', 'Pre-Preliminary Moves', 47);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('PPF', 'Pre-Preliminary Free (Skate)', 48);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('PM', 'Preliminary Moves', 49);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('PF', 'Preliminary Free', 50);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('PJM', 'Pre-Juvenile Moves', 51);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('PJF', 'Pre-Juvenile Free', 52);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('JM', 'Juvenile Moves', 53);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('JF', 'Juvenile Free', 54);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('IM', 'Intermediate Moves', 55);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('IF', 'Intermediate Free', 56);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('NM', 'Novice Moves', 57);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('NF', 'Novice Free', 58);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('JRM', 'Junior Moves', 59);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('JRF', 'Junior Free', 60);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('SRM', 'Senior Moves', 61);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('SRF', 'Senior Free', 62);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('PD', 'Preliminary Dance', 63);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('PBD', 'Pre-Bronze Dance', 64);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('BD', 'Bronze Dance', 65);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('PSD', 'Pre-Silver Dance', 66);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('SD', 'Silver Dance', 67);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('PGD', 'Pre-Gold Dance', 68);
+INSERT INTO levels (levelcode, levelname, levelorder) VALUES ('GD', 'Gold Dance', 69);
+
+
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('Beginner Youth','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('Intermediate Youth','TBD','SS1');
 INSERT INTO classtypes (classtype, classdescription, requireslevel) VALUES ('Advanced Youth','TBD','SS1');
