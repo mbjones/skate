@@ -629,7 +629,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * The method checks that the person removing the entry is
      * a COACH or ADMIN role.
      */
-    public boolean saveRoster(LoginSession loginSession, long rosterid, String newLevel, String newSection) {
+    public boolean saveRoster(LoginSession loginSession, long rosterid, String newLevel, String newSection, String newClassId) {
         // Check authentication credentials
         if (!isSessionValid(loginSession)) {
             return false;
@@ -654,6 +654,10 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 sql.append("SET");
                 sql.append(" levelpassed = '").append(newLevel).append("'");
                 sql.append(", section = '").append(newSection).append("'");
+                long classid = new Long(newClassId).longValue();
+                if (classid > 0) {
+                    sql.append(", classid = ").append(classid);
+                }
                 sql.append(" where rosterid = ");
                 sql.append(rosterid);
                 System.out.println(sql.toString());

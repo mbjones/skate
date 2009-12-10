@@ -21,7 +21,7 @@ public interface SkaterRegistrationService extends RemoteService {
     ArrayList<SessionSkatingClass> getSessionClassList(LoginSession loginSession, Person person);
     RegistrationResults register(LoginSession loginSession, Person person, ArrayList<RosterEntry> newEntryList, boolean createMembership);
     boolean cancelInvoice(LoginSession loginSession, long paymentid);
-    boolean saveRoster(LoginSession loginSession, long rosterid, String newLevel, String newSection);
+    boolean saveRoster(LoginSession loginSession, long rosterid, String newLevel, String newSection, String newClassId);
     ArrayList<RosterEntry> getStudentRoster(LoginSession loginSession, Person person);
     ArrayList<RosterEntry> getClassRoster(LoginSession loginSession, long classId);
     boolean resetPassword(String username);

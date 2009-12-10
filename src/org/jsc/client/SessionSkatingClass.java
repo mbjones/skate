@@ -291,6 +291,28 @@ public class SessionSkatingClass implements Serializable {
     }
     
     /**
+     * Create a brief string that can be used to represent this class, including
+     * minimal information to be unique
+     * @return the String label representing the class
+     */
+    public String formatShortClassLabel() {
+        StringBuffer classLabel = new StringBuffer();
+        classLabel.append(" Session ").append(getSessionNum());
+        classLabel.append(" ").append(getClassType());
+        classLabel.append(" (").append(getDay()).append(")");
+        return classLabel.toString();
+    }
+    
+    /**
+     * Return a boolean flag indicating whether this skating class is in the
+     * current season.
+     * @return boolean true if the class is in the current season
+     */
+    public boolean isCurrentSeason() {
+        return season.equals(SessionSkatingClass.calculateSeason());
+    }
+    
+    /**
      * Utility function to determine the current skating season.  If the current
      * month is before June, we assume we are in the Spring of the previous 
      * year's season, otherwise we assume we're in Fall of this year's season.

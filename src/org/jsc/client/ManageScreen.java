@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -196,9 +197,9 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             rosterPanel.add(printButton);
         }
         
-        int columns = 8;
+        int columns = 9;
         if (layoutForPrinting) {
-            columns += 2;
+            columns += 1;
         }
         rosterGrid = new Grid(0, columns);
         
@@ -207,6 +208,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         Label skaterNameLabel = new Label("Skater");
         Label statusLabel = new Label("Payment");
         Widget w1, w2, w3, w4, w5, w6;
+        Label moveLabel =new Label("Move to:");
         if (layoutForPrinting) {
             w1 = new Label("Wk 1");
             w2 = new Label("Wk 2");
@@ -230,7 +232,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             levelPassedLabel = new Label("Level Passed");
         }
         Label saveLabel = new Label(" ");
-        Label cancelLabel = new Label(" ");
+        Label deleteLabel = new Label(" ");
         
         if (layoutForPrinting) {
             Widget[] widgets = {sectionLabel, skaterNameLabel, statusLabel,  
@@ -238,7 +240,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             addRowToGrid(rosterGrid, widgets);
         } else {
             Widget[] widgets = {sectionLabel, skaterNameLabel, statusLabel,  
-                    w1, w2, levelPassedLabel, saveLabel, cancelLabel};
+                    w1, w2, levelPassedLabel, saveLabel, deleteLabel, moveLabel};
             addRowToGrid(rosterGrid, widgets);
         }
         rosterPanel.add(rosterGrid);
@@ -377,7 +379,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 saveWidget = new Label(" ");
             }
             
-            Widget cancelWidget;
+            Widget deleteWidget;
             if (!layoutForPrinting && entry.getPaypal_status().equals("Pending")) {
                 Button cancelButton = new Button("Delete");
                 final long currentPaymentId = entry.getPaymentid();
@@ -387,9 +389,9 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                     }
                 });
                 cancelButton.addStyleName("jsc-button-right");
-                cancelWidget = cancelButton;
+                deleteWidget = cancelButton;
             } else {
-                cancelWidget = new Label(" ");
+                deleteWidget = new Label(" ");
             }
             
             Widget rosterIdWidget = null;
@@ -404,6 +406,9 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 paymentIdWidget = paymentIdHidden;
             }
 
+            //Label moveMenu = new Label("Move menu goes here");
+            ListBox moveMenu = createClassListBox(entry.getClassid());
+            
             if (layoutForPrinting) {
                 Widget[] widgets = {sectionBox, skaterNameLabel, paymentStatusLabel, 
                         rosterIdWidget, paymentIdWidget, week3Label, week4Label, week5Label, 
@@ -411,7 +416,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 addRowToGrid(rosterGrid, widgets);
             } else {
                 Widget[] widgets = {sectionBox, skaterNameLabel, paymentStatusLabel, 
-                        rosterIdWidget, paymentIdWidget, levelPassedBox, saveWidget, cancelWidget};
+                        rosterIdWidget, paymentIdWidget, levelPassedBox, saveWidget, deleteWidget, moveMenu};
                 addRowToGrid(rosterGrid, widgets);
 
             }
@@ -433,7 +438,9 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         tb = (TextBox)rosterGrid.getWidget(row, 0);
         String newSection = tb.getValue();
         GWT.log("Section value is: " + newLevel + " " + newSection, null);
-        
+        ListBox lb = (ListBox)rosterGrid.getWidget(row, 8);
+        String selectedClassId = lb.getValue(lb.getSelectedIndex());
+
         // Initialize the service proxy.
         if (regService == null) {
             regService = GWT.create(SkaterRegistrationService.class);
@@ -460,7 +467,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         };
 
         // Make the call to the registration service.
-        regService.saveRoster(loginSession, currentRosterId, newLevel, newSection, callback);
+        regService.saveRoster(loginSession, currentRosterId, newLevel, newSection, selectedClassId, callback);
     }
     
     /**
@@ -541,5 +548,28 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         SessionSkatingClass curClass = classes.get(selectedClassRowIndex-1);
         roster.updateRosterTable(currentRoster, curClass);
         History.newItem("roster");
+    }
+    
+    private ListBox createClassListBox(long classid) {
+        ListBox classField = new ListBox();
+        classField.addItem("Select new class", "0");
+        
+        ArrayList<SessionSkatingClass> list = sessionClassList.getClassList();
+        
+        if (list != null) {
+            for (SessionSkatingClass curClass : list) {
+                // Only include the active session in the dropdown list
+                if (curClass.isCurrentSeason()) {
+                    // Only add item to list if student is not registered
+                    if (classid == curClass.getClassId()) {
+                        GWT.log("Skipping class in menu: " + curClass.getClassId(), null);
+                    } else {
+                        String classLabel = curClass.formatShortClassLabel();
+                        classField.addItem(classLabel, new Long(curClass.getClassId()).toString());
+                    }
+                }
+            }
+        }
+        return classField;
     }
 }
