@@ -758,6 +758,122 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     }
     
     /**
+     * Duplicate all of the classes that are present for one session and assign
+     * them to a new session, thereby allowing us to quickly create a new set of
+     * classes for the whole session.
+     * @param loginSession the session used to authenticate
+     * @param oldSeason the season of the session from which we will copy
+     * @param oldSession the sessionName of the session from which we will copy
+     * @param newSeason the target season for copying classes
+     * @param newSession the target session for copying classes
+     */
+    public boolean duplicateSessionClassList(LoginSession loginSession, String oldSeason, 
+            String oldSession, String newSeason, String newSession) {
+        // Check authentication credentials
+        if (!isSessionValid(loginSession)) {
+            return false;
+        }
+
+        // Basic validation check on input
+        if (oldSeason != null && oldSeason.length() > 0 &&
+                oldSession != null && oldSession.length() > 0 &&
+                newSeason != null && newSeason.length() > 0 &&
+                newSession != null && newSession.length() > 0) {
+        } else {
+            return false;
+        }
+        
+        // Check if person is authorized because they are an administrator
+        boolean isAuthorized = false;
+        long role = getRole(loginSession.getPerson().getPid());
+        if (role >= Person.ADMIN) {
+            isAuthorized = true;
+        }
+        
+        if (isAuthorized) {
+            Connection con = getConnection();
+            try {
+                con.setAutoCommit(false);
+                
+                // Get the sid for the new session
+                StringBuffer sql = new StringBuffer();                
+                sql.append("SELECT sid FROM sessions WHERE season = '");
+                sql.append(newSeason).append("' ");
+                sql.append("and sessionname = '");
+                sql.append(newSession).append("';");
+                System.out.println(sql.toString());
+                Statement stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery(sql.toString());
+
+                // Check if there is a result, and if so record the sid
+                long sid = -1;
+                if (rs.next()) {
+                    // Substitute new session information and insert
+                    sid = rs.getLong(1);
+                } else {
+                    return false;
+                }
+                stmt.close();
+                
+                // Get list of current classes for old session
+                sql = new StringBuffer();                
+                sql.append("SELECT classid, classType, day, timeslot, instructorid, " +
+                        "otherinstructors FROM sessionclasses WHERE season = '");
+                sql.append(oldSeason).append("' ");
+                sql.append("and sessionname = '");
+                sql.append(oldSession).append("';");
+                System.out.println(sql.toString());
+                stmt = con.createStatement();
+                rs = stmt.executeQuery(sql.toString());
+                
+                // Loop through each class in the old session
+                while (rs.next()) {
+                    // Substitute new session information and insert
+                    long classid = rs.getLong(1);
+                    String classType = rs.getString(2);
+                    String day = rs.getString(3);
+                    String timeslot = rs.getString(4);
+                    long instructorId = rs.getLong(5);
+                    String otherInstructors = rs.getString(6);
+                    
+                    StringBuffer ins = new StringBuffer();
+                    ins.append("INSERT INTO skatingclass (sid, classtype, day, " +
+                    		"timeslot, instructorid, otherinstructors) VALUES (");
+                    ins.append(sid).append(", ");
+                    ins.append("'").append(classType).append("', ");
+                    ins.append("'").append(day).append("', ");
+                    ins.append("'").append(timeslot).append("', ");
+                    ins.append(instructorId).append(", ");
+                    ins.append("'").append(otherInstructors).append("' ");
+                    ins.append(")");
+                    System.out.println(ins.toString());
+                    
+                    Statement stmt2 = con.createStatement();                    
+                    int rowcount = stmt2.executeUpdate(ins.toString());
+                    System.out.println("Updated " + rowcount + " rows in skatingclass.");
+                }
+                stmt.close();                
+                con.commit();
+                con.close();
+    
+            } catch(SQLException ex) {
+                try {
+                    con.rollback();
+                    con.close();
+                } catch (SQLException e) {
+                    System.out.println("Unable to rollback during class duplication." + e.getMessage());
+                    return false;
+                }
+                System.err.println("SQLException: " + ex.getMessage());
+                return false;
+            }
+        }
+        
+        return isAuthorized;        
+        
+    }
+
+    /**
      * Look up a roster of classes.  The exact roster looked up depends on the sql
      * that is passed into the class, sometimes for a particular student, sometimes
      * for a particular class.

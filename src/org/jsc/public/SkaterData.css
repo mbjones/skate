@@ -97,7 +97,7 @@ table.jsc-toolbar {
 	opacity: .85;
 	border: 2pt solid #2E385B;
 	font-size: 20pt;
-	padding: 5pt;
+	padding: 5pt;	
 }
 
 .jsc-spacer {
@@ -201,6 +201,10 @@ table.jsc-toolbar {
 
 .jsc-text-box-short {
 	width: 4em;
+}
+
+.jsc-text-box-medium {
+	width: 8em;
 }
 
 .jsc-classes-scroll {
