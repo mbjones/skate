@@ -620,7 +620,7 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
                 if (resultFlag) {
                     setMessage("Class duplication completed.");
                     // Update the skating class list
-                    //refreshClassRoster(selectedClassRowIndex);
+                    sessionClassList.refreshClassList();
                 } else {
                     setMessage("Error duplicating classes.");
                 }
