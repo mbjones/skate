@@ -358,15 +358,50 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 GWT.log("Removing table row: " + i, null);
                 classInfoGrid.removeRow(i);
             }
-            Label seasonLabel = new Label(curClass.getSeason());
-            Label sessionLabel = new Label(Long.toString(curClass.getSessionNum()));
-            Label classTypeLabel = new Label(curClass.getClassType());
-            Label dayLabel = new Label(curClass.getDay());
-            Label timeLabel = new Label(curClass.getTimeslot());
-            Label instructorLabel = new Label(curClass.getInstructorSurName());
+            
+            Widget seasonWidget = null;
+            Widget sessionWidget = null;
+            Widget classTypeWidget = null;
+            Widget dayWidget = null;
+            Widget timeWidget = null;
+            Widget instructorWidget = null;
+            if (loginSession.getPerson().getRole() >= Person.ADMIN) {
+                GWT.log("Yeehaaaa", null);
+                seasonWidget = new TextBox();
+                ((TextBox)seasonWidget).setText(curClass.getSeason());
+                seasonWidget.addStyleName("jsc-text-box-medium");
+                
+                sessionWidget = new TextBox();
+                ((TextBox)sessionWidget).setText(Long.toString(curClass.getSessionNum()));
+                sessionWidget.addStyleName("jsc-text-box-medium");
+                
+                classTypeWidget = new TextBox();
+                ((TextBox)classTypeWidget).setText(curClass.getClassType());
+                classTypeWidget.addStyleName("jsc-text-box-medium");
+                
+                dayWidget = new TextBox();
+                ((TextBox)dayWidget).setText(curClass.getDay());
+                dayWidget.addStyleName("jsc-text-box-medium");
+                
+                timeWidget = new TextBox();
+                ((TextBox)timeWidget).setText(curClass.getTimeslot());
+                timeWidget.addStyleName("jsc-text-box-medium");
+                
+                instructorWidget = new TextBox();
+                ((TextBox)instructorWidget).setText(curClass.getInstructorSurName());
+                instructorWidget.addStyleName("jsc-text-box-medium");
+                
+            } else {
+                seasonWidget = new Label(curClass.getSeason());
+                sessionWidget = new Label(Long.toString(curClass.getSessionNum()));
+                classTypeWidget = new Label(curClass.getClassType());
+                dayWidget = new Label(curClass.getDay());
+                timeWidget = new Label(curClass.getTimeslot());
+                instructorWidget = new Label(curClass.getInstructorSurName());
 
-            Widget[] labels = {seasonLabel, sessionLabel, classTypeLabel,  
-                    dayLabel, timeLabel, instructorLabel};
+            }
+            Widget[] labels = {seasonWidget, sessionWidget, classTypeWidget,  
+                    dayWidget, timeWidget, instructorWidget};
             addRowToGrid(classInfoGrid, labels);
         }
         
