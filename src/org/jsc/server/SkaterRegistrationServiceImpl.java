@@ -325,7 +325,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         StringBuffer sql = new StringBuffer();
         sql.append("select sid, sessionname, season, startdate, enddate, "); 
         sql.append("classid, classtype, day, timeslot, instructorid, "); 
-        sql.append("otherinstructors, surname, givenname, activesession, discountDate from sessionclasses");
+        sql.append("otherinstructors, surname, givenname, activesession, discountDate from sessionclasses ");
+        sql.append("order by season, sessionname, classid");
         System.out.println(sql.toString());
         
         try {
@@ -869,8 +870,119 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             }
         }
         
-        return isAuthorized;        
+        return isAuthorized;
+    }
+
+    /**
+     * Save changes to a skating class identified by the given classid if the
+     * person logging in is an administrator. The array of values to be changed 
+     * must consist of 6 non-null String values representing the fields 
+     * {season, session, classType, day, time, instructor}.
+     * 
+     * @param loginSession used to authenticate the session
+     * @param currentClassId the identifier of the class to be saved
+     * @param newClassValues an array of values to be changed for this class
+     */
+    public boolean saveSkatingClass(LoginSession loginSession,
+            long currentClassId, ArrayList<String> newClassValues) {
         
+        // Check if person is authorized because they are a coach or administrator
+        boolean isAuthorized = false;
+        long role = getRole(loginSession.getPerson().getPid());
+        if (role >= Person.ADMIN) {
+            isAuthorized = true;
+            System.out.println("SaveSkatingClassRole role is: " + role);
+        }
+        
+        if (isAuthorized) {
+            Connection con = getConnection();
+            try {
+                con.setAutoCommit(false); 
+                
+                String season = newClassValues.get(0);
+                String session = newClassValues.get(1);
+                String classType = newClassValues.get(2);
+                String day = newClassValues.get(3);
+                String time = newClassValues.get(4);
+                String instructor = newClassValues.get(5);
+                
+                // Look up the new sid from the sessions table
+                StringBuffer sql = new StringBuffer();
+                sql.append("SELECT sid from sessions WHERE");
+                sql.append(" season = '").append(season).append("'");
+                sql.append(" AND");
+                sql.append(" sessionname = '").append(session).append("'");
+                System.out.println(sql.toString());
+                Statement stmt = con.createStatement();
+                long sid = -1;
+                ResultSet rs = stmt.executeQuery(sql.toString());
+                if (rs.next()) {
+                    sid = rs.getLong(1);
+                } else {
+                    // session id was not found, so return an error
+                    stmt.close();
+                    con.close();
+                    return false;
+                }
+                stmt.close();
+                
+                // Look up the new instructorid from the people table
+                boolean foundInstructorId = false;
+                sql = new StringBuffer();
+                String[] nameArray = instructor.split(" ", 2);
+                sql.append("SELECT pid from people WHERE");
+                sql.append(" givenname = '").append(nameArray[0]).append("'");
+                sql.append(" AND");
+                sql.append(" surname = '").append(nameArray[1]).append("'");
+                sql.append(" AND");
+                sql.append(" role >= ").append(Person.COACH).append("");
+                System.out.println(sql.toString());
+                stmt = con.createStatement();
+                long pid = -1;
+                rs = stmt.executeQuery(sql.toString());
+                if (rs.next()) {
+                    pid = rs.getLong(1);
+                    foundInstructorId = true;
+                }
+                stmt.close();
+                System.out.println("Found coach with pid: " + pid);
+                
+                // Save the new information to the skatingclass table
+                sql = new StringBuffer();
+                sql.append("UPDATE skatingclass ");
+                sql.append("SET");
+                sql.append(" sid = ").append(sid);
+                sql.append(", classType = '").append(classType).append("'");
+                sql.append(", day = '").append(day).append("'");
+                sql.append(", timeslot = '").append(time).append("'");
+                if (foundInstructorId) {
+                    sql.append(", instructorid = ").append(pid);
+                }
+                sql.append(" where classid = ").append(currentClassId);
+                System.out.println(sql.toString());
+                stmt = con.createStatement();
+                int rowcount = stmt.executeUpdate(sql.toString());
+                System.out.println("Updated " + rowcount + " rows in skatingclass.");
+                stmt.close();
+                
+                con.commit();
+                con.close();
+    
+            } catch(SQLException ex) {
+                try {
+                    System.out.println("SQL Error while saving class, so rolling back changes.");
+                    con.rollback();
+                    con.close();
+                } catch (SQLException e) {
+                    System.out.println("Unable to rollback during class save." + e.getMessage());
+                    return false;
+                }
+                System.err.println("SQLException: " + ex.getMessage());
+                return false;
+            }
+        }
+        
+        return isAuthorized;
     }
 
     /**

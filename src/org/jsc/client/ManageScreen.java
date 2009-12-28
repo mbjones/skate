@@ -158,7 +158,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         // Reset the selected class row marker
         selectedClassRowIndex = 0;
         
-        // Add all of the new roster entries into the table
+        // Add all of the new class entries into the table
         for (SessionSkatingClass curClass : sessionClassList.getClassList()) {
             
             if (curClass == null) {
@@ -190,17 +190,20 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         rosterPanel.add(classLabel);
         
         if (!layoutForPrinting) {
-            int classInfoColumns = 6;
-            classInfoGrid = new Grid(0, classInfoColumns);
+            int classInfoColumns = 7;
             Label seasonLabel = new Label("Season");
             Label sessionLabel = new Label("Session");
             Label classTypeLabel = new Label("Class");
             Label dayLabel = new Label("Day");
             Label timeLabel = new Label("Time");
             Label instructorLabel = new Label("Instructor");
+            Label saveButtonLabel = new Label(" ");
+
+            classInfoGrid = new Grid(0, classInfoColumns);
             Widget[] labels = {seasonLabel, sessionLabel, classTypeLabel,  
-                    dayLabel, timeLabel, instructorLabel};
+                    dayLabel, timeLabel, instructorLabel, saveButtonLabel};
             addRowToGrid(classInfoGrid, labels);
+            
             rosterPanel.add(classInfoGrid);
         }
         
@@ -365,8 +368,8 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             Widget dayWidget = null;
             Widget timeWidget = null;
             Widget instructorWidget = null;
+            Widget saveButtonWidget = null;
             if (loginSession.getPerson().getRole() >= Person.ADMIN) {
-                GWT.log("Yeehaaaa", null);
                 seasonWidget = new TextBox();
                 ((TextBox)seasonWidget).setText(curClass.getSeason());
                 seasonWidget.addStyleName("jsc-text-box-medium");
@@ -388,8 +391,21 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 timeWidget.addStyleName("jsc-text-box-medium");
                 
                 instructorWidget = new TextBox();
-                ((TextBox)instructorWidget).setText(curClass.getInstructorSurName());
+                ((TextBox)instructorWidget).setText(curClass.getInstructorGivenName() + " " + curClass.getInstructorSurName());
                 instructorWidget.addStyleName("jsc-text-box-medium");
+                
+                Button saveClassButton = new Button("Save");
+                final long currentClassId = curClass.getClassId();
+                saveClassButton.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        requestSaveClass(currentClassId, event);
+                    }
+                });
+                saveClassButton.addStyleName("jsc-button-right");
+                                
+                Widget[] labels = {seasonWidget, sessionWidget, classTypeWidget,  
+                        dayWidget, timeWidget, instructorWidget, saveClassButton};
+                addRowToGrid(classInfoGrid, labels);
                 
             } else {
                 seasonWidget = new Label(curClass.getSeason());
@@ -397,12 +413,11 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 classTypeWidget = new Label(curClass.getClassType());
                 dayWidget = new Label(curClass.getDay());
                 timeWidget = new Label(curClass.getTimeslot());
-                instructorWidget = new Label(curClass.getInstructorSurName());
-
+                instructorWidget = new Label(curClass.getInstructorGivenName() + " " + curClass.getInstructorSurName());
+                Widget[] labels = {seasonWidget, sessionWidget, classTypeWidget,  
+                        dayWidget, timeWidget, instructorWidget};
+                addRowToGrid(classInfoGrid, labels);
             }
-            Widget[] labels = {seasonWidget, sessionWidget, classTypeWidget,  
-                    dayWidget, timeWidget, instructorWidget};
-            addRowToGrid(classInfoGrid, labels);
         }
         
         // Remove all of the rows from the table, except the header row
@@ -498,6 +513,52 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
 
             }
         }
+    }
+ 
+    /**
+     * Handle the request to save changes to a class by calling the remote
+     * registration service and passing off the request data and login information.
+     * @param currentClassId the class to be changed
+     * @param event the event that was clicked, from which form field data can be retrieved
+     */
+    private void requestSaveClass(long currentClassId, ClickEvent event) {
+        Button source = (Button)event.getSource();
+        Grid rosterGrid = (Grid)source.getParent();
+        ArrayList<String> newClassValues = new ArrayList<String>();
+        int row = rosterGrid.getCellForEvent(event).getRowIndex();
+        // Loop through the text boxes and put the values in an array
+        // season, session, class, day, time, instructor
+        for (int i=0; i<6; i++) {
+            TextBox tb = (TextBox)rosterGrid.getWidget(row, i);
+            newClassValues.add(tb.getValue());
+        }
+
+        // Initialize the service proxy.
+        if (regService == null) {
+            regService = GWT.create(SkaterRegistrationService.class);
+        }
+
+        // Set up the callback object.
+        AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+
+            public void onFailure(Throwable caught) {
+                // TODO: Do something with errors.
+                GWT.log("Failed to save the class changes.", caught);
+            }
+
+            public void onSuccess(Boolean resultFlag) {
+                GWT.log("Save class returned: " + resultFlag, null);
+                if (resultFlag) {
+                    sessionClassList.refreshClassList();
+                    setMessage("Class changes saved.");
+                } else {
+                    setMessage("Error saving class changes. Check your entries and try again.");
+                }
+            }
+        };
+
+        // Make the call to the registration service.
+        regService.saveSkatingClass(loginSession, currentClassId, newClassValues, callback);
     }
     
     /**
