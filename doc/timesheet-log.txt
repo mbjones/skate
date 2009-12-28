@@ -17,3 +17,8 @@ Hours worked on the JSC registration data system
 10/23/2009,2,Change discount calculation to be based on fixed date, release beta 2 release
 11/9/2009,3.5,Add query for mailing list generation, initial support for password reset
 11/11/2009,2,Finished support for emailing usernames and resetting passwords
+12/10/2009,2,Added ability to move entries across classes
+12/21/2009,2,Added ability for Admin to duplicate session classes, and new Admin section
+12/27/2009,5,Created new OS deployment on slicehost to host production server
+12/28/2009,4,Added ability to edit class details if you are an admin
+
