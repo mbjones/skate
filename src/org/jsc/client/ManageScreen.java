@@ -688,6 +688,11 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         History.newItem("roster");
     }
     
+    /**
+     * Construct a list box of the classes to be listed.
+     * @param classid the class that they are already registered for
+     * @return ListBox for use in the GUI
+     */
     private ListBox createClassListBox(long classid) {
         ListBox classField = new ListBox();
         classField.addItem("Select new class", "0");
