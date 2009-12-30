@@ -1315,6 +1315,10 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             System.err.println("SQLException: " + ex.getMessage());
         }
         
+        if (con == null) {
+            System.err.println("Created a null connection object.");
+        }
+        
         return con;
     }
 
