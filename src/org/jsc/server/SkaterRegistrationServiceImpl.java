@@ -325,7 +325,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         StringBuffer sql = new StringBuffer();
         sql.append("select sid, sessionname, season, startdate, enddate, "); 
         sql.append("classid, classtype, day, timeslot, instructorid, "); 
-        sql.append("otherinstructors, surname, givenname, activesession, discountDate from sessionclasses");
+        sql.append("otherinstructors, surname, givenname, activesession, discountDate from sessionclasses ");
+        sql.append("order by season, sessionname, classid");
         System.out.println(sql.toString());
         
         try {
@@ -758,6 +759,233 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     }
     
     /**
+     * Duplicate all of the classes that are present for one session and assign
+     * them to a new session, thereby allowing us to quickly create a new set of
+     * classes for the whole session.
+     * @param loginSession the session used to authenticate
+     * @param oldSeason the season of the session from which we will copy
+     * @param oldSession the sessionName of the session from which we will copy
+     * @param newSeason the target season for copying classes
+     * @param newSession the target session for copying classes
+     */
+    public boolean duplicateSessionClassList(LoginSession loginSession, String oldSeason, 
+            String oldSession, String newSeason, String newSession) {
+        // Check authentication credentials
+        if (!isSessionValid(loginSession)) {
+            return false;
+        }
+
+        // Basic validation check on input
+        if (oldSeason != null && oldSeason.length() > 0 &&
+                oldSession != null && oldSession.length() > 0 &&
+                newSeason != null && newSeason.length() > 0 &&
+                newSession != null && newSession.length() > 0) {
+        } else {
+            return false;
+        }
+        
+        // Check if person is authorized because they are an administrator
+        boolean isAuthorized = false;
+        long role = getRole(loginSession.getPerson().getPid());
+        if (role >= Person.ADMIN) {
+            isAuthorized = true;
+        }
+        
+        if (isAuthorized) {
+            Connection con = getConnection();
+            try {
+                con.setAutoCommit(false);
+                
+                // Get the sid for the new session
+                StringBuffer sql = new StringBuffer();                
+                sql.append("SELECT sid FROM sessions WHERE season = '");
+                sql.append(newSeason).append("' ");
+                sql.append("and sessionname = '");
+                sql.append(newSession).append("';");
+                System.out.println(sql.toString());
+                Statement stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery(sql.toString());
+
+                // Check if there is a result, and if so record the sid
+                long sid = -1;
+                if (rs.next()) {
+                    // Substitute new session information and insert
+                    sid = rs.getLong(1);
+                } else {
+                    return false;
+                }
+                stmt.close();
+                
+                // Get list of current classes for old session
+                sql = new StringBuffer();                
+                sql.append("SELECT classid, classType, day, timeslot, instructorid, " +
+                        "otherinstructors FROM sessionclasses WHERE season = '");
+                sql.append(oldSeason).append("' ");
+                sql.append("and sessionname = '");
+                sql.append(oldSession).append("';");
+                System.out.println(sql.toString());
+                stmt = con.createStatement();
+                rs = stmt.executeQuery(sql.toString());
+                
+                // Loop through each class in the old session
+                while (rs.next()) {
+                    // Substitute new session information and insert
+                    long classid = rs.getLong(1);
+                    String classType = rs.getString(2);
+                    String day = rs.getString(3);
+                    String timeslot = rs.getString(4);
+                    long instructorId = rs.getLong(5);
+                    String otherInstructors = rs.getString(6);
+                    
+                    StringBuffer ins = new StringBuffer();
+                    ins.append("INSERT INTO skatingclass (sid, classtype, day, " +
+                    		"timeslot, instructorid, otherinstructors) VALUES (");
+                    ins.append(sid).append(", ");
+                    ins.append("'").append(classType).append("', ");
+                    ins.append("'").append(day).append("', ");
+                    ins.append("'").append(timeslot).append("', ");
+                    ins.append(instructorId).append(", ");
+                    ins.append("'").append(otherInstructors).append("' ");
+                    ins.append(")");
+                    System.out.println(ins.toString());
+                    
+                    Statement stmt2 = con.createStatement();                    
+                    int rowcount = stmt2.executeUpdate(ins.toString());
+                    System.out.println("Updated " + rowcount + " rows in skatingclass.");
+                }
+                stmt.close();                
+                con.commit();
+                con.close();
+    
+            } catch(SQLException ex) {
+                try {
+                    con.rollback();
+                    con.close();
+                } catch (SQLException e) {
+                    System.out.println("Unable to rollback during class duplication." + e.getMessage());
+                    return false;
+                }
+                System.err.println("SQLException: " + ex.getMessage());
+                return false;
+            }
+        }
+        
+        return isAuthorized;
+    }
+
+    /**
+     * Save changes to a skating class identified by the given classid if the
+     * person logging in is an administrator. The array of values to be changed 
+     * must consist of 6 non-null String values representing the fields 
+     * {season, session, classType, day, time, instructor}.
+     * 
+     * @param loginSession used to authenticate the session
+     * @param currentClassId the identifier of the class to be saved
+     * @param newClassValues an array of values to be changed for this class
+     */
+    public boolean saveSkatingClass(LoginSession loginSession,
+            long currentClassId, ArrayList<String> newClassValues) {
+        
+        // Check if person is authorized because they are a coach or administrator
+        boolean isAuthorized = false;
+        long role = getRole(loginSession.getPerson().getPid());
+        if (role >= Person.ADMIN) {
+            isAuthorized = true;
+            System.out.println("SaveSkatingClassRole role is: " + role);
+        }
+        
+        if (isAuthorized) {
+            Connection con = getConnection();
+            try {
+                con.setAutoCommit(false); 
+                
+                String season = newClassValues.get(0);
+                String session = newClassValues.get(1);
+                String classType = newClassValues.get(2);
+                String day = newClassValues.get(3);
+                String time = newClassValues.get(4);
+                String instructor = newClassValues.get(5);
+                
+                // Look up the new sid from the sessions table
+                StringBuffer sql = new StringBuffer();
+                sql.append("SELECT sid from sessions WHERE");
+                sql.append(" season = '").append(season).append("'");
+                sql.append(" AND");
+                sql.append(" sessionname = '").append(session).append("'");
+                System.out.println(sql.toString());
+                Statement stmt = con.createStatement();
+                long sid = -1;
+                ResultSet rs = stmt.executeQuery(sql.toString());
+                if (rs.next()) {
+                    sid = rs.getLong(1);
+                } else {
+                    // session id was not found, so return an error
+                    stmt.close();
+                    con.close();
+                    return false;
+                }
+                stmt.close();
+                
+                // Look up the new instructorid from the people table
+                boolean foundInstructorId = false;
+                sql = new StringBuffer();
+                String[] nameArray = instructor.split(" ", 2);
+                sql.append("SELECT pid from people WHERE");
+                sql.append(" givenname = '").append(nameArray[0]).append("'");
+                sql.append(" AND");
+                sql.append(" surname = '").append(nameArray[1]).append("'");
+                sql.append(" AND");
+                sql.append(" role >= ").append(Person.COACH).append("");
+                System.out.println(sql.toString());
+                stmt = con.createStatement();
+                long pid = -1;
+                rs = stmt.executeQuery(sql.toString());
+                if (rs.next()) {
+                    pid = rs.getLong(1);
+                    foundInstructorId = true;
+                }
+                stmt.close();
+                System.out.println("Found coach with pid: " + pid);
+                
+                // Save the new information to the skatingclass table
+                sql = new StringBuffer();
+                sql.append("UPDATE skatingclass ");
+                sql.append("SET");
+                sql.append(" sid = ").append(sid);
+                sql.append(", classType = '").append(classType).append("'");
+                sql.append(", day = '").append(day).append("'");
+                sql.append(", timeslot = '").append(time).append("'");
+                if (foundInstructorId) {
+                    sql.append(", instructorid = ").append(pid);
+                }
+                sql.append(" where classid = ").append(currentClassId);
+                System.out.println(sql.toString());
+                stmt = con.createStatement();
+                int rowcount = stmt.executeUpdate(sql.toString());
+                System.out.println("Updated " + rowcount + " rows in skatingclass.");
+                stmt.close();
+                
+                con.commit();
+                con.close();
+    
+            } catch(SQLException ex) {
+                try {
+                    System.out.println("SQL Error while saving class, so rolling back changes.");
+                    con.rollback();
+                    con.close();
+                } catch (SQLException e) {
+                    System.out.println("Unable to rollback during class save." + e.getMessage());
+                    return false;
+                }
+                System.err.println("SQLException: " + ex.getMessage());
+                return false;
+            }
+        }
+        
+        return isAuthorized;
+    }
+
+    /**
      * Look up a roster of classes.  The exact roster looked up depends on the sql
      * that is passed into the class, sometimes for a particular student, sometimes
      * for a particular class.
@@ -1085,6 +1313,10 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             con = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
         } catch(SQLException ex) {
             System.err.println("SQLException: " + ex.getMessage());
+        }
+        
+        if (con == null) {
+            System.err.println("Created a null connection object.");
         }
         
         return con;

@@ -25,16 +25,16 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 
 /**
- * A screen that is used by coaches and administrators to manage class rosters, 
- * and to mark student level passed, and sections.
+ * A screen that is used to administer the skating data, including creating modifying
+ * sessions and classes.
  * 
  * @author Matt Jones
  */
-public class ManageScreen extends BaseScreen implements SkatingClassChangeHandler, ClickHandler {
+public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler, ClickHandler {
 
     protected HorizontalPanel screen;
     private VerticalPanel classesPanel;
-    protected VerticalPanel rosterPanel;
+    protected VerticalPanel adminPanel;
     private ClassListModel sessionClassList;
     private Grid classesGrid;
     private SkaterRegistrationServiceAsync regService;
@@ -45,6 +45,10 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     protected ArrayList<RosterEntry> currentRoster;
     private RosterScreen roster;
     private boolean layoutForPrinting;
+    private TextBox oldSeasonField;
+    private TextBox oldSessionField;
+    private TextBox newSeasonField;
+    private TextBox newSessionField;
 
     /**
      * Create the Management screen for managing class rosters and levels 
@@ -53,15 +57,15 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
      * @param eventBus
      * @param sessionClassList
      */
-    public ManageScreen(LoginSession loginSession, HandlerManager eventBus, 
+    public AdminScreen(LoginSession loginSession, HandlerManager eventBus, 
             ClassListModel sessionClassList, RosterScreen roster) {
         super(loginSession, eventBus);
         this.sessionClassList = sessionClassList;
         this.roster = roster;
-        this.layoutForPrinting = false;
+        //this.layoutForPrinting = false;
         selectedClassRowIndex = 0;
         
-        this.setScreenTitle("Manage Classes");
+        this.setScreenTitle("Administer Database");
         layoutScreen();
         this.setContentPanel(screen);
         
@@ -74,7 +78,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
      * @param loginSession
      * @param eventBus
      */
-    public ManageScreen(LoginSession loginSession, HandlerManager eventBus) {
+    public AdminScreen(LoginSession loginSession, HandlerManager eventBus) {
         super(loginSession, eventBus);
         this.layoutForPrinting = true;
     }
@@ -83,7 +87,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
      * Lay out the user interface widgets on the screen.
      */
     protected void layoutScreen() {
-        this.setScreenTitle("Manage Classes");
+        this.setScreenTitle("Administer Database");
         this.setStyleName("jsc-twopanel-screen");
         
         screen = new HorizontalPanel();
@@ -91,10 +95,10 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         createClassListPanel();
         Label spacer = new Label("");
         spacer.addStyleName("jsc-spacer");
-        createRosterPanel();
+        createAdminPanel();
         screen.add(classesPanel);
         screen.add(spacer);
-        screen.add(rosterPanel);
+        screen.add(adminPanel);
     }
     
     /**
@@ -158,7 +162,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         // Reset the selected class row marker
         selectedClassRowIndex = 0;
         
-        // Add all of the new class entries into the table
+        // Add all of the new roster entries into the table
         for (SessionSkatingClass curClass : sessionClassList.getClassList()) {
             
             if (curClass == null) {
@@ -181,49 +185,57 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     /**
      * Set up the roster panel to display students in a selected class.
      */
-    protected void createRosterPanel() {
-        rosterPanel = new VerticalPanel();
-        rosterPanel.addStyleName("jsc-rightpanel");
+    private void createAdminPanel() {
+        adminPanel = new VerticalPanel();
+        adminPanel.addStyleName("jsc-rightpanel");
         
-        classLabel = new Label("Select a class from the list to see the class roster.");
+        classLabel = new Label("Select a function from the choices below.");
         classLabel.addStyleName("jsc-step");
-        rosterPanel.add(classLabel);
-        
-        if (!layoutForPrinting) {
-            int classInfoColumns = 7;
-            Label seasonLabel = new Label("Season");
-            Label sessionLabel = new Label("Session");
-            Label classTypeLabel = new Label("Class");
-            Label dayLabel = new Label("Day");
-            Label timeLabel = new Label("Time");
-            Label instructorLabel = new Label("Instructor");
-            Label saveButtonLabel = new Label(" ");
-
-            classInfoGrid = new Grid(0, classInfoColumns);
-            Widget[] labels = {seasonLabel, sessionLabel, classTypeLabel,  
-                    dayLabel, timeLabel, instructorLabel, saveButtonLabel};
-            addRowToGrid(classInfoGrid, labels);
-            
-            rosterPanel.add(classInfoGrid);
-        }
-        
-        Button printButton = new Button("Print Roster");
-        printButton.addClickHandler(new ClickHandler() {
+        adminPanel.add(classLabel);
+               
+        Button duplicateButton = new Button("Duplicate");
+        duplicateButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                printRoster();
+                duplicateSessionClassList();
             }
         });
-        printButton.addStyleName("jsc-button-right");
-        if (!layoutForPrinting) {
-            Label spacer = new Label(" ");
-            spacer.addStyleName("jsc-spacer");
-            rosterPanel.add(spacer);
-            rosterPanel.add(printButton);
-            Label spacer2 = new Label(" ");
-            spacer2.addStyleName("jsc-spacer");
-            rosterPanel.add(spacer2);
-        }
+        duplicateButton.addStyleName("jsc-button-right");
+
+        Label duplicateLabel = new Label("Duplicate all classes from a previous session into a new session.");
+        duplicateLabel.addStyleName("jsc-text");
+
+        //HorizontalPanel duplicatePanel = new HorizontalPanel();
+        //duplicatePanel.add(duplicateButton);
+        //duplicatePanel.add(duplicateLabel);
         
+        // Create a table to lay out the form for duplicating the classes in a session
+        Grid duplicateGrid = new Grid(0, 5);
+        Label oldSeasonLabel = new Label("Old Season");
+        Label oldSessionLabel = new Label("Old Session");
+        Label newSeasonLabel = new Label("New Season");
+        Label newSessionLabel = new Label("New Session");
+        Widget[] labels= {oldSeasonLabel, oldSessionLabel, newSeasonLabel, newSessionLabel};
+        addRowToGrid(duplicateGrid, labels);
+        oldSeasonField = new TextBox();
+        oldSeasonField.addStyleName("jsc-text-box-medium");    
+        oldSessionField = new TextBox();
+        oldSessionField.addStyleName("jsc-text-box-medium");    
+        newSeasonField = new TextBox();
+        newSeasonField.addStyleName("jsc-text-box-medium");    
+        newSessionField = new TextBox();
+        newSessionField.addStyleName("jsc-text-box-medium"); 
+        Widget[] boxes= {oldSeasonField, oldSessionField, newSeasonField, newSessionField, duplicateButton};
+        addRowToGrid(duplicateGrid, boxes);
+
+        Label spacer = new Label(" ");
+        spacer.addStyleName("jsc-spacer");
+        adminPanel.add(spacer);
+        adminPanel.add(duplicateGrid);
+        Label spacer2 = new Label(" ");
+        spacer2.addStyleName("jsc-spacer");
+        adminPanel.add(spacer2);
+        
+        /*
         int columns = 9;
         if (layoutForPrinting) {
             columns += 1;
@@ -270,7 +282,8 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                     w1, w2, levelPassedLabel, saveLabel, deleteLabel, moveLabel};
             addRowToGrid(rosterGrid, widgets);
         }
-        rosterPanel.add(rosterGrid);
+        adminPanel.add(rosterGrid);
+        */
     }
 
     /**
@@ -347,8 +360,9 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
      * @param newRoster the array of RosterEntrys to be displayed
      * @param curClass the SkatingSessionClass that is being displayed
      */
-    protected void updateRosterTable(ArrayList<RosterEntry> newRoster, 
+    private void updateRosterTable(ArrayList<RosterEntry> newRoster, 
             SessionSkatingClass curClass) {
+        /*
         if (layoutForPrinting) {
             // Update the class label
             classLabel.setText(curClass.formatClassLabel());
@@ -361,63 +375,16 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 GWT.log("Removing table row: " + i, null);
                 classInfoGrid.removeRow(i);
             }
-            
-            Widget seasonWidget = null;
-            Widget sessionWidget = null;
-            Widget classTypeWidget = null;
-            Widget dayWidget = null;
-            Widget timeWidget = null;
-            Widget instructorWidget = null;
-            Widget saveButtonWidget = null;
-            if (loginSession.getPerson().getRole() >= Person.ADMIN) {
-                seasonWidget = new TextBox();
-                ((TextBox)seasonWidget).setText(curClass.getSeason());
-                seasonWidget.addStyleName("jsc-text-box-medium");
-                
-                sessionWidget = new TextBox();
-                ((TextBox)sessionWidget).setText(Long.toString(curClass.getSessionNum()));
-                sessionWidget.addStyleName("jsc-text-box-medium");
-                
-                classTypeWidget = new TextBox();
-                ((TextBox)classTypeWidget).setText(curClass.getClassType());
-                classTypeWidget.addStyleName("jsc-text-box-medium");
-                
-                dayWidget = new TextBox();
-                ((TextBox)dayWidget).setText(curClass.getDay());
-                dayWidget.addStyleName("jsc-text-box-medium");
-                
-                timeWidget = new TextBox();
-                ((TextBox)timeWidget).setText(curClass.getTimeslot());
-                timeWidget.addStyleName("jsc-text-box-medium");
-                
-                instructorWidget = new TextBox();
-                ((TextBox)instructorWidget).setText(curClass.getInstructorGivenName() + " " + curClass.getInstructorSurName());
-                instructorWidget.addStyleName("jsc-text-box-medium");
-                
-                Button saveClassButton = new Button("Save");
-                final long currentClassId = curClass.getClassId();
-                saveClassButton.addClickHandler(new ClickHandler() {
-                    public void onClick(ClickEvent event) {
-                        requestSaveClass(currentClassId, event);
-                    }
-                });
-                saveClassButton.addStyleName("jsc-button-right");
-                                
-                Widget[] labels = {seasonWidget, sessionWidget, classTypeWidget,  
-                        dayWidget, timeWidget, instructorWidget, saveClassButton};
-                addRowToGrid(classInfoGrid, labels);
-                
-            } else {
-                seasonWidget = new Label(curClass.getSeason());
-                sessionWidget = new Label(Long.toString(curClass.getSessionNum()));
-                classTypeWidget = new Label(curClass.getClassType());
-                dayWidget = new Label(curClass.getDay());
-                timeWidget = new Label(curClass.getTimeslot());
-                instructorWidget = new Label(curClass.getInstructorGivenName() + " " + curClass.getInstructorSurName());
-                Widget[] labels = {seasonWidget, sessionWidget, classTypeWidget,  
-                        dayWidget, timeWidget, instructorWidget};
-                addRowToGrid(classInfoGrid, labels);
-            }
+            Label seasonLabel = new Label(curClass.getSeason());
+            Label sessionLabel = new Label(Long.toString(curClass.getSessionNum()));
+            Label classTypeLabel = new Label(curClass.getClassType());
+            Label dayLabel = new Label(curClass.getDay());
+            Label timeLabel = new Label(curClass.getTimeslot());
+            Label instructorLabel = new Label(curClass.getInstructorSurName());
+
+            Widget[] labels = {seasonLabel, sessionLabel, classTypeLabel,  
+                    dayLabel, timeLabel, instructorLabel};
+            addRowToGrid(classInfoGrid, labels);
         }
         
         // Remove all of the rows from the table, except the header row
@@ -513,52 +480,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
 
             }
         }
-    }
- 
-    /**
-     * Handle the request to save changes to a class by calling the remote
-     * registration service and passing off the request data and login information.
-     * @param currentClassId the class to be changed
-     * @param event the event that was clicked, from which form field data can be retrieved
-     */
-    private void requestSaveClass(long currentClassId, ClickEvent event) {
-        Button source = (Button)event.getSource();
-        Grid rosterGrid = (Grid)source.getParent();
-        ArrayList<String> newClassValues = new ArrayList<String>();
-        int row = rosterGrid.getCellForEvent(event).getRowIndex();
-        // Loop through the text boxes and put the values in an array
-        // season, session, class, day, time, instructor
-        for (int i=0; i<6; i++) {
-            TextBox tb = (TextBox)rosterGrid.getWidget(row, i);
-            newClassValues.add(tb.getValue());
-        }
-
-        // Initialize the service proxy.
-        if (regService == null) {
-            regService = GWT.create(SkaterRegistrationService.class);
-        }
-
-        // Set up the callback object.
-        AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
-
-            public void onFailure(Throwable caught) {
-                // TODO: Do something with errors.
-                GWT.log("Failed to save the class changes.", caught);
-            }
-
-            public void onSuccess(Boolean resultFlag) {
-                GWT.log("Save class returned: " + resultFlag, null);
-                if (resultFlag) {
-                    sessionClassList.refreshClassList();
-                    setMessage("Class changes saved.");
-                } else {
-                    setMessage("Error saving class changes. Check your entries and try again.");
-                }
-            }
-        };
-
-        // Make the call to the registration service.
-        regService.saveSkatingClass(loginSession, currentClassId, newClassValues, callback);
+        */
     }
     
     /**
@@ -674,25 +596,47 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     }
 
     /**
-     * Switch to the screen for printing rosters after updating it by passing in
-     * the currently selected roster and class.
+     * Copy all of the classes from one session and assign them to a new session.
+     * For now, the new session must already exist.
      */
-    private void printRoster() {
-        GWT.log("Print roster rows: " + currentRoster.size(), null);
-        // Switch to the screen for printing rosters, but before doing so
-        // update it by passing in the currentRoster to be displayed along with 
-        // a reference to the current selected class to be displayed
-        ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList();
-        SessionSkatingClass curClass = classes.get(selectedClassRowIndex-1);
-        roster.updateRosterTable(currentRoster, curClass);
-        History.newItem("roster");
+    private void duplicateSessionClassList() {
+        GWT.log("Duplicating class list...", null);
+        
+        // Initialize the service proxy.
+        if (regService == null) {
+            regService = GWT.create(SkaterRegistrationService.class);
+        }
+    
+        // Set up the callback object.
+        AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+    
+            public void onFailure(Throwable caught) {
+                // TODO: Do something with errors.
+                GWT.log("Failed to duplicate the class list.", caught);
+            }
+    
+            public void onSuccess(Boolean resultFlag) {
+                GWT.log("DuplicateClassList returned: " + resultFlag, null);
+                if (resultFlag) {
+                    setMessage("Class duplication completed.");
+                    // Update the skating class list
+                    sessionClassList.refreshClassList();
+                } else {
+                    setMessage("Error duplicating classes.");
+                }
+            }
+        };
+    
+        // Get values from the duplicate form text boxes
+        String oldSeason = oldSeasonField.getText();
+        String oldSession = oldSessionField.getText();
+        String newSeason = newSeasonField.getText();
+        String newSession = newSessionField.getText();
+        
+        // Make the call to the registration service.
+        regService.duplicateSessionClassList(loginSession, oldSeason, oldSession, newSeason, newSession, callback);
     }
     
-    /**
-     * Construct a list box of the classes to be listed.
-     * @param classid the class that they are already registered for
-     * @return ListBox for use in the GUI
-     */
     private ListBox createClassListBox(long classid) {
         ListBox classField = new ListBox();
         classField.addItem("Select new class", "0");

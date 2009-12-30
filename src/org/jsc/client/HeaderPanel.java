@@ -23,6 +23,8 @@ public class HeaderPanel extends VerticalPanel {
     private Hyperlink classesLink;
     private Label manageSeparator;
     private Hyperlink manageLink;
+    private Label adminSeparator;
+    private Hyperlink adminLink;
     private Hyperlink settingsLink;
     private Hyperlink signoutLink;
     private String currentMessage;
@@ -81,6 +83,14 @@ public class HeaderPanel extends VerticalPanel {
         leftLinks.add(manageLink);
         leftLinks.addStyleName("jsc-toolbar");
         manageLink.setVisible(false);
+        
+        adminSeparator = createSeparatorLabel();
+        leftLinks.add(adminSeparator);
+        adminSeparator.setVisible(false);
+        adminLink = new Hyperlink("Admin", "admin");
+        leftLinks.add(adminLink);
+        leftLinks.addStyleName("jsc-toolbar");
+        adminLink.setVisible(false);
         
         HorizontalPanel rightLinks = new HorizontalPanel();
         rightLinks.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
@@ -141,6 +151,10 @@ public class HeaderPanel extends VerticalPanel {
                 manageSeparator.setVisible(true);
                 manageLink.setVisible(true);
             }
+            if (loginSession.getPerson().getRole() >= Person.ADMIN) {
+                adminSeparator.setVisible(true);
+                adminLink.setVisible(true);
+            }
             //regLink.setVisible(true);
             //classesLink.setVisible(true);
         } else {
@@ -148,6 +162,8 @@ public class HeaderPanel extends VerticalPanel {
             signoutLink.setText("Sign In");
             manageSeparator.setVisible(false);
             manageLink.setVisible(false);
+            adminSeparator.setVisible(false);
+            adminLink.setVisible(false);
             //regLink.setVisible(false);
             //classesLink.setVisible(false);
         }
