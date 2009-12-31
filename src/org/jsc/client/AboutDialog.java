@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * @author Matt Jones
  */
 public class AboutDialog extends DialogBox {
-    private static final String VERSION = "1.1.0";
+    private static final String VERSION = "1.2.0";
     
     public AboutDialog() {
         // Set the dialog box's caption.
