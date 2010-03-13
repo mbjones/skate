@@ -22,22 +22,57 @@ SELECT ppl.surname, ppl.givenname, m.season, p.paypal_status
     AND r.paymentid = y.paymentid
     AND r.classid = sc.classid
     AND sc.season = '2009-2010'
-    AND sc.sessionname = '1'
+    AND sc.sessionname = '3'
   ORDER BY y.paypal_status, sc.classtype, p.surname, p.givenname;
 
-   SELECT p.surname||','|| p.givenname||','||p.levelpassed||','||sc.classtype||','||sc.day||','||y.paypal_status
+   SELECT p.surname||','|| p.givenname||','||p.levelpassed||','||
+          sc.classtype||','||sc.day||','||y.paypal_status||','||
+          y.paypal_tx_id||','||y.paypal_gross||','||y.discount||','||
+          y.paypal_fee||','||y.paypal_net||','||y.payment_date
    FROM roster r, peoplelevel p, payment y, sessionclasses sc
   WHERE r.pid = p.pid 
     AND r.paymentid = y.paymentid
     AND r.classid = sc.classid
     AND sc.season = '2009-2010'
-    AND sc.sessionname = '1'
+    AND sc.sessionname = '3'
   ORDER BY y.paypal_status, sc.classtype, p.surname, p.givenname;
+  
+ -- Query for USFSA report
+ SELECT p.pid||','|| p.surname||','||p.givenname||','||sc.classtype||','||sc.day||','||y.paypal_status||',2009-2010,3'
+   FROM roster r, people p, payment y, sessionclasses sc
+  WHERE r.pid = p.pid
+    AND r.paymentid = y.paymentid
+    AND r.classid = sc.classid
+    AND sc.season = '2009-2010'
+    AND sc.sessionname = '3'
+  ORDER BY y.paypal_status, sc.classtype, p.surname, p.givenname;
+ 
+ -- Roster & Payment Dump for Wendy
+ SELECT sc.season,sc.sessionname,p.pid, p.surname,
+        p.givenname, sc.classtype, sc.day, y.paypal_status,
+        y.paypal_tx_id, y.paypal_gross, y.discount,
+        y.paypal_fee, y.paypal_net, y.date_updated
+   FROM roster r, people p, payment y, sessionclasses sc
+  WHERE r.pid = p.pid
+    AND r.paymentid = y.paymentid
+    AND r.classid = sc.classid
+  ORDER BY sc.season,sc.sessionname, p.date_updated;
   
 -- Query to create a mailing list
 SELECT givenname|| ' ' || surname || ' <' || email || '>' from people
 UNION
 SELECT parentfirstname|| ' ' || parentsurname || ' <' || parentemail || '>' from people;
+
+-- Query to create a mailing list, but for a specific session
+SELECT givenname|| ' ' || surname || ' <' || email || '>' from people 
+ WHERE (pid in 
+       (select r.pid from roster r, skatingclass s 
+         where r.classid = s.classid and s.sid = 5002))
+UNION
+SELECT parentfirstname|| ' ' || parentsurname || ' <' || parentemail || '>' from people
+ WHERE (pid in 
+       (select r.pid from roster r, skatingclass s 
+         where r.classid = s.classid and s.sid = 5002));
 
 -- Update query to batch correct the maxlevel field for people based on the hishest level
 -- they have passed in any of their classes
@@ -51,4 +86,12 @@ UPDATE people
          FROM peoplelevel
         WHERE peoplelevel.pid = people.pid
           AND peoplelevel.levelorder > 0);
+
+-- Find all of the registrants for a given session for sending to Sigrid
+SELECT p.pid, p.givenname, p.surname, p.birthdate, p.usfsaid 
+  FROM people p, roster r, sessionclasses c 
+ WHERE p.pid = r.pid 
+   AND r.classid = c.classid 
+   AND (c.sid = 5002 or c.sid = 5003) 
+ ORDER BY p.pid, c.sid, c.classtype;
 
