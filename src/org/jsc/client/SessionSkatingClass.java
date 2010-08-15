@@ -330,7 +330,7 @@ public class SessionSkatingClass implements Serializable {
         int previousyear = year-1;
         int nextyear = year+1;
         String season;
-        if (month < 6) {
+        if (month < AppConstants.SEASON_CUTOFF_MONTH) {
             season = previousyear + "-" + year;
         } else {
             season = year + "-" + nextyear;

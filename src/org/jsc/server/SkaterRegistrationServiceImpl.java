@@ -37,6 +37,10 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     private static final String JDBC_DRIVER = ServerConstants.getString("JDBC_DRIVER");
     private static final String ROSTER_QUERY = "SELECT rosterid, classid, pid, levelPassed, paymentid, payment_amount, paypal_status, date_updated, surname, givenname, section, maxlevel FROM rosterpeople";
     private static final int MAX_SESSION_INTERVAL = 60 * 30;
+    private static final int SAVE = 1;
+    private static final int ADD = 2;
+    private static final int DELETE = 3;
+
     private static Random random = new Random();
     
     /**
@@ -882,9 +886,10 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * @param loginSession used to authenticate the session
      * @param currentClassId the identifier of the class to be saved
      * @param newClassValues an array of values to be changed for this class
+     * @param operation integer code indicating whether to save (1), add (2), or delete (3) a class
      */
     public boolean saveSkatingClass(LoginSession loginSession,
-            long currentClassId, ArrayList<String> newClassValues) {
+            long currentClassId, ArrayList<String> newClassValues, int operation) {
         
         // Check if person is authorized because they are a coach or administrator
         boolean isAuthorized = false;
@@ -898,67 +903,95 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             Connection con = getConnection();
             try {
                 con.setAutoCommit(false); 
+                String season, session, classType, day, time, instructor;
+                StringBuffer sql = null;
                 
-                String season = newClassValues.get(0);
-                String session = newClassValues.get(1);
-                String classType = newClassValues.get(2);
-                String day = newClassValues.get(3);
-                String time = newClassValues.get(4);
-                String instructor = newClassValues.get(5);
-                
-                // Look up the new sid from the sessions table
-                StringBuffer sql = new StringBuffer();
-                sql.append("SELECT sid from sessions WHERE");
-                sql.append(" season = '").append(season).append("'");
-                sql.append(" AND");
-                sql.append(" sessionname = '").append(session).append("'");
-                System.out.println(sql.toString());
-                Statement stmt = con.createStatement();
-                long sid = -1;
-                ResultSet rs = stmt.executeQuery(sql.toString());
-                if (rs.next()) {
-                    sid = rs.getLong(1);
-                } else {
-                    // session id was not found, so return an error
+                Statement stmt;
+                if (operation == SAVE || operation == ADD) {
+                    season = newClassValues.get(0);
+                    session = newClassValues.get(1);
+                    classType = newClassValues.get(2);
+                    day = newClassValues.get(3);
+                    time = newClassValues.get(4);
+                    instructor = newClassValues.get(5);
+                    
+                    // Look up the new sid from the sessions table
+                    sql = new StringBuffer();
+                    sql.append("SELECT sid from sessions WHERE");
+                    sql.append(" season = '").append(season).append("'");
+                    sql.append(" AND");
+                    sql.append(" sessionname = '").append(session).append("'");
+                    System.out.println(sql.toString());
+                    stmt = con.createStatement();
+                    long sid = -1;
+                    ResultSet rs = stmt.executeQuery(sql.toString());
+                    if (rs.next()) {
+                        sid = rs.getLong(1);
+                    } else {
+                        // session id was not found, so return an error
+                        stmt.close();
+                        con.close();
+                        return false;
+                    }
                     stmt.close();
-                    con.close();
-                    return false;
+                    
+                    // Look up the new instructorid from the people table
+                    boolean foundInstructorId = false;
+                    sql = new StringBuffer();
+                    String[] nameArray = instructor.split(" ", 2);
+                    sql.append("SELECT pid from people WHERE");
+                    sql.append(" givenname = '").append(nameArray[0]).append(
+                            "'");
+                    sql.append(" AND");
+                    sql.append(" surname = '").append(nameArray[1]).append("'");
+                    sql.append(" AND");
+                    sql.append(" role >= ").append(Person.COACH).append("");
+                    System.out.println(sql.toString());
+                    stmt = con.createStatement();
+                    long pid = -1;
+                    rs = stmt.executeQuery(sql.toString());
+                    if (rs.next()) {
+                        pid = rs.getLong(1);
+                        foundInstructorId = true;
+                    }
+                    stmt.close();
+                    System.out.println("Found coach with pid: " + pid);
+                    // Save the new information to the skatingclass table
+                    sql = new StringBuffer();
+                    if (operation == SAVE) {
+                        sql.append("UPDATE skatingclass ");
+                        sql.append("SET");
+                        sql.append(" sid = ").append(sid);
+                        sql.append(", classType = '").append(classType).append(
+                                "'");
+                        sql.append(", day = '").append(day).append("'");
+                        sql.append(", timeslot = '").append(time).append("'");
+                        if (foundInstructorId) {
+                            sql.append(", instructorid = ").append(pid);
+                        }
+                        sql.append(" where classid = ").append(currentClassId);
+                    } else if (operation == ADD) {
+                        sql.append("INSERT INTO skatingclass ");
+                        sql.append("(sid, classType, day, timeslot");
+                        if (foundInstructorId) {
+                            sql.append(", instructorid");
+                        }
+                        sql.append(") VALUES (");
+                        sql.append(sid).append(", ");
+                        sql.append("'").append(classType).append("', ");
+                        sql.append("'").append(day).append("', ");
+                        sql.append("'").append(time).append("'");
+                        if (foundInstructorId) {
+                            sql.append(", ").append(pid);
+                        }
+                        sql.append(")");
+                    }
+                } else if (operation == DELETE) {
+                    sql = new StringBuffer();
+                    sql.append("DELETE from skatingclass where classid = ").append(currentClassId);
+                } else {
+                    System.err.println("Invalid operation while saving class: " + operation);
                 }
-                stmt.close();
-                
-                // Look up the new instructorid from the people table
-                boolean foundInstructorId = false;
-                sql = new StringBuffer();
-                String[] nameArray = instructor.split(" ", 2);
-                sql.append("SELECT pid from people WHERE");
-                sql.append(" givenname = '").append(nameArray[0]).append("'");
-                sql.append(" AND");
-                sql.append(" surname = '").append(nameArray[1]).append("'");
-                sql.append(" AND");
-                sql.append(" role >= ").append(Person.COACH).append("");
-                System.out.println(sql.toString());
-                stmt = con.createStatement();
-                long pid = -1;
-                rs = stmt.executeQuery(sql.toString());
-                if (rs.next()) {
-                    pid = rs.getLong(1);
-                    foundInstructorId = true;
-                }
-                stmt.close();
-                System.out.println("Found coach with pid: " + pid);
-                
-                // Save the new information to the skatingclass table
-                sql = new StringBuffer();
-                sql.append("UPDATE skatingclass ");
-                sql.append("SET");
-                sql.append(" sid = ").append(sid);
-                sql.append(", classType = '").append(classType).append("'");
-                sql.append(", day = '").append(day).append("'");
-                sql.append(", timeslot = '").append(time).append("'");
-                if (foundInstructorId) {
-                    sql.append(", instructorid = ").append(pid);
-                }
-                sql.append(" where classid = ").append(currentClassId);
                 System.out.println(sql.toString());
                 stmt = con.createStatement();
                 int rowcount = stmt.executeUpdate(sql.toString());
@@ -1303,19 +1336,26 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         Connection con = null;
         
         try {
-            Class.forName(JDBC_DRIVER);
+            System.out.println("getConnection: finding driver class...");
+            // TODO: Be sure the java version matches the JDBC version
+            Class driverClass = Class.forName(JDBC_DRIVER);
+            System.out.println("getConnection: driver loaded.");
         } catch(java.lang.ClassNotFoundException e) {
             System.err.print("ClassNotFoundException: ");
             System.err.println(e.getMessage());
         }
 
         try {
+            System.out.println("getConnection: opening connection...");
             con = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
+            System.out.println("getConnection: connection attempt completed.");
         } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage());
+            ex.printStackTrace(System.err);
+            System.err.println(ex.getClass().getName() + ": " + ex.getMessage());
         }
         
         if (con == null) {
+            System.out.println("getConnection: Connection was null.");
             System.err.println("Created a null connection object.");
         }
         

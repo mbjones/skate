@@ -85,7 +85,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
 
         // Create our header with internal toolbar
         header = new HeaderPanel(loginSession, eventBus);
-        header.setTitle("Juneau Skating Club");
+        header.setTitle(AppConstants.CLUB_NAME);
    
         // Create the screens to be used in the application
         content = new ContentPanel();

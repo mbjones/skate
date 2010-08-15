@@ -121,7 +121,8 @@ public class LoginScreen extends BaseScreen {
                 // TODO: Do something with errors.
                 loginSession.setAuthenticated(false);
                 loginSession.setSessionId("invalid");
-                GWT.log("Authentication failed to complete.", null);
+//                GWT.log("Authentication failed to complete.", null);
+                GWT.log("Authentication failed to complete.", caught);
                 password.setText("");
             }
 
@@ -162,7 +163,7 @@ public class LoginScreen extends BaseScreen {
         introPanel = new VerticalPanel();
         introPanel.addStyleName("jsc-rightpanel");
         StringBuffer intro = new StringBuffer();
-        intro.append("<p class=\"jsc-step\">Register for the <a href=\"http://juneauskatingclub.org\">Juneau Skating Club</a>!</p>");
+        intro.append("<p class=\"jsc-step\">Register for the <a href=\"").append(AppConstants.CLUB_URL).append("\">").append(AppConstants.CLUB_NAME).append("</a>!</p>");
         intro.append("<p class=\"jsc-text\">This is our new web-based site for class registration and management. Using this site, you can register for new classes after you have created an account and signed in. Some of the functions available from this site include:</p>");
         intro.append("<p class=\"jsc-text\"><ul><li>Register for classes</li><li>Pay registration fees</li><li>View registered classes</li></ul></p>");
         
@@ -172,7 +173,7 @@ public class LoginScreen extends BaseScreen {
         intro.append("<p class=\"jsc-text\">You can register for new classes after you have <a href=\"/SkaterData.html#signout\">Signed In</a>.</p>");
         intro.append("<p class=\"jsc-text\">If you forgot your username or password, you can retrieve them by using the <a href=\"/SkaterData.html#reset\">Reset Password</a> form.");
         intro.append("<p class=\"jsc-text\"> </p>");
-        intro.append("<p class=\"jsc-text\">Need help? Contact <b>'registrar@juneauskatingclub.org'</b></p>");
+        intro.append("<p class=\"jsc-text\">Need help? Contact <b>'").append(AppConstants.CLUB_EMAIL).append("'</b></p>");
 
         HTMLPanel introHTML = new HTMLPanel(intro.toString());
         introPanel.add(introHTML);

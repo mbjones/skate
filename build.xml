@@ -5,6 +5,7 @@
 	<property environment="env" />
 
 	<property name="release.dir" value="${dist.dir}/${name}-${release}" />
+	<property name="deploy.dir"  value="/Users/jones/tomcat6/apache-tomcat-6.0.26/webapps" />
 
 	<target name="dist" depends="">
 		<!-- make the dist directories -->
@@ -24,12 +25,12 @@
 	            webxml="war/WEB-INF/web.xml">
 	         <fileset dir="${release.dir}"/>
 	         <lib dir="war/WEB-INF/lib"/>
-	    	 <classes dir="bin"/>
+	    	 <classes dir="war/WEB-INF/classes"/>
 	         <webinf dir="war/WEB-INF"/>
 	    </war>
 		
-		<!-- remove the staged files -->
-		<delete dir="${release.dir}" />
+		<!-- remove the staged files
+		<delete dir="${release.dir}" /> -->
 	</target>
 
 	<target name="clean">
@@ -37,4 +38,8 @@
 		<delete dir="${dist.dir}" />
 	</target>
 
+	<target name="deploy" depends="dist">
+		<copy file="${dist.dir}/${name}-${release}.war"
+			  tofile="${deploy.dir}/${name}.war" />
+	</target>
 </project>

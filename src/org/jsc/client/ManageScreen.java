@@ -36,7 +36,9 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     private VerticalPanel classesPanel;
     protected VerticalPanel rosterPanel;
     private ClassListModel sessionClassList;
+    private ArrayList<SessionSkatingClass> currentSeasonClasses;
     private Grid classesGrid;
+    private TextBox seasonToList;
     private SkaterRegistrationServiceAsync regService;
     private int selectedClassRowIndex;
     private Grid rosterGrid;
@@ -45,6 +47,9 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     protected ArrayList<RosterEntry> currentRoster;
     private RosterScreen roster;
     private boolean layoutForPrinting;
+    private static int SAVE = 1;
+    private static int ADD = 2;
+    private static int DELETE = 3;
 
     /**
      * Create the Management screen for managing class rosters and levels 
@@ -104,6 +109,28 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         classesPanel = new VerticalPanel();
         classesPanel.addStyleName("jsc-leftpanel");
                 
+        Label seasonLabel = new Label("Show season: ");
+        seasonToList = new TextBox();
+        String season = SessionSkatingClass.calculateSeason();
+        ((TextBox)seasonToList).setText(season);
+        seasonToList.addStyleName("jsc-text-box-medium");
+        Button seasonButton = new Button("Show Season");
+        seasonButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                setSeason();
+            }
+        });
+        seasonButton.addStyleName("jsc-button-right");
+        HorizontalPanel seasonPanel = new HorizontalPanel();
+        seasonPanel.add(seasonLabel);
+        seasonPanel.add(seasonToList);   
+        seasonPanel.add(seasonButton);
+        classesPanel.add(seasonPanel);
+        
+        Label spacer = new Label(" ");
+        spacer.addStyleName("jsc-spacer");
+        classesPanel.add(spacer);
+
         classesGrid = new Grid(0, 3);
         classesGrid.addStyleName("jsc-pointer-cursor");
         
@@ -120,6 +147,14 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         classesPanel.add(scrollPanel);
         
         addClickHandler(classesGrid);
+    }
+    
+    /**
+     * Change the season that is being displayed in the class list, and update
+     * the class list to show only that season classes.
+     */
+    private void setSeason() {
+        updateClassListTable();
     }
     
     /**
@@ -155,6 +190,8 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             classesGrid.removeRow(i);
         }
         
+        currentSeasonClasses = new ArrayList<SessionSkatingClass>();
+        
         // Reset the selected class row marker
         selectedClassRowIndex = 0;
         
@@ -165,12 +202,21 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 GWT.log("Expected SessionSkatingClass was not found in model", null);
                 break;
             }
-            Label sessionLabel = new Label(curClass.getSeason() + " (" +
-                    curClass.getSessionNum() + ")");
-            Label classLabel = new Label(curClass.getClassType());
-            Label dayLabel = new Label(curClass.getDay().substring(0, 3)); 
-            Widget[] labels= {sessionLabel, classLabel, dayLabel};
-            addRowToGrid(classesGrid, labels);
+            String classSeason = curClass.getSeason();
+            
+            if (classSeason.equals(seasonToList.getText())) {
+                
+                // Create a new list of just the classes from the current season
+                // This will be used to find the right class to refresh the roster display
+                currentSeasonClasses.add(curClass);
+                
+                Label sessionLabel = new Label(classSeason + " (" +
+                        curClass.getSessionNum() + ")");
+                Label classLabel = new Label(curClass.getClassType());
+                Label dayLabel = new Label(curClass.getDay().substring(0, 3)); 
+                Widget[] labels= {sessionLabel, classLabel, dayLabel};
+                addRowToGrid(classesGrid, labels);
+            }
         }
     }
 
@@ -190,7 +236,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         rosterPanel.add(classLabel);
         
         if (!layoutForPrinting) {
-            int classInfoColumns = 7;
+            int classInfoColumns = 9;
             Label seasonLabel = new Label("Season");
             Label sessionLabel = new Label("Session");
             Label classTypeLabel = new Label("Class");
@@ -198,10 +244,13 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             Label timeLabel = new Label("Time");
             Label instructorLabel = new Label("Instructor");
             Label saveButtonLabel = new Label(" ");
+            Label addButtonLabel = new Label(" ");
+            Label deleteButtonLabel = new Label(" ");
 
             classInfoGrid = new Grid(0, classInfoColumns);
             Widget[] labels = {seasonLabel, sessionLabel, classTypeLabel,  
-                    dayLabel, timeLabel, instructorLabel, saveButtonLabel};
+                    dayLabel, timeLabel, instructorLabel, saveButtonLabel,
+                    addButtonLabel, deleteButtonLabel};
             addRowToGrid(classInfoGrid, labels);
             
             rosterPanel.add(classInfoGrid);
@@ -306,8 +355,9 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
      */
     private void refreshClassRoster(int row) {
         clearMessage();
-        ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList(); 
-        final SessionSkatingClass curClass = classes.get(row-1);
+//        ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList(); 
+//        final SessionSkatingClass curClass = classes.get(row-1);
+        final SessionSkatingClass curClass = currentSeasonClasses.get(row-1);
         //classLabel.setText(curClass.formatClassLabel());
         
         // Initialize the service proxy.
@@ -398,13 +448,30 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 final long currentClassId = curClass.getClassId();
                 saveClassButton.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                        requestSaveClass(currentClassId, event);
+                        requestClassChange(currentClassId, event);
                     }
                 });
                 saveClassButton.addStyleName("jsc-button-right");
                                 
+                Button addClassButton = new Button("Add");
+                addClassButton.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        requestClassChange(currentClassId, event);
+                    }
+                });
+                addClassButton.addStyleName("jsc-button-right");
+                
+                Button deleteClassButton = new Button("Delete");
+                saveClassButton.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        requestClassChange(currentClassId, event);
+                    }
+                });
+                deleteClassButton.addStyleName("jsc-button-right");
+                
                 Widget[] labels = {seasonWidget, sessionWidget, classTypeWidget,  
-                        dayWidget, timeWidget, instructorWidget, saveClassButton};
+                        dayWidget, timeWidget, instructorWidget, saveClassButton,
+                        addClassButton, deleteClassButton};
                 addRowToGrid(classInfoGrid, labels);
                 
             } else {
@@ -521,7 +588,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
      * @param currentClassId the class to be changed
      * @param event the event that was clicked, from which form field data can be retrieved
      */
-    private void requestSaveClass(long currentClassId, ClickEvent event) {
+    private void requestClassChange(long currentClassId, ClickEvent event) {
         Button source = (Button)event.getSource();
         Grid rosterGrid = (Grid)source.getParent();
         ArrayList<String> newClassValues = new ArrayList<String>();
@@ -556,9 +623,24 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 }
             }
         };
-
+        
+        int operation;
+        if (source.getText().equals("Save")) {
+            GWT.log("Got save button", null);
+            operation = SAVE;
+        } else if (source.getText().equals("Add")) {
+            GWT.log("Got add button", null);
+            operation = ADD;
+        } else if (source.getText().equals("Delete")) {
+            GWT.log("Got delete button", null);
+            operation = DELETE;
+        } else {
+            GWT.log("Invalid button choice", null);
+            return;
+        }
+        
         // Make the call to the registration service.
-        regService.saveSkatingClass(loginSession, currentClassId, newClassValues, callback);
+        regService.saveSkatingClass(loginSession, currentClassId, newClassValues, operation, callback);
     }
     
     /**
@@ -682,8 +764,9 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         // Switch to the screen for printing rosters, but before doing so
         // update it by passing in the currentRoster to be displayed along with 
         // a reference to the current selected class to be displayed
-        ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList();
-        SessionSkatingClass curClass = classes.get(selectedClassRowIndex-1);
+//        ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList();
+//        SessionSkatingClass curClass = classes.get(selectedClassRowIndex-1);
+        SessionSkatingClass curClass = currentSeasonClasses.get(selectedClassRowIndex-1);
         roster.updateRosterTable(currentRoster, curClass);
         History.newItem("roster");
     }

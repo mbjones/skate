@@ -46,6 +46,34 @@ SELECT ppl.surname, ppl.givenname, m.season, p.paypal_status
     AND sc.season = '2009-2010'
     AND sc.sessionname = '3'
   ORDER BY y.paypal_status, sc.classtype, p.surname, p.givenname;
+
+select DISTINCT p.pid, p.givenname, p.surname, p.birthdate, p.usfsaid, p.street1,
+       p.city, p.state, p.zipcode
+  from people p, rosterpeople r, sessionclasses c
+ where p.pid = r.pid
+   and r.classid = c.classid
+   and (c.sid = 5002 or c.sid = 5003)
+   and r.paypal_status NOT IN ('Pending', 'Refunded')
+   and c.classtype NOT LIKE 'FS%'
+ EXCEPT
+ (select DISTINCT p.pid, p.givenname, p.surname, p.birthdate, p.usfsaid, p.street1,
+       p.city, p.state, p.zipcode
+  from people p, rosterpeople r, sessionclasses c
+ where p.pid = r.pid
+   and r.classid = c.classid
+   and (c.sid = 5000 or c.sid = 5001)
+   and r.paypal_status NOT IN ('Pending', 'Refunded'));
+ 
+select DISTINCT p.pid, p.givenname, p.surname, p.birthdate, p.usfsaid, p.street1,
+       p.city, p.state, p.zipcode
+  from people p, rosterpeople r, sessionclasses c
+ where p.pid = r.pid
+   and r.classid = c.classid
+   and (c.sid = 5000 or c.sid = 5001)
+   and r.paypal_status NOT IN ('Pending', 'Refunded')
+   and c.classtype NOT LIKE 'FS%'
+ order by p.givenname, p.surname;
+
  
  -- Roster & Payment Dump for Wendy
  SELECT sc.season,sc.sessionname,p.pid, p.surname,
@@ -72,7 +100,7 @@ UNION
 SELECT parentfirstname|| ' ' || parentsurname || ' <' || parentemail || '>' from people
  WHERE (pid in 
        (select r.pid from roster r, skatingclass s 
-         where r.classid = s.classid and s.sid = 5002));
+         where r.classid = s.classid and s.sid = 5003));
 
 -- Update query to batch correct the maxlevel field for people based on the hishest level
 -- they have passed in any of their classes

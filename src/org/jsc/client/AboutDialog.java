@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * @author Matt Jones
  */
 public class AboutDialog extends DialogBox {
-    private static final String VERSION = "1.2.0";
+    private static final String VERSION = AppConstants.VERSION;
     
     public AboutDialog() {
         // Set the dialog box's caption.
@@ -23,7 +23,7 @@ public class AboutDialog extends DialogBox {
         title.addStyleName("jsc-dialog");
         Label version = new Label("Version: " + VERSION);
         version.addStyleName("jsc-dialog");
-        Label copyright = new Label("Copyright 2009 Matthew B. Jones. All rights reserved.");
+        Label copyright = new Label(AppConstants.COPYRIGHT);
         copyright.addStyleName("jsc-dialog");
 
         Button ok = new Button("OK");

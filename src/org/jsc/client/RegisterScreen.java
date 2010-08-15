@@ -343,7 +343,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
                         checkbox.setEnabled(false);
                     }
                     
-                // Otherwise it is a Basic Skills class, but on include if its the active session
+                // Otherwise it is a Basic Skills class, but only include if its the active session
                 } else if (curClass.isActiveSession()) {
                     // Only add item to list if student is not registered
                     if (studentRoster.contains(loginSession.getPerson().getPid(),
