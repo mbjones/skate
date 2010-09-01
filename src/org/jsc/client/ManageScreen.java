@@ -154,6 +154,8 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
      * the class list to show only that season classes.
      */
     private void setSeason() {
+        clearClassInfoTable();
+        clearRosterTable();
         updateClassListTable();
     }
     
@@ -190,6 +192,8 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             classesGrid.removeRow(i);
         }
         
+        // Create a new list of just the classes from the current season
+        // This will be used to find the right class to refresh the roster display
         currentSeasonClasses = new ArrayList<SessionSkatingClass>();
         
         // Reset the selected class row marker
@@ -206,8 +210,6 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             
             if (classSeason.equals(seasonToList.getText())) {
                 
-                // Create a new list of just the classes from the current season
-                // This will be used to find the right class to refresh the roster display
                 currentSeasonClasses.add(curClass);
                 
                 Label sessionLabel = new Label(classSeason + " (" +
@@ -355,10 +357,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
      */
     private void refreshClassRoster(int row) {
         clearMessage();
-//        ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList(); 
-//        final SessionSkatingClass curClass = classes.get(row-1);
         final SessionSkatingClass curClass = currentSeasonClasses.get(row-1);
-        //classLabel.setText(curClass.formatClassLabel());
         
         // Initialize the service proxy.
         if (regService == null) {
@@ -406,11 +405,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
 
             classLabel.setText("Class and Roster Information");
             // Remove all of the rows from the classInfoGrid, except the header row
-            int rows = classInfoGrid.getRowCount();
-            for (int i = rows-1; i > 0; i--) {
-                GWT.log("Removing table row: " + i, null);
-                classInfoGrid.removeRow(i);
-            }
+            clearClassInfoTable();
             
             Widget seasonWidget = null;
             Widget sessionWidget = null;
@@ -448,6 +443,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 final long currentClassId = curClass.getClassId();
                 saveClassButton.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
+                        GWT.log("Save class button clicked.");
                         requestClassChange(currentClassId, event);
                     }
                 });
@@ -456,14 +452,16 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 Button addClassButton = new Button("Add");
                 addClassButton.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
+                        GWT.log("Add class button clicked.");
                         requestClassChange(currentClassId, event);
                     }
                 });
                 addClassButton.addStyleName("jsc-button-right");
                 
                 Button deleteClassButton = new Button("Delete");
-                saveClassButton.addClickHandler(new ClickHandler() {
+                deleteClassButton.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
+                        GWT.log("Delete class button clicked.");
                         requestClassChange(currentClassId, event);
                     }
                 });
@@ -487,12 +485,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             }
         }
         
-        // Remove all of the rows from the table, except the header row
-        int rows = rosterGrid.getRowCount();
-        for (int i = rows-1; i > 0; i--) {
-            GWT.log("Removing table row: " + i, null);
-            rosterGrid.removeRow(i);
-        }
+        clearRosterTable();
         
         // Add all of the new roster entries into the table
         for (RosterEntry entry : newRoster) {
@@ -581,7 +574,32 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             }
         }
     }
- 
+
+    /**
+     * Remove the rows from the class information display in preparation to 
+     * update the information.
+     */
+    private void clearClassInfoTable() {
+        // Remove all of the rows from the classInfoGrid, except the header row
+        int rows = classInfoGrid.getRowCount();
+        for (int i = rows-1; i > 0; i--) {
+            GWT.log("Removing table row: " + i, null);
+            classInfoGrid.removeRow(i);
+        }
+    }
+
+    /**
+     * Remove rows from the roster table before updating it.
+     */
+    private void clearRosterTable() {
+        // Remove all of the rows from the table, except the header row
+        int rows = rosterGrid.getRowCount();
+        for (int i = rows-1; i > 0; i--) {
+            GWT.log("Removing table row: " + i, null);
+            rosterGrid.removeRow(i);
+        }
+    }
+    
     /**
      * Handle the request to save changes to a class by calling the remote
      * registration service and passing off the request data and login information.
@@ -600,6 +618,21 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             newClassValues.add(tb.getValue());
         }
 
+        final int operation;
+        if (source.getText().equals("Save")) {
+            GWT.log("Got save button", null);
+            operation = SAVE;
+        } else if (source.getText().equals("Add")) {
+            GWT.log("Got add button", null);
+            operation = ADD;
+        } else if (source.getText().equals("Delete")) {
+            GWT.log("Got delete button", null);
+            operation = DELETE;
+        } else {
+            GWT.log("Invalid button choice", null);
+            return;
+        }
+        
         // Initialize the service proxy.
         if (regService == null) {
             regService = GWT.create(SkaterRegistrationService.class);
@@ -617,27 +650,16 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 GWT.log("Save class returned: " + resultFlag, null);
                 if (resultFlag) {
                     sessionClassList.refreshClassList();
+//                    if (operation==DELETE) {
+//                        SessionSkatingClass curClass = currentSeasonClasses.get(0);
+//                        roster.updateRosterTable(currentRoster, curClass);
+//                    }
                     setMessage("Class changes saved.");
                 } else {
                     setMessage("Error saving class changes. Check your entries and try again.");
                 }
             }
         };
-        
-        int operation;
-        if (source.getText().equals("Save")) {
-            GWT.log("Got save button", null);
-            operation = SAVE;
-        } else if (source.getText().equals("Add")) {
-            GWT.log("Got add button", null);
-            operation = ADD;
-        } else if (source.getText().equals("Delete")) {
-            GWT.log("Got delete button", null);
-            operation = DELETE;
-        } else {
-            GWT.log("Invalid button choice", null);
-            return;
-        }
         
         // Make the call to the registration service.
         regService.saveSkatingClass(loginSession, currentClassId, newClassValues, operation, callback);
@@ -676,11 +698,10 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
 
             public void onSuccess(Boolean resultFlag) {
                 GWT.log("Save roster returned: " + resultFlag, null);
+                refreshClassRoster(selectedClassRowIndex);
                 if (resultFlag) {
-                    refreshClassRoster(selectedClassRowIndex);
                     setMessage("Changes saved.");
                 } else {
-                    refreshClassRoster(selectedClassRowIndex);
                     setMessage("Error saving changes. Please check that you provided a valid level code (e.g., BS1, BS2).");
                 }
             }
@@ -764,8 +785,6 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         // Switch to the screen for printing rosters, but before doing so
         // update it by passing in the currentRoster to be displayed along with 
         // a reference to the current selected class to be displayed
-//        ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList();
-//        SessionSkatingClass curClass = classes.get(selectedClassRowIndex-1);
         SessionSkatingClass curClass = currentSeasonClasses.get(selectedClassRowIndex-1);
         roster.updateRosterTable(currentRoster, curClass);
         History.newItem("roster");
