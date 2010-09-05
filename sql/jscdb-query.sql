@@ -7,6 +7,16 @@ select rp.surname, rp.givenname, sc.classtype, sc.day, rp.paypal_status
    and sc.sessionname = '1'
  order by classtype, surname, givenname;
 
+-- Report of the number of people in each class
+SELECT c.season, c.sessionname as session, c.classtype as class, c.day, count(*) as count
+  FROM people p, roster r, sessionclasses c, payment py
+ WHERE p.pid = r.pid
+   AND r.classid = c.classid
+   AND r.paymentid = py.paymentid
+   AND py.paypal_status NOT IN ('Pending', 'Refunded')
+ GROUP BY c.season, c.sessionname, c.classtype, c.day
+ ORDER BY c.season, c.sessionname, c.classtype, c.day;
+ 
 -- Query to find the list of memberships
 SELECT ppl.surname, ppl.givenname, m.season, p.paypal_status   
   FROM membership m, payment p, people ppl  

@@ -101,13 +101,13 @@ INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, di
      VALUES ('4', '2009-2010', '2010-03-01', '2010-04-11', 'f', '2009-03-05');
      
 INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, discountdate)
-     VALUES ('1', '2010-2011', '2010-09-19', '2010-10-31', 'f', '2010-09-17');
+     VALUES ('1', '2010-2011', '2010-09-19', '2010-10-31', 'f', '2010-09-22');
 INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, discountdate)
-     VALUES ('2', '2010-2011', '2010-11-08', '2010-12-19', 't', '2010-11-06');
+     VALUES ('2', '2010-2011', '2010-11-08', '2010-12-19', 't', '2010-11-10');
 INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, discountdate)
-     VALUES ('3', '2010-2011', '2011-01-10', '2011-02-20', 'f', '2011-01-08');
+     VALUES ('3', '2010-2011', '2011-01-10', '2011-02-20', 'f', '2011-01-12');
 INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, discountdate)
-     VALUES ('4', '2010-2011', '2011-02-28', '2011-04-10', 'f', '2011-02-26');
+     VALUES ('4', '2010-2011', '2011-02-28', '2011-04-10', 'f', '2011-03-02');
 
 
 INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost, 

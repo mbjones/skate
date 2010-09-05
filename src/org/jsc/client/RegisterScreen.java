@@ -32,8 +32,9 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boolean> {
 
-    private static final String DISCOUNT_EXPLANATION = "<p class=\"jsc-text\">Because it helps with planning our class sizes, <b>we offer a discount for those who register early</b> (more than " + AppConstants.EARLY_PRICE_GRACE_DAYS + " days before the session starts).</p>";
-    private static final String PRICE_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p>" + DISCOUNT_EXPLANATION + "</div>";
+    private static final String DISCOUNT_EXPLANATION = "<p class=\"jsc-text\">Because it helps with planning our class sizes, <b>we offer a discount for those who register early</b>.</p>";
+    private static final String PRICE_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p>";
+    private static final String DISCOUNT_LABEL_PREFIX = "Discount deadline: ";
     private static final String PAYPAL_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">You must make your payment using PayPal by clicking on the button below.  <b>Your registration is <em>not complete</em></b> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
     private static final String BS_EXPLANATION = "Basic Skills is our Learn to Skate program. These group lessons are based on the United States Figure Skating's (USFSA) Basic Skills Program. This is a nationwide, skills-based, graduated series of instruction for youth and adult skaters. This program is designed to teach all skaters the fundamentals of skating.";
     private static final String FS_EXPLANATION = "Figure Skating is a one- to five-day-a-week program for skaters that have completed all of the Basic Skills Levels (8) or Adult Levels (4). Students work individually with their coach to develop their skills. Please only sign up for Figure Skating Classes only if you have permission from the Figure Skating Coordinator.";
@@ -67,7 +68,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
     private double total;
     private Label memberCheckboxLabel;
     private HashSet<String> fsClassesToRegister;
-    private Label discountLabel;
+    private Label fsDiscountLabel;
+    private Label discountDateLabel;
     private NumberFormat numfmt;
     private Label bsTotalLabel;
     private Label bsDiscountLabel;
@@ -187,7 +189,12 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         fmt.addStyleName(newRow, 3,  "jsc-currencyfield");
         
         bsClassChoicePanel = new VerticalPanel();
-        bsClassChoicePanel.add(new HTMLPanel(PRICE_EXPLANATION));
+        StringBuffer sb = new StringBuffer(PRICE_EXPLANATION);
+        sb.append(DISCOUNT_EXPLANATION);
+        //Date discountDate = getDiscountDate();
+        bsClassChoicePanel.add(new HTMLPanel(sb.toString()));
+        discountDateLabel = new Label(DISCOUNT_LABEL_PREFIX);
+        bsClassChoicePanel.add(discountDateLabel);
         bsClassChoicePanel.add(basicSkillsGrid);
 
         bsPanel.add(bsClassChoicePanel);
@@ -229,10 +236,10 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         
         // Insert the next to last row containing the discount amount
         newRow = figureSkatingGrid.insertRow(figureSkatingGrid.getRowCount());
-        discountLabel = new Label();
-        discountLabel.setText(numfmt.format(zero));
+        fsDiscountLabel = new Label();
+        fsDiscountLabel.setText(numfmt.format(zero));
         figureSkatingGrid.setWidget(newRow, 4, new Label("Discount"));
-        figureSkatingGrid.setWidget(newRow, 5, discountLabel);
+        figureSkatingGrid.setWidget(newRow, 5, fsDiscountLabel);
         fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
         fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
         
@@ -383,6 +390,23 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
     private void recalculateAndDisplayBasicSkillsTotal() {
         // Update the cost discount, and total fields on the BS Form
         feeLabel.setText(numfmt.format(AppConstants.STANDARD_PRICE));
+        Date discountDate = getDiscountDate();
+        GWT.log("Discount date is: " + discountDate, null);
+        Date discountDisplay = discountDate;
+        discountDisplay.setTime( discountDate.getTime() + -1*1000*60*60*24 );
+        String discountString = DateTimeFormat.getLongDateFormat().format(discountDisplay);
+        discountDateLabel.setText(DISCOUNT_LABEL_PREFIX + discountString);
+        double bsDiscount = calculateBSDiscount(discountDate);
+        bsDiscountLabel.setText(numfmt.format(bsDiscount));
+        double bsTotal = AppConstants.STANDARD_PRICE - bsDiscount;
+        bsTotalLabel.setText(numfmt.format(bsTotal));
+    }
+
+    /**
+     * Find the discount date for the first class in the active session.
+     * @return the Date which represents the Discount date
+     */
+    private Date getDiscountDate() {
         ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList();
         String sessionDiscount = "";
         for (SessionSkatingClass curClass : classes) {
@@ -396,11 +420,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
             discountDate = fmt.parse(sessionDiscount);
         }
-        GWT.log("Discount date is: " + discountDate, null);
-        double bsDiscount = calculateBSDiscount(discountDate);
-        bsDiscountLabel.setText(numfmt.format(bsDiscount));
-        double bsTotal = AppConstants.STANDARD_PRICE - bsDiscount;
-        bsTotalLabel.setText(numfmt.format(bsTotal));
+        return discountDate;
     }
 
     /**
@@ -632,7 +652,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
     private void recalculateAndDisplayFSTotals() {
         boolean isMember = loginSession.getPerson().isMember() || memberCheckbox.getValue();
         double discount = calculateFSDiscount(fsClassesToRegister.size(), isMember);
-        discountLabel.setText(numfmt.format(discount));
+        fsDiscountLabel.setText(numfmt.format(discount));
         total = totalFSCost - discount;
         totalCostLabel.setText(numfmt.format(total));
     }
