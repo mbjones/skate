@@ -101,9 +101,9 @@ INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, di
      VALUES ('4', '2009-2010', '2010-03-01', '2010-04-11', 'f', '2009-03-05');
      
 INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, discountdate)
-     VALUES ('1', '2010-2011', '2010-09-19', '2010-10-31', 'f', '2010-09-22');
+     VALUES ('1', '2010-2011', '2010-09-19', '2010-10-31', 't', '2010-09-22');
 INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, discountdate)
-     VALUES ('2', '2010-2011', '2010-11-08', '2010-12-19', 't', '2010-11-10');
+     VALUES ('2', '2010-2011', '2010-11-08', '2010-12-19', 'f', '2010-11-10');
 INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, discountdate)
      VALUES ('3', '2010-2011', '2011-01-10', '2011-02-20', 'f', '2011-01-12');
 INSERT INTO sessions (sessionname, season, startdate, enddate, activesession, discountdate)
