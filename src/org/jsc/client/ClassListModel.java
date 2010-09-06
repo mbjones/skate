@@ -1,6 +1,7 @@
 package org.jsc.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.jsc.client.event.LoginSessionChangeEvent;
 import org.jsc.client.event.LoginSessionChangeHandler;
@@ -65,6 +66,7 @@ public class ClassListModel {
                 } else {
                     // Assign the classList
                     classList = list;
+                    Collections.sort(classList);
                     SkatingClassChangeEvent event = new SkatingClassChangeEvent(classList);
                     eventBus.fireEvent(event);
                 }

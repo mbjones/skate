@@ -1,6 +1,7 @@
 package org.jsc.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.jsc.client.event.SkatingClassChangeEvent;
 import org.jsc.client.event.SkatingClassChangeHandler;
@@ -198,7 +199,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         
         // Reset the selected class row marker
         selectedClassRowIndex = 0;
-        
+                
         // Add all of the new class entries into the table
         for (SessionSkatingClass curClass : sessionClassList.getClassList()) {
             

@@ -9,7 +9,7 @@ import java.util.Date;
  * .
  * @author Matt Jones
  */
-public class SessionSkatingClass implements Serializable {
+public class SessionSkatingClass implements Serializable, Comparable<SessionSkatingClass> {
     private long sid;
     private long sessionNum;
     private String season;
@@ -338,19 +338,28 @@ public class SessionSkatingClass implements Serializable {
         
         return season;
     }
-    
-    public static String calculateCurrentSession() {
-        String sessionName = "";
-        // TODO: determine which session we are currently in by comparing to the database
-        // and returning the first matching result
-        return sessionName;
+
+    @Override
+    public int compareTo(SessionSkatingClass that) {
+        final int BEFORE = -1;
+        final int EQUAL = 0;
+        final int AFTER = 1;
+        
+        if (this.equals(that)) return EQUAL;
+                
+        // First sort by season, in ascending order
+        int comparison = this.season.compareTo(that.season);
+        if ( comparison != EQUAL ) return comparison;
+        
+        // Next sort by session number, in descending order
+        if (this.sessionNum < that.sessionNum) return AFTER;
+        if (this.sessionNum > that.sessionNum) return BEFORE;
+
+        // Finally sort alphabetically by name of class
+        comparison = this.classType.compareTo(that.classType);
+        if ( comparison != EQUAL ) return comparison;
+        
+        return EQUAL;
     }
-    
-    public static String calculateActiveSession() {
-        String sessionName = "";
-        // TODO: determine which session is active for registration based on
-        // either a midpoint algorithm or by marking active sessions in the database
-        // Prefer the latter!
-        return sessionName;
-    }
+
 }

@@ -15,7 +15,7 @@ public class AppConstants {
     public static final int SEASON_CUTOFF_MONTH = 5;
     
     // Various display strings
-    public static final String COPYRIGHT = "Copyright 2009 Matthew B. Jones. All rights reserved.";
+    public static final String COPYRIGHT = "Copyright 2009-2010 Matthew B. Jones. All rights reserved.";
     public static final String CLUB_NAME = "Juneau Skating Club";
     public static final String CLUB_URL = "http://juneauskatingclub.org";
     public static final String CLUB_EMAIL = "registrar@juneauskatingclub.org";
