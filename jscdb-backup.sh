@@ -1,11 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 #
 # Backup the JSCDB database to a text file and copy it offsite
 #
+# Install in crontab with this:
+#23 0,3,6,9,12,15,18,21 * * *       $HOME/jscdb-backup/jscdb-backup.sh >> $HOME/jscdb-backup/jscdb-backup.log 2>&1
 # Matt Jones 6 Sep 2009
 
-DIR=/Users/jones/jscdb-backup
+DIR=/home/jones/jscdb-backup
 DBNAME=jscdb
 HOST=localhost
 USER=jscdb
@@ -21,8 +23,8 @@ DAY=`date "+%w"`
 DOM=`date "+%d"`
 MIDNIGHT=0
 SUNDAY=0
-PGDUMP=/opt/local/lib/postgresql84/bin/pg_dump
-TOMCAT=/opt/local/share/java/tomcat6
+PGDUMP=/usr/bin/pg_dump
+TOMCAT=/etc/tomcat6
 NAME=$DATESTAMP-$DBNAME-backup
 BACKUPDIR=$DIR/$NAME
 FILENAME="-$DBNAME-backup.sql"
@@ -34,14 +36,17 @@ echo "Dump file: $DUMPFILE"
 mkdir $BACKUPDIR
 
 # Create the database backup file
-$PGDUMP -f $DUMPFILE -U $USER -h $HOST $DBNAME
+#$PGDUMP -f $DUMPFILE -U $USER -h $HOST $DBNAME
+$PGDUMP -f $DUMPFILE -U $USER $DBNAME
 
 # Backup the config files and app jar as well once a week
 if test $HOUR -eq $MIDNIGHT && test $DAY -eq $SUNDAY; then
     echo "It is $HOUR on $SUNDAY so backing up app files."
-    cp /etc/httpd/virtual/org.juneauskatingclub.reg.conf $BACKUPDIR
-    cp -r $TOMCAT/jscdb $BACKUPDIR
-    cp -R $TOMCAT/conf/Catalina/localhost/ROOT.xml $BACKUPDIR
+    cp /etc/apache2/sites-available/jsc-reg $BACKUPDIR
+    cp /etc/apache2/sites-available/jsc-apps $BACKUPDIR
+    cp -r /var/jscdb $BACKUPDIR
+    #cp -R $TOMCAT/Catalina/apps.juneauskatingclub.org/ROOT.xml $BACKUPDIR
+    cp -R $TOMCAT/Catalina/reg.juneauskatingclub.org/ROOT.xml $BACKUPDIR
 fi
 
 # tar and gzip the backup directory
@@ -53,7 +58,7 @@ popd
 scp -P $REMOTEPORT $BACKUPDIR.tgz $REMOTEUSER@$REMOTEHOST:$REMOTEDIR
 
 # Copy it to a local external disk
-cp -p $BACKUPDIR.tgz $DISKDIR
+#cp -p $BACKUPDIR.tgz $DISKDIR
 
 # Remove the temporary directory
 rm -rf $BACKUPDIR
