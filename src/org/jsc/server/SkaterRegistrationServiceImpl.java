@@ -3,6 +3,7 @@ package org.jsc.server;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -1225,17 +1226,19 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         AccountInfo acctInfo = null;
         try {
             Connection con = getConnection();
-            Statement stmt = con.createStatement();
+            //Statement stmt = con.createStatement();
+            Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             ResultSet rs = stmt.executeQuery(sql.toString());
             long pid = 0;
             ArrayList<String> usernames = new ArrayList<String>();
             String email = "";
-            while (rs.next()) {
+            
+            if (rs.next()) {
                 pid = rs.getLong(1);
                 usernames.add(rs.getString(2));
                 email = rs.getString(3);
+                acctInfo = new AccountInfo(pid, usernames, email);
             }
-            acctInfo = new AccountInfo(pid, usernames, email);
             stmt.close();
             con.close();
     
@@ -1244,6 +1247,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         }
         return acctInfo;
     }
+        
 
     /**
      * Update the database with new encrypted password for the person identified by pid.

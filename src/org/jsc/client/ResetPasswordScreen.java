@@ -133,7 +133,7 @@ public class ResetPasswordScreen extends BaseScreen {
                     History.newItem("login");
                     setMessage("Password reset succeeded. Check your email for the new password, then sign in here.");
                 } else {
-                    setMessage("Sorry, resetting password failed.");
+                    setMessage("Sorry, resetting password failed. Username not found. Look up your username if needed.");
                 }
             }
         };
