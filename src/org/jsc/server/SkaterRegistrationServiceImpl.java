@@ -2,8 +2,8 @@ package org.jsc.server;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -1196,11 +1196,22 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         StringBuffer sql = new StringBuffer();
         sql.append("select pid, username, email "); 
         sql.append("from people "); 
-        sql.append("where username = '");
-        sql.append(username).append("';");
+        sql.append("where username = ?;");
         System.out.println(sql.toString());
         
-        AccountInfo acctInfo = lookupAccount(sql);
+        AccountInfo acctInfo = null;
+        try {
+            Connection con = getConnection();
+            PreparedStatement stmt = con.prepareStatement(sql.toString(), 
+                    ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            stmt.setString(1, username);
+            System.out.println(stmt.toString());
+            acctInfo = lookupAccount(stmt);
+            stmt.close();
+            con.close();
+        } catch (SQLException e) {
+            System.err.println("SQLException: " + e.getMessage());
+        }
         
         return acctInfo;
     }
@@ -1211,24 +1222,32 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         StringBuffer sql = new StringBuffer();
         sql.append("select pid, username, email "); 
         sql.append("from people "); 
-        sql.append("where email = '");
-        sql.append(email).append("' ");
-        sql.append("OR parentemail = '");
-        sql.append(email).append("';");
+        sql.append("where email = ?");
+        sql.append(" OR parentemail = ?;");
         System.out.println(sql.toString());
         
-        AccountInfo acctInfo = lookupAccount(sql);
-        
-        return acctInfo;
-    }
-    
-    private AccountInfo lookupAccount(StringBuffer sql) {
         AccountInfo acctInfo = null;
         try {
             Connection con = getConnection();
-            //Statement stmt = con.createStatement();
-            Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ResultSet rs = stmt.executeQuery(sql.toString());
+            PreparedStatement stmt = con.prepareStatement(sql.toString(), 
+                    ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            stmt.setString(1, email);
+            stmt.setString(2, email);
+            System.out.println(stmt.toString());
+            acctInfo = lookupAccount(stmt);
+            stmt.close();
+            con.close();
+        } catch (SQLException e) {
+            System.err.println("SQLException: " + e.getMessage());
+        }
+                
+        return acctInfo;
+    }
+    
+    private AccountInfo lookupAccount(PreparedStatement stmt) {
+        AccountInfo acctInfo = null;
+        try {
+            ResultSet rs = stmt.executeQuery();
             long pid = 0;
             ArrayList<String> usernames = new ArrayList<String>();
             String email = "";
@@ -1239,8 +1258,6 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 email = rs.getString(3);
                 acctInfo = new AccountInfo(pid, usernames, email);
             }
-            stmt.close();
-            con.close();
     
         } catch(SQLException ex) {
             System.err.println("SQLException: " + ex.getMessage());
