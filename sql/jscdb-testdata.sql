@@ -1,5 +1,7 @@
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('0', '0', 0);
+INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Snowplow Sam', 'SS0', 10);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Snowplow Sam', 'SS1', 11);
+INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Basic Skills 0', 'BS0', 20);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Basic Skills 1', 'BS1', 21);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Basic Skills 2', 'BS2', 22);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Basic Skills 3', 'BS3', 23);
@@ -8,10 +10,12 @@ INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Basic Skills 5', 
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Basic Skills 6', 'BS6', 26);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Basic Skills 7', 'BS7', 27);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Basic Skills 8', 'BS8', 28);
+INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Adult 0', 'AD0', 30);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Adult 1', 'AD1', 31);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Adult 2', 'AD2', 32);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Adult 3', 'AD3', 33);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Adult 4', 'AD4', 34);
+INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Free Skate 0', 'FS0', 40);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Free Skate 1', 'FS1', 41);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Free Skate 2', 'FS2', 42);
 INSERT INTO levels (levelname, levelcode, levelorder) VALUES ('Free Skate 3', 'FS3', 43);
