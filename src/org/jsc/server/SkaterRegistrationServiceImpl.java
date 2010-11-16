@@ -98,18 +98,13 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             System.out.println(sql.toString());
             try {
                 pstmt = con.prepareStatement(sql.toString());
-                System.out.println("Marker 1");
                 pstmt.setLong(1, newPid);
                 pstmt.setString(2, person.getLname());
                 pstmt.setString(3, person.getFname());
                 pstmt.setString(4, person.getMname());
                 pstmt.setString(5, person.getEmail());
-                System.out.println("Marker 2");
-//                SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy");
-//                Date bday = df.parse(person.getBday());
                 Date bday = parseDate(person.getBday());
                 pstmt.setDate(6, new java.sql.Date(bday.getTime()));
-                System.out.println("Marker 3");
                 pstmt.setString(7, person.getHomephone());
                 pstmt.setString(8, person.getCellphone());
                 pstmt.setString(9, person.getWorkphone());
@@ -122,25 +117,16 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 pstmt.setString(16, person.getParentLastname());
                 pstmt.setString(17, person.getParentEmail());
                 pstmt.setString(18, person.getUsername());
-                System.out.println("Marker 4");
                 // Hash the password before insertion into the database
                 String hashed = BCrypt.hashpw(person.getNewPassword(),
                         BCrypt.gensalt());
-                System.out.println("Marker 5");
                 pstmt.setString(19, hashed);
-                System.out.println("Marker 6");
                 System.out.println(pstmt.toString());
-                System.out.println("Marker 7");
                 pstmt.executeUpdate();
-                System.out.println("Marker 8");
                 pstmt.close();
-                System.out.println("Marker 9");
             } catch (SQLException e) {
                 System.out.println("SQLException: " + e.getMessage());
                 return null;
-//            } catch (ParseException e) {
-//                System.out.println("Date Parsing Exception: " + e.getMessage());
-//                return null;
             }
 
         } else {
@@ -208,16 +194,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             } catch (SQLException e) {
                 System.out.println("SQLException: " + e.getMessage());
                 return null;
-//            } catch (ParseException e) {
-//                System.out.println("Date Parsing Exception: " + e.getMessage());
-//                return null;
             }
         }
         
-        System.out.println("Marker 10");
         try {
             if (person.getPid() == 0) {
-                System.out.println("Marker 11a");
                 // This is an INSERT, so look up the new PID for the new record
                 PreparedStatement stmt = con
                         .prepareStatement("SELECT max(pid) from people where email LIKE ?");
@@ -230,22 +211,17 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 }
                 stmt.close();
             } else {
-                System.out.println("Marker 11b");
                 // This is an UPDATE, so use the passed in PID
                 pid = person.getPid();
             }
-            System.out.println("Marker 12");
             con.close();
-            System.out.println("Marker 13");
             
         } catch (SQLException ex) {
             System.err.println("SQLException: " + ex.getMessage());
             throw new SQLRecordException(ex);
         }
 
-        System.out.println("Marker 14");
         Person newPerson = lookupPerson(pid);
-        System.out.println("Marker 15");
         return newPerson;
     }
 
