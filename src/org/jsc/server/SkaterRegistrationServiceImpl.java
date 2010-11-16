@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
@@ -104,11 +105,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 pstmt.setString(4, person.getMname());
                 pstmt.setString(5, person.getEmail());
                 System.out.println("Marker 2");
-                SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy");
-                System.out.println("Marker 2a");
-                Date bday = df.parse(person.getBday());
-                System.out.println("Marker 2b");
-                // TODO: Update is mistranslating the date when it loads into the form, date gets corrupted
+//                SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy");
+//                Date bday = df.parse(person.getBday());
+                Date bday = parseDate(person.getBday());
                 pstmt.setDate(6, new java.sql.Date(bday.getTime()));
                 System.out.println("Marker 3");
                 pstmt.setString(7, person.getHomephone());
@@ -139,9 +138,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             } catch (SQLException e) {
                 System.out.println("SQLException: " + e.getMessage());
                 return null;
-            } catch (ParseException e) {
-                System.out.println("Date Parsing Exception: " + e.getMessage());
-                return null;
+//            } catch (ParseException e) {
+//                System.out.println("Date Parsing Exception: " + e.getMessage());
+//                return null;
             }
 
         } else {
@@ -168,9 +167,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 pstmt.setString(2, person.getFname());
                 pstmt.setString(3, person.getMname());
                 pstmt.setString(4, person.getEmail());
-                SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy");
-                Date bday = df.parse(person.getBday());
-                System.out.println("Updated BDAY is: " + bday.toGMTString());
+//                SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy");
+//                Date bday = df.parse(person.getBday());
+                Date bday = parseDate(person.getBday());
                 pstmt.setDate(5, new java.sql.Date(bday.getTime()));
                 pstmt.setString(6, person.getHomephone());
                 pstmt.setString(7, person.getCellphone());
@@ -209,9 +208,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             } catch (SQLException e) {
                 System.out.println("SQLException: " + e.getMessage());
                 return null;
-            } catch (ParseException e) {
-                System.out.println("Date Parsing Exception: " + e.getMessage());
-                return null;
+//            } catch (ParseException e) {
+//                System.out.println("Date Parsing Exception: " + e.getMessage());
+//                return null;
             }
         }
         
@@ -250,6 +249,33 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         return newPerson;
     }
 
+    private Date parseDate(String inputDate) {
+        Date date = null;
+        boolean success = false;
+        String[] formats = {"MM-dd-yyyy", "MM/dd/yyyy"};
+        for (String format : formats) {
+            System.out.println("Trying to parse " + inputDate + " using format: " + format);
+            SimpleDateFormat df = new SimpleDateFormat(format);
+            try {
+                date = df.parse(inputDate);
+                // Check if we get a reasonable year value -- if not, we likely 
+                // are misinterpreting the year as a month in one of our earlier 
+                // formats, so move on to a new format to be tried
+                if ((date.getYear() > 1995) && (date.getYear() <= Calendar.getInstance().getTime().getYear())) {
+                    success = true;
+                    break;    
+                } else {
+                    System.out.println("Got year: " + date.getYear());
+                }
+            } catch (ParseException e) {
+                success = false;
+                System.out.println("Failed parsing " + inputDate + " using format: " + format);
+            }    
+        }
+        
+        return date;
+    }
+    
     /**
      * Check if the user is in the database, and if the given password matches
      * @param username the username of the person who is signing in

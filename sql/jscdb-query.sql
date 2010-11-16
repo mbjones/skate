@@ -96,6 +96,43 @@ select DISTINCT p.pid, p.givenname, p.surname, p.birthdate, p.usfsaid, p.street1
     AND r.classid = sc.classid
   ORDER BY sc.season,sc.sessionname, p.date_updated;
   
+-- New payment dump for wendy -- one row per transaction
+SELECT DISTINCT sc.season,sc.sessionname as session, p.surname,
+        p.givenname, y.paypal_status,
+        y.paypal_tx_id, y.paypal_gross, y.discount,
+        y.paypal_fee, y.paypal_net
+   FROM roster r, people p, payment y, sessionclasses sc
+  WHERE r.pid = p.pid
+    AND r.paymentid = y.paymentid
+    AND r.classid = sc.classid
+    AND sc.season = '2010-2011'
+    AND sc.sessionname = '1'
+  ORDER BY sc.season,sc.sessionname, p.surname, p.givenname;
+
+-- Class enrollment summary count for a session
+SELECT sc.season,sc.sessionname as session,
+        sc.classtype, sc.day, count(*) as count
+   FROM roster r, people p, payment y, sessionclasses sc
+  WHERE r.pid = p.pid
+    AND r.paymentid = y.paymentid
+    AND r.classid = sc.classid
+    AND sc.season = '2010-2011'
+    AND sc.sessionname = '1'
+    AND y.paypal_status IN ('Completed', 'Paid Cash', 'Paid Check')
+  GROUP BY sc.season, session, sc.classtype, sc.day
+  ORDER BY sc.season,sc.sessionname, sc.classtype, sc.day;
+  
+-- Class enrollment listing for a session
+SELECT sc.season,sc.sessionname as session,
+        sc.classtype, sc.day, p.surname, p.givenname, y.paypal_status
+   FROM roster r, people p, payment y, sessionclasses sc
+  WHERE r.pid = p.pid
+    AND r.paymentid = y.paymentid
+    AND r.classid = sc.classid
+    AND sc.season = '2010-2011'
+    AND sc.sessionname = '1'
+  ORDER BY sc.season,sc.sessionname, sc.classtype, sc.day, p.surname, p.givenname;
+
 -- Query to create a mailing list
 SELECT givenname|| ' ' || surname || ' <' || email || '>' from people
 UNION
@@ -132,4 +169,31 @@ SELECT p.pid, p.givenname, p.surname, p.birthdate, p.usfsaid
    AND r.classid = c.classid 
    AND (c.sid = 5002 or c.sid = 5003) 
  ORDER BY p.pid, c.sid, c.classtype;
+ 
+ -- Select registrants for USFSA membership registration
+ SELECT DISTINCT p.usfsaid, p.givenname, p.surname, p.birthdate, p.birthdate, p.street1, p.city, p.state, p.zipcode 
+  FROM people p, roster r, sessionclasses c 
+ WHERE p.pid = r.pid 
+   AND r.classid = c.classid 
+   AND (c.sid = 5004) 
+ ORDER BY p.usfsaid, p.surname, p.givenname;
+
+ 
+ -- All FS and Advanced Youth skaters for given session
+ SELECT DISTINCT p.givenname, p.surname, p.email, p.parentemail, p.home_phone, p.cell_phone
+  FROM people p, roster r, sessionclasses c
+ WHERE p.pid = r.pid
+   AND r.classid = c.classid
+   AND c.sid = 5004
+   AND (c.classid in (SELECT classid from sessionclasses where classtype like 'FS%'or classtype like 'Advanced Youth'))
+ORDER BY p.surname, p.givenname;
+
+-- A mechanism to update the data in people.usfsaid from a column in another table
+UPDATE people
+  SET usfsaid = t2.usfsaid
+ FROM usfsaid as t2
+WHERE people.pid = t2.pid;
+
+
+
 

@@ -1,9 +1,14 @@
 package org.jsc.client;
 
+import java.util.Date;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -33,6 +38,7 @@ public class SettingsScreen extends BaseScreen {
     private TextBox lnameField;
     private TextBox emailField;
     private TextBox birthdayField;
+    private YearDatePicker datePicker;
     private TextBox homephoneField;
 
     private TextBox cellphoneField;
@@ -124,7 +130,21 @@ public class SettingsScreen extends BaseScreen {
         emailField = new TextBox();
         addToLeftGrid("Contact Email*:", emailField);
         birthdayField = new TextBox();
+        birthdayField.setReadOnly(true);
         addToLeftGrid("Skater's Birthdate*:", birthdayField);
+        
+        // A DatePicker that sets the value in the text box when the user selects a date
+        datePicker = new YearDatePicker();
+        datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {
+          public void onValueChange(ValueChangeEvent<Date> event) {
+            Date date = event.getValue();
+            String dateString = DateTimeFormat.getFormat("MM-dd-yyyy").format(date);
+            birthdayField.setText(dateString);
+          }
+        });
+        // Set the default value
+        datePicker.setValue(new Date(), true);
+        addToLeftGrid("", datePicker);
         
         addToLeftGrid(" ", new Label(" "));
         addToLeftGrid(" ", new Label("Account information:"));
@@ -222,7 +242,16 @@ public class SettingsScreen extends BaseScreen {
             mnameField.setText(person.getMname());
             lnameField.setText(person.getLname());
             emailField.setText(person.getEmail());
-            birthdayField.setText(person.getBday());
+            GWT.log("Parsing birthday: " + person.getBday());
+            try {
+                Date birthdate = DateTimeFormat.getFormat("MM-dd-yyyy").parseStrict(person.getBday());
+                GWT.log("Parsed date is: " + birthdate.getYear() + birthdate.getMonth() + birthdate.getDay());
+                datePicker.setValue(birthdate);
+            } catch (IllegalArgumentException e) {
+                GWT.log("Problem parsing birthday....");
+                GWT.log(e.getMessage());
+            }
+            //birthdayField.setText(person.getBday());
             
             homephoneField.setText(person.getHomephone());
             cellphoneField.setText(person.getCellphone());
