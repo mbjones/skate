@@ -215,3 +215,18 @@ INSERT INTO skatingclass (sid, classtype, day, timeslot, instructorid, cost,
     otherinstructors) VALUES
     (5001, 'FS Club Ice', 'Sunday', '9:15-10:15am', 1004, 75.00, '');
     
+-- Script to update previous payment data
+UPDATE membership SET payment_amount = 60;
+UPDATE roster SET payment_amount = 80 
+ WHERE rosterid IN
+       (SELECT rosterid
+          FROM roster r, sessionclasses sc
+         WHERE r.classid = sc.classid
+           AND sc.sid <= 5003);
+UPDATE roster SET payment_amount = 85 
+ WHERE rosterid IN
+       (SELECT rosterid
+          FROM roster r, sessionclasses sc
+         WHERE r.classid = sc.classid
+           AND sc.sid > 5003);
+           
