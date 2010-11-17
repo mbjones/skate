@@ -1,7 +1,6 @@
 package org.jsc.client;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import org.jsc.client.event.SkatingClassChangeEvent;
 import org.jsc.client.event.SkatingClassChangeHandler;
@@ -16,6 +15,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable;
+import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 
 /**
  * A screen that is used by coaches and administrators to manage class rosters, 

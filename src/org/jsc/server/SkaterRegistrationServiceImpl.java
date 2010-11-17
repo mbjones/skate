@@ -1471,7 +1471,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
 
         try {
             System.out.println("getConnection: finding driver class...");
-            // TODO: Be sure the java version matches the JDBC version
+            @SuppressWarnings("rawtypes")
             Class driverClass = Class.forName(JDBC_DRIVER);
             System.out.println("getConnection: driver loaded.");
         } catch (java.lang.ClassNotFoundException e) {

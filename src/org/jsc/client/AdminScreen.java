@@ -9,20 +9,17 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable;
-import com.google.gwt.user.client.ui.Hidden;
+import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 
 /**
  * A screen that is used to administer the skating data, including creating modifying
@@ -39,12 +36,12 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
     private Grid classesGrid;
     private SkaterRegistrationServiceAsync regService;
     private int selectedClassRowIndex;
-    private Grid rosterGrid;
+//    private Grid rosterGrid;
     private Label classLabel;
-    private Grid classInfoGrid;
+//    private Grid classInfoGrid;
     protected ArrayList<RosterEntry> currentRoster;
     private RosterScreen roster;
-    private boolean layoutForPrinting;
+//    private boolean layoutForPrinting;
     private TextBox oldSeasonField;
     private TextBox oldSessionField;
     private TextBox newSeasonField;
@@ -80,7 +77,7 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
      */
     public AdminScreen(LoginSession loginSession, HandlerManager eventBus) {
         super(loginSession, eventBus);
-        this.layoutForPrinting = true;
+//        this.layoutForPrinting = true;
     }
     
     /**
@@ -489,7 +486,7 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
      * @param currentRosterId the roster entry to be changed
      * @param event the event that was clicked, from which form field data can be retrieved
      */
-    private void requestSaveRoster(long currentRosterId, ClickEvent event) {
+/*    private void requestSaveRoster(long currentRosterId, ClickEvent event) {
         Button source = (Button)event.getSource();
         Grid rosterGrid = (Grid)source.getParent();
         int row = rosterGrid.getCellForEvent(event).getRowIndex();
@@ -528,14 +525,14 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
 
         // Make the call to the registration service.
         regService.saveRoster(loginSession, currentRosterId, newLevel, newSection, selectedClassId, callback);
-    }
+    }*/
     
     /**
      * Put up a confirmation dialog when a request to cancel a registration
      * entry is made.
      * @param paymentid the payment to be canceled
      */
-    private void requestCancelInvoice(long paymentid) {
+/*    private void requestCancelInvoice(long paymentid) {
         GWT.log("CANCEL requested for invoice: " + paymentid, null);
         String prompt = "Are you sure you want to delete " +
                 "all registration entries for invoice " +
@@ -545,7 +542,7 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
         confirm.setModal(true);
         confirm.center();
         confirm.show();
-    }
+    }*/
     
     /**
      * This handler method is a callback that is registered with the confirmation
@@ -553,12 +550,12 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
      */
     public void onClick(ClickEvent event) {
         Button source = (Button)event.getSource();
-        ConfirmDialog confirm = (ConfirmDialog)source.getParent().getParent().getParent().getParent();
+        /*ConfirmDialog confirm = (ConfirmDialog)source.getParent().getParent().getParent().getParent();
         if (source.getText().equals("Yes")) {
             long paymentid = confirm.getIdentifier();
             finishCancelInvoice(paymentid);
         }
-        confirm.hide();
+        confirm.hide();*/
     }
     
     /**
@@ -567,7 +564,7 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
      * and payment tables.
      * @param paymentid the identifier of the invoice to be deleted
      */
-    private void finishCancelInvoice(long paymentid) {
+    /*private void finishCancelInvoice(long paymentid) {
         GWT.log("Cancel confirmed for invoice: " + paymentid, null);
         
         // Initialize the service proxy.
@@ -593,7 +590,7 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
     
         // Make the call to the registration service.
         regService.cancelInvoice(loginSession, paymentid, callback);
-    }
+    }*/
 
     /**
      * Copy all of the classes from one session and assign them to a new session.
@@ -637,7 +634,7 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
         regService.duplicateSessionClassList(loginSession, oldSeason, oldSession, newSeason, newSession, callback);
     }
     
-    private ListBox createClassListBox(long classid) {
+/*    private ListBox createClassListBox(long classid) {
         ListBox classField = new ListBox();
         classField.addItem("Select new class", "0");
         
@@ -658,5 +655,5 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
             }
         }
         return classField;
-    }
+    }*/
 }

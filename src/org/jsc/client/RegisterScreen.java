@@ -756,6 +756,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         /**
          * @return the classPrice
          */
+        @SuppressWarnings("unused")
         public double getClassPrice() {
             return classPrice;
         }
