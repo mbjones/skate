@@ -157,7 +157,7 @@ public class SettingsScreen extends BaseScreen {
         membershipLabel = new Label("false");
         addToLeftGrid("Membership paid:", membershipLabel);
         maxLevelLabel = new Label(" ");
-        addToLeftGrid("Highest Level:", maxLevelLabel);
+        addToLeftGrid("Highest BS Level:", maxLevelLabel);
     }
     
     private void layoutRightPanel() {
