@@ -5,12 +5,8 @@ public class AppConstants {
     public static final String VERSION = "1.3.0";
     
     // Policy constants
-    //public static final int EARLY_PRICE_GRACE_DAYS = 2;
     public static final long MILLISECS_PER_DAY = 24*60*60*1000;
-    //public static final double EARLY_PRICE = 75.00;
-    //public static final double STANDARD_PRICE = 85.00;
     public static final double BS_DISCOUNT = 10.00;
-    //public static final double FS_PRICE = 85.00;
     public static final double MEMBERSHIP_PRICE = 60.00;
     public static final double MEMBERSHIP_DISCOUNT = 5.00;
     public static final int SEASON_CUTOFF_MONTH = 5;

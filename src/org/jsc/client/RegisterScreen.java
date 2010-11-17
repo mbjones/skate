@@ -381,8 +381,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             memberCheckboxLabel.setText("Pay membership dues");
             memberCheckbox.setValue(false);
             memberCheckbox.setEnabled(true);
-            //String duesString = numfmt.format(MEMBERSHIP_PRICE);
-            //memberDues.setText(duesString);
         }
         
         recalculateAndDisplayBasicSkillsTotal();
