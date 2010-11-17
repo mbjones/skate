@@ -913,7 +913,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 // Get list of current classes for old session
                 sql = new StringBuffer();
                 sql.append("SELECT classid, classType, day, timeslot, instructorid, "
-                        + "otherinstructors FROM sessionclasses WHERE season = '");
+                        + "otherinstructors, cost FROM sessionclasses WHERE season = '");
                 sql.append(oldSeason).append("' ");
                 sql.append("and sessionname = '");
                 sql.append(oldSession).append("';");
@@ -925,21 +925,25 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 while (rs.next()) {
                     // Substitute new session information and insert
                     long classid = rs.getLong(1);
+                    System.out.println("Duplicating class: " + classid);
                     String classType = rs.getString(2);
                     String day = rs.getString(3);
                     String timeslot = rs.getString(4);
                     long instructorId = rs.getLong(5);
                     String otherInstructors = rs.getString(6);
+                    double cost = rs.getDouble(7);
+                    System.out.println("  Class cost is: " + cost);
 
                     StringBuffer ins = new StringBuffer();
                     ins.append("INSERT INTO skatingclass (sid, classtype, day, "
-                            + "timeslot, instructorid, otherinstructors) VALUES (");
+                            + "timeslot, instructorid, otherinstructors, cost) VALUES (");
                     ins.append(sid).append(", ");
                     ins.append("'").append(classType).append("', ");
                     ins.append("'").append(day).append("', ");
                     ins.append("'").append(timeslot).append("', ");
                     ins.append(instructorId).append(", ");
-                    ins.append("'").append(otherInstructors).append("' ");
+                    ins.append("'").append(otherInstructors).append("', ");
+                    ins.append(cost);
                     ins.append(")");
                     System.out.println(ins.toString());
 
