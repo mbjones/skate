@@ -16,6 +16,7 @@ import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.jsc.client.AppConstants;
 import org.jsc.client.ClientConstants;
 import org.jsc.client.LoginSession;
 import org.jsc.client.Person;
@@ -519,11 +520,13 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             results.setMembershipAttempted(true);
             // Create the SQL INSERT statement
             StringBuffer sql = new StringBuffer();
-            sql.append("insert into membership (pid, paymentid, season) VALUES ('");
+            sql.append("insert into membership (pid, paymentid, season, payment_amount) VALUES ('");
             sql.append(person.getPid()).append("','");
             sql.append(paymentId).append("','");
             sql.append(SessionSkatingClass.calculateSeason());
-            sql.append("')");
+            sql.append("',");
+            sql.append(AppConstants.MEMBERSHIP_PRICE);
+            sql.append(")");
             System.out.println(sql.toString());
 
             // Execute the INSERT to create the new membership table entry
