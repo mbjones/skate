@@ -996,7 +996,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             Connection con = getConnection();
             try {
                 con.setAutoCommit(false);
-                String season, session, classType, day, time, instructor;
+                String season, session, classType, day, time, instructor, price;
                 StringBuffer sql = null;
 
                 Statement stmt;
@@ -1007,6 +1007,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                     day = newClassValues.get(3);
                     time = newClassValues.get(4);
                     instructor = newClassValues.get(5);
+                    price = newClassValues.get(6);
 
                     // Look up the new sid from the sessions table
                     sql = new StringBuffer();
@@ -1062,10 +1063,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                         if (foundInstructorId) {
                             sql.append(", instructorid = ").append(pid);
                         }
+                        sql.append(", cost = ").append(price);
                         sql.append(" where classid = ").append(currentClassId);
                     } else if (operation == ADD) {
                         sql.append("INSERT INTO skatingclass ");
-                        sql.append("(sid, classType, day, timeslot");
+                        sql.append("(sid, classType, day, timeslot, cost");
                         if (foundInstructorId) {
                             sql.append(", instructorid");
                         }
@@ -1073,7 +1075,8 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                         sql.append(sid).append(", ");
                         sql.append("'").append(classType).append("', ");
                         sql.append("'").append(day).append("', ");
-                        sql.append("'").append(time).append("'");
+                        sql.append("'").append(time).append("',");
+                        sql.append(price);
                         if (foundInstructorId) {
                             sql.append(", ").append(pid);
                         }

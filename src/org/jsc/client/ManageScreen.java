@@ -10,6 +10,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -239,21 +240,22 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         rosterPanel.add(classLabel);
         
         if (!layoutForPrinting) {
-            int classInfoColumns = 9;
+            int classInfoColumns = 10;
             Label seasonLabel = new Label("Season");
             Label sessionLabel = new Label("Session");
             Label classTypeLabel = new Label("Class");
             Label dayLabel = new Label("Day");
             Label timeLabel = new Label("Time");
             Label instructorLabel = new Label("Instructor");
+            Label priceLabel = new Label("Price");
             Label saveButtonLabel = new Label(" ");
             Label addButtonLabel = new Label(" ");
             Label deleteButtonLabel = new Label(" ");
 
             classInfoGrid = new Grid(0, classInfoColumns);
             Widget[] labels = {seasonLabel, sessionLabel, classTypeLabel,  
-                    dayLabel, timeLabel, instructorLabel, saveButtonLabel,
-                    addButtonLabel, deleteButtonLabel};
+                    dayLabel, timeLabel, instructorLabel, priceLabel,
+                    saveButtonLabel, addButtonLabel, deleteButtonLabel};
             addRowToGrid(classInfoGrid, labels);
             
             rosterPanel.add(classInfoGrid);
@@ -407,14 +409,16 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             classLabel.setText("Class and Roster Information");
             // Remove all of the rows from the classInfoGrid, except the header row
             clearClassInfoTable();
-            
+
             Widget seasonWidget = null;
             Widget sessionWidget = null;
             Widget classTypeWidget = null;
             Widget dayWidget = null;
             Widget timeWidget = null;
             Widget instructorWidget = null;
+            Widget priceWidget = null;
             Widget saveButtonWidget = null;
+            
             if (loginSession.getPerson().getRole() >= Person.ADMIN) {
                 seasonWidget = new TextBox();
                 ((TextBox)seasonWidget).setText(curClass.getSeason());
@@ -439,6 +443,11 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 instructorWidget = new TextBox();
                 ((TextBox)instructorWidget).setText(curClass.getInstructorGivenName() + " " + curClass.getInstructorSurName());
                 instructorWidget.addStyleName("jsc-text-box-medium");
+                
+                priceWidget = new TextBox();
+                NumberFormat numfmt = NumberFormat.getFormat("###0.00");
+                ((TextBox)priceWidget).setText(numfmt.format(curClass.getCost()));
+                priceWidget.addStyleName("jsc-text-box-medium");
                 
                 Button saveClassButton = new Button("Save");
                 final long currentClassId = curClass.getClassId();
@@ -469,7 +478,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 deleteClassButton.addStyleName("jsc-button-right");
                 
                 Widget[] labels = {seasonWidget, sessionWidget, classTypeWidget,  
-                        dayWidget, timeWidget, instructorWidget, saveClassButton,
+                        dayWidget, timeWidget, instructorWidget, priceWidget, saveClassButton,
                         addClassButton, deleteClassButton};
                 addRowToGrid(classInfoGrid, labels);
                 
@@ -480,8 +489,10 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 dayWidget = new Label(curClass.getDay());
                 timeWidget = new Label(curClass.getTimeslot());
                 instructorWidget = new Label(curClass.getInstructorGivenName() + " " + curClass.getInstructorSurName());
+                NumberFormat numfmt = NumberFormat.getFormat("$#,##0.00");
+                priceWidget = new Label(numfmt.format(curClass.getCost()));
                 Widget[] labels = {seasonWidget, sessionWidget, classTypeWidget,  
-                        dayWidget, timeWidget, instructorWidget};
+                        dayWidget, timeWidget, instructorWidget, priceWidget};
                 addRowToGrid(classInfoGrid, labels);
             }
         }
@@ -614,7 +625,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         int row = rosterGrid.getCellForEvent(event).getRowIndex();
         // Loop through the text boxes and put the values in an array
         // season, session, class, day, time, instructor
-        for (int i=0; i<6; i++) {
+        for (int i=0; i<7; i++) {
             TextBox tb = (TextBox)rosterGrid.getWidget(row, i);
             newClassValues.add(tb.getValue());
         }
