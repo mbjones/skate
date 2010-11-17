@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.HashSet;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -30,7 +32,7 @@ import com.google.gwt.user.client.ui.Widget;
  * needed for registration, and then redirects the user to PayPal for payment.
  * @author Matt Jones
  */
-public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boolean> {
+public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boolean>, ChangeHandler {
 
     private static final String DISCOUNT_EXPLANATION = "<p class=\"jsc-text\">Because it helps with planning our class sizes, <b>we offer a discount for those who register early</b>.</p>";
     private static final String PRICE_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p>";
@@ -165,6 +167,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         
         classField = new ListBox();
         classField.setVisibleItemCount(1);
+        classField.addChangeHandler(this);
         addToBSGrid("Class:", classField);
         int currentRow = basicSkillsGrid.getRowCount() - 1;
         feeLabel = new Label("");
@@ -332,7 +335,9 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         ArrayList<SessionSkatingClass> list = sessionClassList.getClassList();
         if (list != null) {
             for (SessionSkatingClass curClass : list) {
-                GWT.log("SessionClass: " + (new Long(curClass.getClassId()).toString()) + " " + curClass.getClassType(), null);
+                GWT.log("SessionClass: " + 
+                        (new Long(curClass.getClassId()).toString()) + " " + 
+                        curClass.getClassType() + " (" + curClass.getCost() + ")", null);
                 String classLabel = curClass.formatClassLabel();
                 
                 // If it starts with "FS " it is a figure skating class
@@ -341,6 +346,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
                     FSClassCheckBox checkbox = new FSClassCheckBox();
                     checkbox.setValue(false, false);
                     checkbox.setName(Long.toString(curClass.getClassId()));
+                    //checkbox.setClassPrice(curClass.getCost());
                     checkbox.addValueChangeHandler(this);
                     addToFSGrid(classLabel, checkbox);
                     // Disable checkboxes if student is already registered
@@ -389,16 +395,18 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
      */
     private void recalculateAndDisplayBasicSkillsTotal() {
         // Update the cost discount, and total fields on the BS Form
-        feeLabel.setText(numfmt.format(AppConstants.STANDARD_PRICE));
+        String selectedClassId = classField.getValue(classField.getSelectedIndex());
+        double classCost = sessionClassList.getSkatingClass(new Long(selectedClassId)).getCost();
+        feeLabel.setText(numfmt.format(classCost));
         Date discountDate = getDiscountDate();
         GWT.log("Discount date is: " + discountDate, null);
         Date discountDisplay = discountDate;
-        discountDisplay.setTime( discountDate.getTime() + -1*1000*60*60*24 );
+        discountDisplay.setTime( discountDate.getTime() - AppConstants.MILLISECS_PER_DAY );
         String discountString = DateTimeFormat.getLongDateFormat().format(discountDisplay);
         discountDateLabel.setText(DISCOUNT_LABEL_PREFIX + discountString);
         double bsDiscount = calculateBSDiscount(discountDate);
         bsDiscountLabel.setText(numfmt.format(bsDiscount));
-        double bsTotal = AppConstants.STANDARD_PRICE - bsDiscount;
+        double bsTotal = classCost - bsDiscount;
         bsTotalLabel.setText(numfmt.format(bsTotal));
     }
 
@@ -438,11 +446,12 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             // Gather information from the Basic Skills form if it is selected
             if (bsRadio.getValue()) {
                 String selectedClassId = classField.getValue(classField.getSelectedIndex());
+                double classCost = sessionClassList.getSkatingClass(new Long(selectedClassId)).getCost();
                 Person registrant = loginSession.getPerson();
                 RosterEntry entry = new RosterEntry();
                 entry.setClassid(new Long(selectedClassId).longValue());
                 entry.setPid(registrant.getPid());
-                entry.setPayment_amount(AppConstants.STANDARD_PRICE);
+                entry.setPayment_amount(classCost);
                 entryList.add(entry);
                 
             // Otherwise gather information from the Figure Skating form if it is selected
@@ -453,11 +462,13 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
                 // Loop through the checked classes, creating a RosterEntry for each
                 for (String selectedClassId : fsClassesToRegister) {
                     GWT.log("Need to register class: " + selectedClassId, null);
+                    long classId = new Long(selectedClassId).longValue();
                     Person registrant = loginSession.getPerson();
                     RosterEntry entry = new RosterEntry();
-                    entry.setClassid(new Long(selectedClassId).longValue());
+                    entry.setClassid(classId);
                     entry.setPid(registrant.getPid());
-                    entry.setPayment_amount(AppConstants.FS_PRICE);
+                    double classCost = sessionClassList.getSkatingClass(classId).getCost();
+                    entry.setPayment_amount(classCost);
                     entryList.add(entry);
                 }
             } else {
@@ -575,7 +586,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             i++;
             ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"" + sessionClassList.getSkatingClass(newEntry.getClassid()).formatClassLabel() + "\">");
             ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\""+ newEntry.getRosterid() +"\">");
-            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + AppConstants.STANDARD_PRICE + "\">");
+            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + newEntry.getPayment_amount() + "\">");
         }
         
         // Handle membership payment by creating form items as needed
@@ -603,6 +614,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
      * Listen for change events when the radio buttons on the registration form
      * are selected and deselected.
      */
+    @Override
     public void onValueChange(ValueChangeEvent<Boolean> event) {
         Widget sender = (Widget) event.getSource();
 
@@ -631,18 +643,29 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             recalculateAndDisplayFSTotals();        
         } else if (sender instanceof FSClassCheckBox) {
             FSClassCheckBox sendercb = (FSClassCheckBox)sender;
+            long classId = new Long(sendercb.getName()).longValue();
+            double classCost = sessionClassList.getSkatingClass(classId).getCost();
+
             GWT.log( "Checked class: " + sendercb.getName(), null);
             if (sendercb.getValue() == true) {
-                totalFSCost += AppConstants.FS_PRICE;
+                GWT.log( "Class cost is: " + classCost, null);
+                totalFSCost += classCost;
                 fsClassesToRegister.add(sendercb.getName());
-                sendercb.setClassPrice(AppConstants.FS_PRICE);
+                sendercb.setClassPrice(classCost);
             } else {
-                totalFSCost -= AppConstants.FS_PRICE;
+                GWT.log( "Class cost is: " + classCost, null);
+                totalFSCost -= classCost;
                 fsClassesToRegister.remove(sendercb.getName());
                 sendercb.setClassPrice(0);
             }
             recalculateAndDisplayFSTotals();
         }
+    }
+
+    @Override
+    public void onChange(ChangeEvent event) {
+        Widget sender = (Widget) event.getSource();
+        recalculateAndDisplayBasicSkillsTotal();
     }
 
     /**
@@ -701,7 +724,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         if (discountDate != null) {
             Date today = new Date(System.currentTimeMillis());
             if (today.before(discountDate)) {
-                bsDiscount = AppConstants.STANDARD_PRICE - AppConstants.EARLY_PRICE;
+                bsDiscount = AppConstants.BS_DISCOUNT;
             }
         }
         

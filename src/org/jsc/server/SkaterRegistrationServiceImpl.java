@@ -403,7 +403,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         // Query the database to get the list of classes
         StringBuffer sql = new StringBuffer();
         sql.append("select sid, sessionname, season, startdate, enddate, ");
-        sql.append("classid, classtype, day, timeslot, instructorid, ");
+        sql.append("classid, classtype, day, timeslot, instructorid, cost,");
         sql.append("otherinstructors, surname, givenname, activesession, discountDate from sessionclasses ");
         sql.append("order by season, sessionname, classid");
         System.out.println(sql.toString());
@@ -424,12 +424,14 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 sc.setDay(rs.getString(8));
                 sc.setTimeslot(rs.getString(9));
                 sc.setInstructorId(rs.getLong(10));
-                sc.setOtherinstructors(rs.getString(11));
-                sc.setInstructorSurName(rs.getString(12));
-                sc.setInstructorGivenName(rs.getString(13));
-                sc.setActiveSession(rs.getBoolean(14));
-                sc.setDiscountDate(rs.getString(15));
+                sc.setCost(rs.getFloat(11));
+                sc.setOtherinstructors(rs.getString(12));
+                sc.setInstructorSurName(rs.getString(13));
+                sc.setInstructorGivenName(rs.getString(14));
+                sc.setActiveSession(rs.getBoolean(15));
+                sc.setDiscountDate(rs.getString(16));
                 classList.add(sc);
+                System.out.println("Set class cost to: " + sc.getCost());
             }
             stmt.close();
             con.close();
@@ -567,23 +569,22 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             RosterEntry newEntry = null;
 
             // Create the SQL INSERT statement
-            StringBuffer sql = new StringBuffer();
-            sql.append("insert into roster (classid, pid, paymentId) values ('");
-            sql.append(entry.getClassid()).append("','");
-            sql.append(entry.getPid()).append("',");
-            sql.append(paymentId);
-            sql.append(")");
-            System.out.println(sql.toString());
+            String sql = "insert into roster (classid, pid, paymentId, payment_amount) values (?, ?, ?, ?)";
+            System.out.println(sql);
 
             // Execute the INSERT to create the new roster table entry
             try {
                 Connection con = getConnection();
-                Statement stmt = con.createStatement();
-                stmt.executeUpdate(sql.toString());
-                stmt.close();
+                PreparedStatement pstmt = con.prepareStatement(sql);
+                pstmt.setLong(1, entry.getClassid());
+                pstmt.setLong(2, entry.getPid());
+                pstmt.setLong(3, paymentId);
+                pstmt.setDouble(4, entry.getPayment_amount());
+                pstmt.executeUpdate();
+                pstmt.close();
 
                 // query the roster table to find the rosterid that was created
-                stmt = con.createStatement();
+                Statement stmt = con.createStatement();
                 StringBuffer rsql = new StringBuffer();
                 rsql.append(ROSTER_QUERY);
                 rsql.append(" WHERE classid = '").append(entry.getClassid())
