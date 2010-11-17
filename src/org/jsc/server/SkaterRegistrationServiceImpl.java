@@ -1466,7 +1466,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     /**
      * Open a JDBC database connection.
      */
-    private static Connection getConnection() {
+    protected static Connection getConnection() {
         Connection con = null;
 
         try {
