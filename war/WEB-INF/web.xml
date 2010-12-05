@@ -31,4 +31,13 @@
     <url-pattern>/skaterdata/ipn</url-pattern>
   </servlet-mapping>
   
+  <servlet>
+    <servlet-name>CSVDownloadServlet</servlet-name>
+    <servlet-class>org.jsc.server.CSVDownloadServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>CSVDownloadServlet</servlet-name>
+    <url-pattern>/download</url-pattern>
+  </servlet-mapping>
 </web-app>

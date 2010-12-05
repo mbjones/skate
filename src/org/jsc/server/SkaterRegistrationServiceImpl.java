@@ -1,5 +1,6 @@
 package org.jsc.server;
 
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -1126,6 +1127,34 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         return isAuthorized;
     }
 
+    // TODO: FINISH THE DOWNLOAD METHOD WITH PARAMS
+    // TODO: ADD RETURN TYPE FOR RETURNING CSV DATA
+    // TODO: WRITE SERVICE TO CONNECT TO IT
+    private void downloadRoster() {
+        PrintWriter w = new PrintWriter(System.out);
+        CsvStreamWriter csw = new CsvStreamWriter(w);
+
+        Connection con = SkaterRegistrationServiceImpl.getConnection();
+        StringBuffer sql = new StringBuffer();
+        sql.append("SELECT sc.season,sc.sessionname as session, ");
+        sql.append("sc.classtype, sc.day, p.surname, p.givenname, y.paypal_status ");
+        sql.append("FROM roster r, people p, payment y, sessionclasses sc ");
+        sql.append("WHERE r.pid = p.pid ");
+        sql.append("AND r.paymentid = y.paymentid ");
+        sql.append("AND r.classid = sc.classid ");
+        sql.append("AND sc.season = ? ");
+        sql.append("AND sc.sessionname = ? ");
+        sql.append("ORDER BY sc.season,sc.sessionname, sc.classtype, sc.day, p.surname, p.givenname");
+        try {
+            PreparedStatement stmt = con.prepareStatement(sql.toString());
+            stmt.setString(1, "2010-2011");
+            stmt.setString(2, "1");
+            csw.writeToCsv(stmt);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
     /**
      * Look up a roster of classes.  The exact roster looked up depends on the sql
      * that is passed into the class, sometimes for a particular student, sometimes
