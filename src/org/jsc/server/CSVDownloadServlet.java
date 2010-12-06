@@ -1,21 +1,14 @@
 package org.jsc.server;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Date;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -29,14 +22,10 @@ import org.apache.commons.io.IOUtils;
  */
 public class CSVDownloadServlet extends HttpServlet {
 
-    private static final String JDBC_URL = ServerConstants.getString("JDBC_URL"); //$NON-NLS-1$
-    private static final String JDBC_USER = ServerConstants.getString("JDBC_USER"); //$NON-NLS-1$
-    private static final String JDBC_PASS = ServerConstants.getString("JDBC_PASS"); //$NON-NLS-1$
-    private static final String JDBC_DRIVER = ServerConstants.getString("JDBC_DRIVER"); //$NON-NLS-1$
-    
-    private static final String PAYPAL_URL = "https://www.paypal.com/cgi-bin/webscr";
-//    private static final String PAYPAL_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr";
-    
+//    private static final long EXP_MILLIS = 10*60*1000;
+    private static final long EXP_MILLIS = 0;
+
+
     public void init() {
         System.out.println("CSVDownloadServlet initialized.");
     }
@@ -87,36 +76,57 @@ public class CSVDownloadServlet extends HttpServlet {
                 }
                 out.close();
             }
+            
+            deleteOldTempFiles();
+            
             stmt.close();
             con.close();
-            
+                        
         } catch (SQLException e1) {
             e1.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
     }
     
-    /**
-     * Open a JDBC database connection.
-     */
-    private static Connection getConnection() {
-        Connection con = null;
-        
+    private void deleteOldTempFiles() {
+                
+        StringBuffer isql = new StringBuffer();
+        isql.append("SELECT randomkey, filepath FROM downloads WHERE date_updated < ?");
+        Connection con = SkaterRegistrationServiceImpl.getConnection();
+        PreparedStatement stmt;
+        String dsql = "DELETE FROM downloads WHERE randomkey = ?";
+        PreparedStatement dstmt;
         try {
-            Class.forName(JDBC_DRIVER);
-        } catch(java.lang.ClassNotFoundException e) {
-            System.err.print("ClassNotFoundException: ");
-            System.err.println(e.getMessage());
+            dstmt = con.prepareStatement(dsql);
+            
+            stmt = con.prepareStatement(isql.toString());
+            Date expiration = new Date(System.currentTimeMillis() - EXP_MILLIS);
+            stmt.setDate(1, new java.sql.Date(expiration.getTime()));
+            System.out.println(stmt.toString());
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                
+                long key = rs.getLong(1);
+                String filepath = rs.getString(2);
+                System.out.println("Found old file to delete with key: " + key);
+                
+                // Having found the filename, delete it
+                File data = new File(filepath);
+                if (data.exists()) {
+                    data.delete();
+                }
+                
+                // Now delete it from the downloads table
+                dstmt.setLong(1, key);
+                dstmt.executeUpdate();
+            }
+            stmt.close();
+            dstmt.close();
+            con.close();
+            
+        } catch (SQLException e1) {
+            e1.printStackTrace();
         }
-
-        try {
-            con = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
-        } catch(SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage());
-        }
-        
-        return con;
     }
 }

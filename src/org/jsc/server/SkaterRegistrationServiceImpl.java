@@ -1129,9 +1129,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         return isAuthorized;
     }
 
-    // TODO: FINISH THE DOWNLOAD METHOD WITH PARAMS
-    // TODO: ADD RETURN TYPE FOR RETURNING CSV DATA
-    // TODO: WRITE SERVICE TO CONNECT TO IT
+    /**
+     * Download a CSV file that corresponds to the given classId.
+     */
     public long downloadRoster(LoginSession loginSession, long classId) {
         
         // TODO: Check authentication credentials as Admin or Coach
@@ -1188,6 +1188,12 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         return key;
     }
 
+    /**
+     * Write a random key and a path to a downloaded file into the JSCDB database.
+     * @param filename the absolute path of the file to be written to the DB
+     * @return the long key value that is used to index the file path/
+     * @throws SQLException
+     */
     private long recordDownloadFilename(String filename) throws SQLException {
         Connection con;
         PreparedStatement stmt;
