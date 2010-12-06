@@ -200,10 +200,6 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
 
         Label duplicateLabel = new Label("Duplicate all classes from a previous session into a new session.");
         duplicateLabel.addStyleName("jsc-text");
-
-        //HorizontalPanel duplicatePanel = new HorizontalPanel();
-        //duplicatePanel.add(duplicateButton);
-        //duplicatePanel.add(duplicateLabel);
         
         // Create a table to lay out the form for duplicating the classes in a session
         Grid duplicateGrid = new Grid(0, 5);
@@ -231,56 +227,6 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
         Label spacer2 = new Label(" ");
         spacer2.addStyleName("jsc-spacer");
         adminPanel.add(spacer2);
-        
-        /*
-        int columns = 9;
-        if (layoutForPrinting) {
-            columns += 1;
-        }
-        rosterGrid = new Grid(0, columns);
-        
-        // Add a header row to the table
-        Label sectionLabel = new Label("Section");
-        Label skaterNameLabel = new Label("Skater");
-        Label statusLabel = new Label("Payment");
-        Widget w1, w2, w3, w4, w5, w6;
-        Label moveLabel =new Label("Move to:");
-        if (layoutForPrinting) {
-            w1 = new Label("Wk 1");
-            w2 = new Label("Wk 2");
-            w3 = new Label("Wk 3");
-            w4 = new Label("Wk 4");
-            w5 = new Label("Wk 5");
-            w6 = new Label("Wk 6");
-        } else {
-            w1 = new Hidden("rosterid");
-            w2 = new Hidden("paymentid");
-            w3 = new Hidden(" ");
-            w4 = new Hidden(" ");
-            w5 = new Hidden(" ");
-            w6 = new Hidden(" ");
-        }
-   
-        Label levelPassedLabel = null;
-        if (layoutForPrinting) {
-            levelPassedLabel = new Label("Max Level");
-        } else {
-            levelPassedLabel = new Label("Level Passed");
-        }
-        Label saveLabel = new Label(" ");
-        Label deleteLabel = new Label(" ");
-        
-        if (layoutForPrinting) {
-            Widget[] widgets = {sectionLabel, skaterNameLabel, statusLabel,  
-                    w1, w2, w3, w4, w5, w6, levelPassedLabel};
-            addRowToGrid(rosterGrid, widgets);
-        } else {
-            Widget[] widgets = {sectionLabel, skaterNameLabel, statusLabel,  
-                    w1, w2, levelPassedLabel, saveLabel, deleteLabel, moveLabel};
-            addRowToGrid(rosterGrid, widgets);
-        }
-        adminPanel.add(rosterGrid);
-        */
     }
 
     /**

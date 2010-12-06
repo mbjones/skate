@@ -28,4 +28,5 @@ public interface SkaterRegistrationServiceAsync {
   void findUsername(String email, AsyncCallback<Boolean> callback);
   void duplicateSessionClassList(LoginSession loginSession, String oldSeason, String oldSession, String newSeason, String newSession, AsyncCallback<Boolean> callback);
   void saveSkatingClass(LoginSession loginSession, long currentClassId, ArrayList<String> newClassValues, int operation, AsyncCallback<Boolean> callback);
+  void downloadRoster(LoginSession loginSession, long classId, AsyncCallback<Long> callback);
 }

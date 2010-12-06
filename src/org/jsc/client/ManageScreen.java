@@ -12,6 +12,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable;
@@ -33,6 +34,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class ManageScreen extends BaseScreen implements SkatingClassChangeHandler, ClickHandler {
 
+    protected static final String DOWNLOAD_SERVLET = "/download?key=";
     protected HorizontalPanel screen;
     private VerticalPanel classesPanel;
     protected VerticalPanel rosterPanel;
@@ -40,6 +42,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     private ArrayList<SessionSkatingClass> currentSeasonClasses;
     private Grid classesGrid;
     private TextBox seasonToList;
+    private Anchor downloadAnchor;
     private SkaterRegistrationServiceAsync regService;
     private int selectedClassRowIndex;
     private Grid rosterGrid;
@@ -267,14 +270,33 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             }
         });
         printButton.addStyleName("jsc-button-right");
+        Button downloadButton = new Button("Prepare Download...");
+        downloadButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                downloadRoster();
+            }
+        });
+        downloadButton.addStyleName("jsc-button-right");
         if (!layoutForPrinting) {
             Label spacer = new Label(" ");
             spacer.addStyleName("jsc-spacer");
             rosterPanel.add(spacer);
-            rosterPanel.add(printButton);
+            HorizontalPanel buttonPanel = new HorizontalPanel();
             Label spacer2 = new Label(" ");
             spacer2.addStyleName("jsc-spacer");
-            rosterPanel.add(spacer2);
+            Label spacer3 = new Label(" ");
+            spacer3.addStyleName("jsc-spacer");
+            downloadAnchor = new Anchor();
+            buttonPanel.add(printButton);
+            buttonPanel.add(spacer2);
+            buttonPanel.add(downloadButton);
+            buttonPanel.add(spacer3);
+            buttonPanel.add(downloadAnchor);
+
+            rosterPanel.add(buttonPanel);
+            Label spacer4 = new Label(" ");
+            spacer4.addStyleName("jsc-spacer");
+            rosterPanel.add(spacer4);
         }
         
         int columns = 9;
@@ -403,9 +425,14 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         if (layoutForPrinting) {
             // Update the class label
             classLabel.setText(curClass.formatClassLabel());
+            downloadAnchor.setText("");
+            downloadAnchor.setHref("");
         } else {
 
             classLabel.setText("Class and Roster Information");
+            downloadAnchor.setText("");
+            downloadAnchor.setHref("");
+
             // Remove all of the rows from the classInfoGrid, except the header row
             clearClassInfoTable();
 
@@ -799,6 +826,40 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         SessionSkatingClass curClass = currentSeasonClasses.get(selectedClassRowIndex-1);
         roster.updateRosterTable(currentRoster, curClass);
         History.newItem("roster");
+    }
+    
+    private void downloadRoster() {
+        GWT.log("Download roster rows: " + currentRoster.size(), null);
+        // Switch to the screen for printing rosters, but before doing so
+        // update it by passing in the currentRoster to be displayed along with 
+        // a reference to the current selected class to be displayed
+        SessionSkatingClass curClass = currentSeasonClasses.get(selectedClassRowIndex-1);
+        long classId = curClass.getClassId();
+        
+        // Initialize the service proxy.
+        if (regService == null) {
+            regService = GWT.create(SkaterRegistrationService.class);
+        }
+    
+        // Set up the callback object.
+        AsyncCallback<Long> callback = new AsyncCallback<Long>() {
+    
+            public void onFailure(Throwable caught) {
+                // TODO: Do something with errors.
+                GWT.log("Failed to download the roster.", caught);
+            }
+    
+            public void onSuccess(Long downloadKey) {
+                GWT.log("Download roster returned: " + downloadKey, null);
+                // TODO: Create an Anchor link with this URL
+                String href = DOWNLOAD_SERVLET + downloadKey;
+                downloadAnchor.setHref(href);
+                downloadAnchor.setText("Download file...");
+            }
+        };
+        
+        // Make the call to the registration service.
+        regService.downloadRoster(loginSession, classId, callback);
     }
     
     /**

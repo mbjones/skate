@@ -67,6 +67,7 @@ public class CsvStreamWriter {
             }
             stmt.close();
             con.close();
+            csv.close();
         } catch (SQLException ex) {
             System.err.println("SQLException: " + ex.getMessage());
         } catch (IOException e) {
@@ -74,6 +75,7 @@ public class CsvStreamWriter {
         } finally {
             try {
                 con.close();
+                csv.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }

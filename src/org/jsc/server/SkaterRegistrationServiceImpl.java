@@ -1,5 +1,7 @@
 package org.jsc.server;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -1130,29 +1132,80 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
     // TODO: FINISH THE DOWNLOAD METHOD WITH PARAMS
     // TODO: ADD RETURN TYPE FOR RETURNING CSV DATA
     // TODO: WRITE SERVICE TO CONNECT TO IT
-    private void downloadRoster() {
-        PrintWriter w = new PrintWriter(System.out);
-        CsvStreamWriter csw = new CsvStreamWriter(w);
-
-        Connection con = SkaterRegistrationServiceImpl.getConnection();
-        StringBuffer sql = new StringBuffer();
-        sql.append("SELECT sc.season,sc.sessionname as session, ");
-        sql.append("sc.classtype, sc.day, p.surname, p.givenname, y.paypal_status ");
-        sql.append("FROM roster r, people p, payment y, sessionclasses sc ");
-        sql.append("WHERE r.pid = p.pid ");
-        sql.append("AND r.paymentid = y.paymentid ");
-        sql.append("AND r.classid = sc.classid ");
-        sql.append("AND sc.season = ? ");
-        sql.append("AND sc.sessionname = ? ");
-        sql.append("ORDER BY sc.season,sc.sessionname, sc.classtype, sc.day, p.surname, p.givenname");
-        try {
-            PreparedStatement stmt = con.prepareStatement(sql.toString());
-            stmt.setString(1, "2010-2011");
-            stmt.setString(2, "1");
-            csw.writeToCsv(stmt);
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public long downloadRoster(LoginSession loginSession, long classId) {
+        
+        // TODO: Check authentication credentials as Admin or Coach
+        // Check authentication credentials
+        if (!isSessionValid(loginSession)) {
+            return 0L;
         }
+
+        // Check if person is authorized because they are a coach or administrator
+        boolean isAuthorized = false;
+        long role = getRole(loginSession.getPerson().getPid());
+        if (role >= Person.COACH) {
+            isAuthorized = true;
+        }
+
+        String filename = "";
+        long key = 0L;
+
+        if (isAuthorized) {
+            try {
+                File tempFile = File.createTempFile("jsc-roster-", ".csv");
+                // tempFile.deleteOnExit();
+                PrintWriter w = new PrintWriter(tempFile);
+
+                CsvStreamWriter csw = new CsvStreamWriter(w);
+        
+                Connection con = SkaterRegistrationServiceImpl.getConnection();
+                StringBuffer sql = new StringBuffer();
+                sql.append("SELECT sc.season,sc.sessionname as session, ");
+                sql.append("sc.classtype, sc.day, p.surname, p.givenname, y.paypal_status ");
+                sql.append("FROM roster r, people p, payment y, sessionclasses sc ");
+                sql.append("WHERE r.pid = p.pid ");
+                sql.append("AND r.paymentid = y.paymentid ");
+                sql.append("AND r.classid = sc.classid ");
+                sql.append("AND r.classId = ? ");
+                sql.append("ORDER BY sc.season,sc.sessionname, sc.classtype, sc.day, p.surname, p.givenname");
+                PreparedStatement stmt = con.prepareStatement(sql.toString());
+                stmt.setLong(1, classId);
+
+                csw.writeToCsv(stmt);
+                filename = tempFile.getAbsolutePath();
+                
+                key = recordDownloadFilename(filename);
+
+            } catch (IOException e) {
+                // TODO: throw a GWT exception here
+                e.printStackTrace();
+            } catch (SQLException e) {
+                // TODO: throw a GWT exception here
+                e.printStackTrace();
+            }
+        }
+
+        return key;
+    }
+
+    private long recordDownloadFilename(String filename) throws SQLException {
+        Connection con;
+        PreparedStatement stmt;
+        Random random =  new Random();
+        long key = random.nextLong();
+        
+        // Now cache the filename in the database for the download servlet to pick up later
+        // Use a random key to index it, which will be included in the request URI
+        StringBuffer isql = new StringBuffer();
+        isql.append("INSERT INTO downloads (randomkey, filepath) VALUES (?, ?)");
+        con = SkaterRegistrationServiceImpl.getConnection();
+        stmt = con.prepareStatement(isql.toString());
+        stmt.setLong(1, key);
+        stmt.setString(2, filename);
+        boolean resultIsRS = stmt.execute();
+        stmt.close();
+        con.close();
+        return key;
     }
     
     /**
