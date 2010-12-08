@@ -169,7 +169,11 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
             Label sessionLabel = new Label(curClass.getSeason() + " (" +
                     curClass.getSessionNum() + ")");
             Label classLabel = new Label(curClass.getClassType());
-            Label dayLabel = new Label(curClass.getDay().substring(0, 3)); 
+            String day = curClass.getDay();
+            Label dayLabel = new Label(day);
+            if (day.length() >= 3) {
+                dayLabel = new Label(day.substring(0, 3));
+            }
             Widget[] labels= {sessionLabel, classLabel, dayLabel};
             addRowToGrid(classesGrid, labels);
         }

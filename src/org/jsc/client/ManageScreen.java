@@ -219,7 +219,11 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
                 Label sessionLabel = new Label(classSeason + " (" +
                         curClass.getSessionNum() + ")");
                 Label classLabel = new Label(curClass.getClassType());
-                Label dayLabel = new Label(curClass.getDay().substring(0, 3)); 
+                String day = curClass.getDay();
+                Label dayLabel = new Label(day);
+                if (day.length() >= 3) {
+                    dayLabel = new Label(day.substring(0, 3));
+                }
                 Widget[] labels= {sessionLabel, classLabel, dayLabel};
                 addRowToGrid(classesGrid, labels);
             }
@@ -241,6 +245,8 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
         classLabel.addStyleName("jsc-step");
         rosterPanel.add(classLabel);
         
+        downloadAnchor = new Anchor();
+
         if (!layoutForPrinting) {
             int classInfoColumns = 10;
             Label seasonLabel = new Label("Season");
@@ -286,7 +292,6 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
             spacer2.addStyleName("jsc-spacer");
             Label spacer3 = new Label(" ");
             spacer3.addStyleName("jsc-spacer");
-            downloadAnchor = new Anchor();
             buttonPanel.add(printButton);
             buttonPanel.add(spacer2);
             buttonPanel.add(downloadButton);
@@ -851,7 +856,7 @@ public class ManageScreen extends BaseScreen implements SkatingClassChangeHandle
     
             public void onSuccess(Long downloadKey) {
                 GWT.log("Download roster returned: " + downloadKey, null);
-                // TODO: Create an Anchor link with this URL
+                // Create an Anchor link with this URL
                 String href = DOWNLOAD_SERVLET + downloadKey;
                 downloadAnchor.setHref(href);
                 downloadAnchor.setText("Download file...");
