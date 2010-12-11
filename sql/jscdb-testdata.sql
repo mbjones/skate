@@ -229,4 +229,8 @@ UPDATE roster SET payment_amount = 85
           FROM roster r, sessionclasses sc
          WHERE r.classid = sc.classid
            AND sc.sid > 5003);
-           
+UPDATE skatingclass SET cost = 80
+ WHERE sid <= 5003;
+UPDATE skatingclass SET cost = 85
+ WHERE sid > 5003;
+
