@@ -100,13 +100,13 @@ select DISTINCT p.pid, p.givenname, p.surname, p.birthdate, p.usfsaid, p.street1
 SELECT DISTINCT sc.season,sc.sessionname as session, p.surname,
         p.givenname, y.paypal_status,
         y.paypal_tx_id, y.paypal_gross, y.discount,
-        y.paypal_fee, y.paypal_net
+        y.paypal_fee, y.paypal_net, y.paymentid
    FROM roster r, people p, payment y, sessionclasses sc
   WHERE r.pid = p.pid
     AND r.paymentid = y.paymentid
     AND r.classid = sc.classid
     AND sc.season = '2010-2011'
-    AND sc.sessionname = '1'
+    AND sc.sessionname = '4'
   ORDER BY sc.season,sc.sessionname, p.surname, p.givenname;
 
 -- Class enrollment summary count for a session
@@ -117,20 +117,21 @@ SELECT sc.season,sc.sessionname as session,
     AND r.paymentid = y.paymentid
     AND r.classid = sc.classid
     AND sc.season = '2010-2011'
-    AND sc.sessionname = '1'
-    AND y.paypal_status IN ('Completed', 'Paid Cash', 'Paid Check')
+    AND sc.sessionname = '4'
+    AND y.paypal_status IN ('Completed', 'Paid Cash', 'Paid Check', 
+    'Paid Scholarship', 'Paid By Club', 'Credit from Session1', 'Coach Discount')
   GROUP BY sc.season, session, sc.classtype, sc.day
   ORDER BY sc.season,sc.sessionname, sc.classtype, sc.day;
   
 -- Class enrollment listing for a session
 SELECT sc.season,sc.sessionname as session,
-        sc.classtype, sc.day, p.surname, p.givenname, y.paypal_status
+        sc.classtype, sc.day, p.surname, p.givenname, y.paypal_status, y.paypal_tx_id, y.paymentid
    FROM roster r, people p, payment y, sessionclasses sc
   WHERE r.pid = p.pid
     AND r.paymentid = y.paymentid
     AND r.classid = sc.classid
     AND sc.season = '2010-2011'
-    AND sc.sessionname = '1'
+    AND sc.sessionname = '4'
   ORDER BY sc.season,sc.sessionname, sc.classtype, sc.day, p.surname, p.givenname;
 
 -- Query to create a mailing list
@@ -142,12 +143,12 @@ SELECT parentfirstname|| ' ' || parentsurname || ' <' || parentemail || '>' from
 SELECT givenname|| ' ' || surname || ' <' || email || '>' from people 
  WHERE (pid in 
        (select r.pid from roster r, skatingclass s 
-         where r.classid = s.classid and s.sid = 5002))
+         where r.classid = s.classid and s.sid IN (5004,5005)))
 UNION
 SELECT parentfirstname|| ' ' || parentsurname || ' <' || parentemail || '>' from people
  WHERE (pid in 
        (select r.pid from roster r, skatingclass s 
-         where r.classid = s.classid and s.sid = 5003));
+         where r.classid = s.classid and s.sid IN (5004,5005)));
 
 -- Update query to batch correct the maxlevel field for people based on the hishest level
 -- they have passed in any of their classes
