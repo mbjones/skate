@@ -1,6 +1,8 @@
 package org.jsc.client;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 
@@ -720,8 +722,12 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         // Calculate the basic skills discount
         double bsDiscount = 0;
         if (discountDate != null) {
-            Date today = new Date(System.currentTimeMillis());
-            if (today.before(discountDate)) {
+            discountDate.setHours(23);
+            discountDate.setMinutes(59);
+            discountDate.setSeconds(59);
+            Date now = Calendar.getInstance().getTime();
+
+            if (now.before(discountDate)) {
                 bsDiscount = AppConstants.BS_DISCOUNT;
             }
         }
