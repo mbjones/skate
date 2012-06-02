@@ -13,7 +13,7 @@ SELECT c.season, c.sessionname as session, c.classtype as class, c.day, count(*)
  WHERE p.pid = r.pid
    AND r.classid = c.classid
    AND r.paymentid = py.paymentid
-   AND py.paypal_status NOT IN ('Pending', 'Refunded')
+   AND py.paypal_status NOT IN ('Pending', 'Refunded','Reversed')
  GROUP BY c.season, c.sessionname, c.classtype, c.day
  ORDER BY c.season, c.sessionname, c.classtype, c.day;
  
@@ -63,7 +63,7 @@ select DISTINCT p.pid, p.givenname, p.surname, p.birthdate, p.usfsaid, p.street1
  where p.pid = r.pid
    and r.classid = c.classid
    and (c.sid = 5002 or c.sid = 5003)
-   and r.paypal_status NOT IN ('Pending', 'Refunded')
+   and r.paypal_status NOT IN ('Pending', 'Refunded','Reversed')
    and c.classtype NOT LIKE 'FS%'
  EXCEPT
  (select DISTINCT p.pid, p.givenname, p.surname, p.birthdate, p.usfsaid, p.street1,
@@ -72,7 +72,7 @@ select DISTINCT p.pid, p.givenname, p.surname, p.birthdate, p.usfsaid, p.street1
  where p.pid = r.pid
    and r.classid = c.classid
    and (c.sid = 5000 or c.sid = 5001)
-   and r.paypal_status NOT IN ('Pending', 'Refunded'));
+   and r.paypal_status NOT IN ('Pending', 'Refunded','Reversed'));
  
 select DISTINCT p.pid, p.givenname, p.surname, p.birthdate, p.usfsaid, p.street1,
        p.city, p.state, p.zipcode
@@ -80,7 +80,7 @@ select DISTINCT p.pid, p.givenname, p.surname, p.birthdate, p.usfsaid, p.street1
  where p.pid = r.pid
    and r.classid = c.classid
    and (c.sid = 5000 or c.sid = 5001)
-   and r.paypal_status NOT IN ('Pending', 'Refunded')
+   and r.paypal_status NOT IN ('Pending', 'Refunded','Reversed')
    and c.classtype NOT LIKE 'FS%'
  order by p.givenname, p.surname;
 
