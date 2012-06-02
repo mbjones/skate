@@ -2,8 +2,6 @@ package org.jsc.client;
 
 import java.util.ArrayList;
 
-import org.jsc.server.SkaterRegistrationServiceImpl;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
