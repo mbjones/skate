@@ -48,7 +48,7 @@ public class SettingsScreen extends BaseScreen {
     private TextBox cityField;
     private TextBox stateField;
     private TextBox zipField;
-    private TextBox usfsaidField;
+//    private TextBox usfsaidField;
     private TextBox parentLastnameField;
     private TextBox parentFirstnameField;
     private TextBox parentEmailField;
@@ -245,7 +245,7 @@ public class SettingsScreen extends BaseScreen {
             GWT.log("Parsing birthday: " + person.getBday());
             try {
                 Date birthdate = DateTimeFormat.getFormat("MM-dd-yyyy").parseStrict(person.getBday());
-                GWT.log("Parsed date is: " + birthdate.getYear() + birthdate.getMonth() + birthdate.getDay());
+//                GWT.log("Parsed date is: " + birthdate.getYear() + birthdate.getMonth() + birthdate.getDay());
                 datePicker.setValue(birthdate);
             } catch (IllegalArgumentException e) {
                 GWT.log("Problem parsing birthday....");

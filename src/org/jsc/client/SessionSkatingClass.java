@@ -1,6 +1,7 @@
 package org.jsc.client;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -322,7 +323,7 @@ public class SessionSkatingClass implements Serializable, Comparable<SessionSkat
         /*
         Calendar rightNow = Calendar.getInstance();
         int month = rightNow.get(Calendar.MONTH);
-        int year = rightNow.get(Calendar.YEAR);
+        int year = rightNow.get(Calendar.YEAR) + 1900;
         */
         Date rightNow = new Date(System.currentTimeMillis());
         int month = rightNow.getMonth();

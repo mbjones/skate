@@ -40,6 +40,7 @@ public class AdminScreen extends BaseScreen implements SkatingClassChangeHandler
     private Label classLabel;
 //    private Grid classInfoGrid;
     protected ArrayList<RosterEntry> currentRoster;
+    @SuppressWarnings("unused")
     private RosterScreen roster;
 //    private boolean layoutForPrinting;
     private TextBox oldSeasonField;
