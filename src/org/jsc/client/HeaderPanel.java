@@ -22,6 +22,9 @@ public class HeaderPanel extends VerticalPanel {
     private Hyperlink regLink;
     private Hyperlink classesLink;
     private Label manageSeparator;
+    private Hyperlink memberLink;
+    private Label memberSeparator;
+
     private Hyperlink manageLink;
     private Label adminSeparator;
     private Hyperlink adminLink;
@@ -75,6 +78,14 @@ public class HeaderPanel extends VerticalPanel {
         leftLinks.add(createSeparatorLabel());
         regLink = new Hyperlink("Register for a Class", "register");
         leftLinks.add(regLink);
+        
+        memberSeparator = createSeparatorLabel();
+        leftLinks.add(memberSeparator);
+        memberSeparator.setVisible(true);
+        memberLink = new Hyperlink("Membership", "member");
+        leftLinks.add(memberLink);
+        leftLinks.addStyleName("jsc-toolbar");
+        memberLink.setVisible(true);
         
         manageSeparator = createSeparatorLabel();
         leftLinks.add(manageSeparator);

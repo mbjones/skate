@@ -43,6 +43,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
     private AdminScreen admin;
     private RosterScreen roster;
     private ConfirmScreen confirm;
+    private MemberScreen member;
 
     private ClassListModel sessionClassList;
     private RosterModel rosterModel;
@@ -107,7 +108,8 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
         manage = new ManageScreen(loginSession, eventBus, sessionClassList, roster);
         admin = new AdminScreen(loginSession, eventBus, sessionClassList, roster);
         confirm = new ConfirmScreen(loginSession, eventBus);
-        
+        member = new MemberScreen(loginSession, eventBus);
+
         // Set the default view screen to be login
         content.setScreen(login);
 
@@ -199,6 +201,9 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
             clearMessage();
         } else if (historyToken.equals("confirm")) {
             content.setScreen(confirm);
+            clearMessage();
+        } else if (historyToken.equals("member")) {
+            content.setScreen(member);
             clearMessage();
         } else if (historyToken.equals("cancel")) {
             content.setScreen(manage);
