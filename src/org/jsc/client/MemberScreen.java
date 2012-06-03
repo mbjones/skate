@@ -29,33 +29,19 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boolean>, ChangeHandler {
 
-//    private static final String DISCOUNT_EXPLANATION = "<p class=\"jsc-text\">Because it helps with planning our class sizes, <b>we offer a discount for those who register early</b>.</p>";
-//    private static final String PRICE_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">After you choose a class, you will be prompted to make payment through PayPal.</p>";
-//    private static final String DISCOUNT_LABEL_PREFIX = "Discount deadline: ";
     private static final String PAYPAL_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">You must make your payment using PayPal by clicking on the button below.  <b>Your membership is <em>not complete</em></b> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
-//    private static final String BS_EXPLANATION = "Basic Skills is our Learn to Skate program. These group lessons are based on the United States Figure Skating's (USFSA) Basic Skills Program. This is a nationwide, skills-based, graduated series of instruction for youth and adult skaters. This program is designed to teach all skaters the fundamentals of skating.";
     private static final String MMB_EXPLANATION = "Club membership provides many benefits, including reduced prices when registering for multiple figure skating classes, membership in the US Figure Skating Association (includes a subscription to 'Skating' magazine), and the ability to participate as a club member in testing and competitions.";
 
     private static final String STEP_1 = "Step 1: Select membership options";
     private static final String STEP_2 = "Step 2: Process payment";
     
-    //private ClassListModel sessionClassList;
-    //private RosterModel studentRoster;
-    
     private HorizontalPanel screen;
     private VerticalPanel outerVerticalPanel;
     private HorizontalPanel outerHorizPanel;
-//    private RadioButton bsRadio;
-//    private RadioButton fsRadio;
-//    private VerticalPanel bsClassChoicePanel;
     private VerticalPanel ppPaymentPanel;
-//    private VerticalPanel bsPanel;
     private VerticalPanel memberPanel;
     private Label stepLabel;
-//    private Grid basicSkillsGrid;
     private Grid memberGrid;
-    private Label feeLabel;
-//    private ListBox classField;
     private Button registerButton;
     private SkaterRegistrationServiceAsync regService;
     private CheckBox memberCheckbox;
@@ -64,37 +50,22 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     private Label totalCostLabel;
     private double total;
     private Label memberCheckboxLabel;
-//    private HashSet<String> fsClassesToRegister;
     private Label fsDiscountLabel;
-//    private Label discountDateLabel;
     private NumberFormat numfmt;
-//    private Label bsTotalLabel;
-//    private Label bsDiscountLabel;
     
     /**
-     * Construct the Registration view and controller used to display a form for
+     * Construct the Member view and controller used to display a form for
      * registering for skating classes.
      * @param loginSession the authenticated login session for submissions to the remote service
      * @param sessionClassList the model of skating classes
      */
     public MemberScreen(LoginSession loginSession, HandlerManager eventBus) {
         super(loginSession, eventBus);
-//        this.sessionClassList = sessionClassList;
-//        sessionClassLabels = new TreeMap<String, String>();
-//        this.studentRoster = studentRoster;
         numfmt = NumberFormat.getFormat("$#,##0.00");
-//        fsClassesToRegister = new HashSet<String>();
         totalFSCost = 0;
         layoutScreen();
         this.setContentPanel(screen);
-        regService = GWT.create(SkaterRegistrationService.class);
-        
-//        // Register as a handler for Skating class changes, and handle those changes
-//        eventBus.addHandler(RosterChangeEvent.TYPE, new RosterChangeHandler(){
-//            public void onRosterChange(RosterChangeEvent event) {
-//                studentRoster = event.getRoster();
-//            }
-//        });
+        regService = GWT.create(SkaterRegistrationService.class);        
     }
     
     /**
@@ -106,8 +77,6 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         
         screen = new HorizontalPanel();
                         
-        //layoutBsPanel();
-        
         layoutMemberPanel();
         
         ppPaymentPanel = new VerticalPanel();
@@ -135,7 +104,6 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
 //        outerVerticalPanel.add(fsRadio);
         
         outerHorizPanel = new HorizontalPanel();
-        //outerHorizPanel.add(bsPanel);
         outerHorizPanel.add(memberPanel);
         outerHorizPanel.add(ppPaymentPanel);
         outerVerticalPanel.add(outerHorizPanel);
@@ -143,62 +111,6 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         outerVerticalPanel.addStyleName("jsc-rightpanel");
         screen.add(outerVerticalPanel);
     }
-
-    /**
-     * Layout the user interface widgets for the basic skills screen.
-     */
-    /*
-    private void layoutBsPanel() {
-        bsPanel = new VerticalPanel();
-        Label bscTitle = new Label("Basic Skills Classes");
-        bscTitle.addStyleName("jsc-fieldlabel-left");
-        bsPanel.add(bscTitle);
-        Label bscDescription = new Label(BS_EXPLANATION);
-        bscDescription.addStyleName("jsc-text");
-        bsPanel.add(bscDescription);
-
-        basicSkillsGrid = new Grid(0, 4);
-        
-        addToBSGrid(" ", new Label(" "));
-        
-        classField = new ListBox();
-        classField.setVisibleItemCount(1);
-        classField.addChangeHandler(this);
-        addToBSGrid("Class:", classField);
-        int currentRow = basicSkillsGrid.getRowCount() - 1;
-        feeLabel = new Label("");
-        basicSkillsGrid.setWidget(currentRow, 2, new Label("Cost"));
-        basicSkillsGrid.setWidget(currentRow, 3, feeLabel);
-        HTMLTable.CellFormatter fmt = basicSkillsGrid.getCellFormatter();
-        fmt.addStyleName(currentRow, 2,  "jsc-fieldlabel");
-        fmt.addStyleName(currentRow, 3,  "jsc-currencyfield");
-        
-        bsDiscountLabel = new Label();
-        int newRow = basicSkillsGrid.insertRow(basicSkillsGrid.getRowCount());
-        basicSkillsGrid.setWidget(newRow, 2, new Label("Discount"));
-        basicSkillsGrid.setWidget(newRow, 3, bsDiscountLabel);
-        fmt.addStyleName(newRow, 2,  "jsc-fieldlabel");
-        fmt.addStyleName(newRow, 3,  "jsc-currencyfield");
-        
-        bsTotalLabel = new Label();
-        newRow = basicSkillsGrid.insertRow(basicSkillsGrid.getRowCount());
-        basicSkillsGrid.setWidget(newRow, 2, new Label("Total"));
-        basicSkillsGrid.setWidget(newRow, 3, bsTotalLabel);
-        fmt.addStyleName(newRow, 2,  "jsc-fieldlabel");
-        fmt.addStyleName(newRow, 3,  "jsc-currencyfield");
-        
-        bsClassChoicePanel = new VerticalPanel();
-        StringBuffer sb = new StringBuffer(PRICE_EXPLANATION);
-        sb.append(DISCOUNT_EXPLANATION);
-        //Date discountDate = getDiscountDate();
-        bsClassChoicePanel.add(new HTMLPanel(sb.toString()));
-        discountDateLabel = new Label(DISCOUNT_LABEL_PREFIX);
-        bsClassChoicePanel.add(discountDateLabel);
-        bsClassChoicePanel.add(basicSkillsGrid);
-
-        bsPanel.add(bsClassChoicePanel);
-    }
-    */
     
     /**
      * Create the widgets needed to populate the figure skating registration panel.
@@ -257,44 +169,6 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     }
     
     /**
-     * Add the given widget to the grid table along with a label.  The Label is
-     * placed in column 1 of the grid, and the widget in column 2.
-     * @param label the label to display in column 1
-     * @param widget the widget to display in column 2
-     */
-    /*
-    private void addToBSGrid(String label, Widget widget) {
-        int newRow = basicSkillsGrid.insertRow(basicSkillsGrid.getRowCount());
-        basicSkillsGrid.setWidget(newRow, 0, new Label(label));
-        basicSkillsGrid.setWidget(newRow, 1, widget);
-        HTMLTable.CellFormatter fmt = basicSkillsGrid.getCellFormatter();
-        fmt.addStyleName(newRow, 0,  "jsc-fieldlabel");
-        fmt.addStyleName(newRow, 1,  "jsc-field");
-    }
-    */
-    
-    /**
-     * Add the given FSClassCheckBox to the Figure Skating grid table along with a label.  
-     * The Label is placed in column 2 of the grid, and the checkbox in column 1. 
-     * FSClassCheckBox also contains a label that can be used to display the price
-     * of a figure skating class, and this label is placed in column 5.
-     *  
-     * @param label the label to display in column 2
-     * @param widget the FSClassCheckBox to display in column 1
-     */
-    /*
-    private void addToFSGrid(String label, FSClassCheckBox widget) {
-        int newRow = memberGrid.insertRow(memberGrid.getRowCount()-2);
-        memberGrid.setWidget(newRow, 0, widget);
-        memberGrid.setWidget(newRow, 1, new Label(label));
-        memberGrid.setWidget(newRow, 5, widget.getClassPriceLabel());
-        HTMLTable.CellFormatter fmt = memberGrid.getCellFormatter();
-        fmt.addStyleName(newRow, 0,  "jsc-fieldlabel");
-        fmt.addStyleName(newRow, 1,  "jsc-field");
-        fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
-    }
-*/
-    /**
      * Remove the current list of classes from the box and replace with the 
      * classes that are currently present in sessionClassList. Reset the 
      * registration form to the initial state of the application.
@@ -303,72 +177,11 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         // Reset the form fields to begin registration
         ppPaymentPanel.setVisible(false);
         stepLabel.setText(STEP_1);
-        //bsRadio.setVisible(true);
-        //fsRadio.setVisible(true);
-//        if (bsRadio.getValue()) {
-//            bsPanel.setVisible(true);
-//            fsPanel.setVisible(false);
-//        } else {
-//            bsPanel.setVisible(false);
-//            fsPanel.setVisible(true);
-//        }
         registerButton.setVisible(true);
         
-        // Clear the list of basic skills classes to reflect the new data
-        //classField.clear();
-        
-        // Clear the set of fsClasses to be registered, and the form totals
-        //fsClassesToRegister.clear();
         totalFSCost = 0;
         total = 0;
-        
-        // Remove all of the rows from the FS grid table except the first and last two rows
-//        int rows = figureSkatingGrid.getRowCount();
-//        for (int i = rows-3; i > 0; i--) {
-//            GWT.log("Removing FS table row: " + i, null);
-//            figureSkatingGrid.removeRow(i);
-//        }
-
-        // Iterate over the new list of classes, putting each class into either
-        // the dropdown for Basic Skills classes or the checkbox list for 
-        // Figure Skating classes
-        /*ArrayList<SessionSkatingClass> list = sessionClassList.getClassList();
-        if (list != null) {
-            for (SessionSkatingClass curClass : list) {
-                GWT.log("SessionClass: " + 
-                        (new Long(curClass.getClassId()).toString()) + " " + 
-                        curClass.getClassType() + " (" + curClass.getCost() + ")", null);
-                String classLabel = curClass.formatClassLabel();
                 
-                // If it starts with "FS " it is a figure skating class
-                // Only include the active session in the dropdown list
-                if (curClass.isActiveSession() && curClass.getClassType().startsWith("FS ")) {
-                    FSClassCheckBox checkbox = new FSClassCheckBox();
-                    checkbox.setValue(false, false);
-                    checkbox.setName(Long.toString(curClass.getClassId()));
-                    //checkbox.setClassPrice(curClass.getCost());
-                    checkbox.addValueChangeHandler(this);
-                    addToFSGrid(classLabel, checkbox);
-                    // Disable checkboxes if student is already registered
-                    if (studentRoster.contains(loginSession.getPerson().getPid(),
-                            curClass.getClassId())) {
-                        GWT.log("Disabling FS class: " + curClass.getClassId(), null);
-                        checkbox.setEnabled(false);
-                    }
-                    
-                // Otherwise it is a Basic Skills class, but only include if its the active session
-                } else if (curClass.isActiveSession()) {
-                    // Only add item to list if student is not registered
-                    if (studentRoster.contains(loginSession.getPerson().getPid(),
-                            curClass.getClassId())) {
-                        GWT.log("Disabling BS class: " + curClass.getClassId(), null);
-                    } else {
-                        classField.addItem(classLabel, new Long(curClass.getClassId()).toString());
-                    }
-                }
-            }
-        }*/
-        
         // Update the membership checkbox status based on the Person logged in
         if (loginSession.getPerson().isMember()) {
             memberCheckboxLabel.setText("Membership dues already paid. Discount applies.");
@@ -383,54 +196,8 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             memberCheckbox.setEnabled(true);
         }
         
-        //recalculateAndDisplayBasicSkillsTotal();
         recalculateAndDisplayFSTotals();
     }
-
-    /**
-     * Set the price and discount for the Basic Skills form by recalculating the
-     * discount.
-     */
-    /*
-    private void recalculateAndDisplayBasicSkillsTotal() {
-        // Update the cost discount, and total fields on the BS Form
-        String selectedClassId = classField.getValue(classField.getSelectedIndex());
-        double classCost = sessionClassList.getSkatingClass(new Long(selectedClassId)).getCost();
-        feeLabel.setText(numfmt.format(classCost));
-        Date discountDate = getDiscountDate();
-        GWT.log("Discount date is: " + discountDate, null);
-        Date discountDisplay = discountDate;
-        discountDisplay.setTime( discountDate.getTime() - AppConstants.MILLISECS_PER_DAY );
-        String discountString = DateTimeFormat.getLongDateFormat().format(discountDisplay);
-        discountDateLabel.setText(DISCOUNT_LABEL_PREFIX + discountString);
-        double bsDiscount = calculateBSDiscount(discountDate);
-        bsDiscountLabel.setText(numfmt.format(bsDiscount));
-        double bsTotal = classCost - bsDiscount;
-        bsTotalLabel.setText(numfmt.format(bsTotal));
-    }*/
-
-    /**
-     * Find the discount date for the first class in the active session.
-     * @return the Date which represents the Discount date
-     */
-    /*
-    private Date getDiscountDate() {
-        ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList();
-        String sessionDiscount = "";
-        for (SessionSkatingClass curClass : classes) {
-            if (curClass.isActiveSession()) {
-                sessionDiscount = curClass.getDiscountDate();
-                break;
-            }
-        }
-        Date discountDate = null;
-        if (sessionDiscount != null) {
-            DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
-            discountDate = fmt.parse(sessionDiscount);
-        }
-        return discountDate;
-    }
-    */
 
     /**
      * Register for a class by creating a RosterEntry object from the form input
@@ -447,41 +214,6 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             if (memberCheckbox.getValue() == true &! loginSession.getPerson().isMember()) {
                 createMembership = true;
             }
-
-            // Gather information from the Basic Skills form if it is selected
-            /*
-            if (bsRadio.getValue()) {
-                String selectedClassId = classField.getValue(classField.getSelectedIndex());
-                double classCost = sessionClassList.getSkatingClass(new Long(selectedClassId)).getCost();
-                Person registrant = loginSession.getPerson();
-                RosterEntry entry = new RosterEntry();
-                entry.setClassid(new Long(selectedClassId).longValue());
-                entry.setPid(registrant.getPid());
-                entry.setPayment_amount(classCost);
-                entryList.add(entry);
-                
-            // Otherwise gather information from the Figure Skating form if it is selected
-            } else if (fsRadio.getValue()) {
-                if (memberCheckbox.getValue() == true &! loginSession.getPerson().isMember()) {
-                    createMembership = true;
-                }
-                // Loop through the checked classes, creating a RosterEntry for each
-                for (String selectedClassId : fsClassesToRegister) {
-                    GWT.log("Need to register class: " + selectedClassId, null);
-                    long classId = new Long(selectedClassId).longValue();
-                    Person registrant = loginSession.getPerson();
-                    RosterEntry entry = new RosterEntry();
-                    entry.setClassid(classId);
-                    entry.setPid(registrant.getPid());
-                    double classCost = sessionClassList.getSkatingClass(classId).getCost();
-                    entry.setPayment_amount(classCost);
-                    entryList.add(entry);
-                }
-            } else {
-                GWT.log("Neither BS nor FS form is active. This shouldn't happen!", null);
-                return;
-            }
-            */
                         
             // Initialize the service proxy.
             if (regService == null) {
@@ -505,7 +237,6 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
                         setMessage("Error registering... Have you are already registered for these classes? Check 'My Classes'.");
                         return;
                     } else {
-                        //studentRoster.refreshRoster();
                         if (results.isMembershipCreated()) {
                             loginSession.getPerson().setMember(true);
                             loginSession.getPerson().setMembershipId(results.getMembershipId());
@@ -513,29 +244,8 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
                         }
                         
                         double discount = 0;
-                        /*
-                        if (bsRadio.getValue()) {
-                            Date discountDate = null;
-                            ArrayList<SessionSkatingClass> classes = sessionClassList.getClassList();
-                            String sessionDiscount = "";
-                            for (SessionSkatingClass curClass : classes) {
-                                if (curClass.isActiveSession()) {
-                                    sessionDiscount = curClass.getDiscountDate();
-                                    break;
-                                }
-                            }
-                            if (sessionDiscount != null) {
-                                DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd");
-                                discountDate = fmt.parse(sessionDiscount);
-                            }
-                            GWT.log("Discount date is: " + discountDate, null);
-                            discount = calculateBSDiscount(discountDate);
-                            
-                        } else {
-                            */
-                            boolean isMember = results.isMembershipCreated() || loginSession.getPerson().isMember();
-                            discount = 0; // calculateFSDiscount(results.getEntriesCreated().size(), isMember);
-                        //}
+                        boolean isMember = results.isMembershipCreated() || loginSession.getPerson().isMember();
+                        discount = 0;
                         StringBuffer ppCart = createPayPalForm(results, null, discount);
                         
                         registerButton.setVisible(false);
@@ -545,9 +255,6 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
                                     " classes, which were excluded.");
                         }
                         stepLabel.setText(STEP_2);
-//                        bsRadio.setVisible(false);
-//                        fsRadio.setVisible(false);
-//                        bsPanel.setVisible(false);
                         memberPanel.setVisible(false);
                         
                         ppPaymentPanel.clear();
@@ -594,14 +301,6 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
 
         
         int i = 0;
-        /*
-        for (RosterEntry newEntry : newEntryList) {
-            i++;
-            ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"" + sessionClassList.getSkatingClass(newEntry.getClassid()).formatClassLabel() + "\">");
-            ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\""+ newEntry.getRosterid() +"\">");
-            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + newEntry.getPayment_amount() + "\">");
-        }
-        */
         // Handle membership payment by creating form items as needed
         if (results.isMembershipCreated()) {
             double dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
@@ -659,27 +358,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             memberDues.setText(duesString);
             recalculateAndDisplayFSTotals();        
         } 
-        /*
-        else if (sender instanceof FSClassCheckBox) {
-            FSClassCheckBox sendercb = (FSClassCheckBox)sender;
-            long classId = new Long(sendercb.getName()).longValue();
-            double classCost = sessionClassList.getSkatingClass(classId).getCost();
-
-            GWT.log( "Checked class: " + sendercb.getName(), null);
-            if (sendercb.getValue() == true) {
-                GWT.log( "Class cost is: " + classCost, null);
-                totalFSCost += classCost;
-                fsClassesToRegister.add(sendercb.getName());
-                sendercb.setClassPrice(classCost);
-            } else {
-                GWT.log( "Class cost is: " + classCost, null);
-                totalFSCost -= classCost;
-                fsClassesToRegister.remove(sendercb.getName());
-                sendercb.setClassPrice(0);
-            }
-            */
-            recalculateAndDisplayFSTotals();
-        //}
+        recalculateAndDisplayFSTotals();
     }
 
     @Override
@@ -695,120 +374,9 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
      */
     private void recalculateAndDisplayFSTotals() {
         boolean isMember = loginSession.getPerson().isMember() || memberCheckbox.getValue();
-        double discount = 0; // calculateFSDiscount(fsClassesToRegister.size(), isMember);
+        double discount = 0; 
         fsDiscountLabel.setText(numfmt.format(discount));
         total = totalFSCost - discount;
         totalCostLabel.setText(numfmt.format(total));
     }
-    
-    /**
-     * Calculate the registration discount based on the number of classes
-     * for which the user registers and whether or not they are a member of
-     * the club.  Hard coding this algorithm is painful, but there are so many
-     * possible variants it seems that some aspect will be hardcoded.
-     * @param numclasses the number of classes for which they are registering
-     * @param isMember boolean set to true if they are a club member
-     * @return the amount of the discount
-     */
-    /*
-    protected static double calculateFSDiscount(int numclasses, boolean isMember) {
-        double multiclassDiscount = 0;        
-        // TODO: determine how to externalize this algorithm for discounting
-        if (numclasses == 3) {
-            multiclassDiscount = 10;
-        } else if (numclasses == 4) {
-            multiclassDiscount = 25;
-        } else if (numclasses >= 5) {
-            multiclassDiscount = 50;
-        }
-        
-        // If the person is already a member, or if they have checked the 
-        // membership box, then include the membership discount
-        double membershipDiscount = 0;
-        if (isMember) {
-            membershipDiscount = numclasses*AppConstants.MEMBERSHIP_DISCOUNT;
-        }
-        
-        return multiclassDiscount + membershipDiscount;
-    }
-    */
-    
-    /**
-     * Calculate the registration discount based on comparing the current date
-     * to the start date of the session.  If the current date is before the session
-     * start date by at least the number of grace days, then the basic skills discount applies.
-     * @param discountDate the date on which discounted registration expires
-     * @return the amount of the discount
-     */
-    /*
-    protected static double calculateBSDiscount(Date discountDate) {
-        double multiclassDiscount = 0;        
-        // Calculate the basic skills discount
-        double bsDiscount = 0;
-        if (discountDate != null) {
-            discountDate.setHours(23);
-            discountDate.setMinutes(59);
-            discountDate.setSeconds(59);
-            //Date now = Calendar.getInstance().getTime();
-            Date now = new Date(System.currentTimeMillis());
-            
-            if (now.before(discountDate)) {
-                bsDiscount = AppConstants.BS_DISCOUNT;
-            }
-        }
-        
-        return bsDiscount;            
-    }
-    */
-    /**
-     * An extension of CheckBox that is used to display a figure skating class
-     * checkbox on the registration panel.  Instances of FSClassCheckBox keep
-     * track of the current price of the class to be displayed, and contain a
-     * label that can be used to display the current price.  Whenever the price
-     * of a class is updated, the label is also updated.
-     * @author Matt Jones
-     *
-     */
-    /*
-    private class FSClassCheckBox extends CheckBox {
-        private Label classPriceLabel;
-        private double classPrice;
-        private NumberFormat numfmt;
-
-        /**
-         * Construct the checkbox, initializing the internal label and price.
-         */
-/*        public FSClassCheckBox() {
-            super();
-            numfmt = NumberFormat.getFormat("$#,##0.00");
-            classPriceLabel = new Label();
-            setClassPrice(0);
-        }*/
-        
-        /**
-         * @return the classPrice
-         */
-  /*      @SuppressWarnings("unused")
-        public double getClassPrice() {
-            return classPrice;
-        }*/
-
-        /**
-         * @param classPrice the classPrice to set
-         */
-/*        public void setClassPrice(double classPrice) {
-            this.classPrice = classPrice;
-            
-            this.classPriceLabel.setText(numfmt.format(classPrice));
-        }*/
-
-        /**
-         * @return the classPriceLabel
-         */
-        /*
-        public Label getClassPriceLabel() {
-            return classPriceLabel;
-        }
-    }
-*/
 }
