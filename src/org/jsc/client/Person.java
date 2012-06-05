@@ -43,6 +43,7 @@ public class Person implements Serializable {
     private String membershipStatus;
     private long membershipPaymentId;
     private String maxLevel;
+    private boolean awaitingRefresh;
     
     // Predefined roles used in the application
     // Roles are cumulative (higher roles have all privileges of lower roles)
@@ -55,7 +56,7 @@ public class Person implements Serializable {
      * Construct a new person object with no fields set.
      */
     public Person() {
-        
+        setAwaitingRefresh(false);
     }
 
     /**
@@ -504,16 +505,32 @@ public class Person implements Serializable {
     }
 
     /**
+     * @return the awaitingRefresh
+     */
+    public boolean isAwaitingRefresh() {
+        return awaitingRefresh;
+    }
+
+    /**
+     * @param awaitingRefresh the awaitingRefresh to set
+     */
+    public void setAwaitingRefresh(boolean awaitingRefresh) {
+        this.awaitingRefresh = awaitingRefresh;
+    }
+
+    /**
      * Look up properties for this Person instance from the database and refresh those
      * details in this instance.
      */
     public void refreshPersonDetails() {
+        setAwaitingRefresh(true);
         
         // Set up the callback object.
         AsyncCallback<Person> callback = new AsyncCallback<Person>() {
             public void onFailure(Throwable caught) {
                 // TODO: Do something with errors.
                 GWT.log("Failed to refresh the person record.", caught);
+                setAwaitingRefresh(false);
             }
 
             public void onSuccess(Person newPerson) {
@@ -522,8 +539,11 @@ public class Person implements Serializable {
                     GWT.log("Error refreshing the person's attributes.", null);
                     return;
                 } else {
+                    GWT.log("Updating fields using new attributes.", null);
                     updateFields(newPerson);
                 }
+                setAwaitingRefresh(false);
+                GWT.log("Success in refreshPersonDetails.", null);
             }
         };
 

@@ -39,7 +39,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     private VerticalPanel outerVerticalPanel;
     private HorizontalPanel outerHorizPanel;
     private VerticalPanel ppPaymentPanel;
-    private VerticalPanel memberPanel;
+    private VerticalPanel memberPanel;  
     private Label stepLabel;
     private Grid memberGrid;
     private Button registerButton;
@@ -274,7 +274,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             }
             
         } else {
-            GWT.log("Error: Can not create membership without first signing in.", null);
+            GWT.log("Error: Can not create a membership without first signing in.", null);
         }
     }
 

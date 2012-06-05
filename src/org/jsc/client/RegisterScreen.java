@@ -15,6 +15,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
@@ -63,8 +64,8 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
     private ListBox classField;
     private Button registerButton;
     private SkaterRegistrationServiceAsync regService;
-    private CheckBox memberCheckbox;
-    private Label memberDues;
+//    private CheckBox memberCheckbox;
+//    private Label memberDues;
     private double totalFSCost;
     private Label totalCostLabel;
     private double total;
@@ -220,10 +221,10 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         
         // Insert the first row containing the membership fields
         int newRow = figureSkatingGrid.insertRow(figureSkatingGrid.getRowCount());
+        /*
         memberCheckbox = new CheckBox();
         memberCheckboxLabel = new Label("Pay membership dues");
         memberDues = new Label();
-        double zero = 0;
         memberDues.setText(numfmt.format(zero));
         memberCheckbox.setValue(false, false);
         memberCheckbox.addValueChangeHandler(this);
@@ -231,11 +232,14 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         figureSkatingGrid.setWidget(newRow, 3, memberCheckboxLabel);
         figureSkatingGrid.setWidget(newRow, 4, new Label("Dues"));
         figureSkatingGrid.setWidget(newRow, 5, memberDues);
+        */
+        double zero = 0;
         HTMLTable.CellFormatter fmt = figureSkatingGrid.getCellFormatter();
         fmt.addStyleName(newRow, 2,  "jsc-fieldlabel");
         fmt.addStyleName(newRow, 3,  "jsc-field");
         fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
         fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
+        
         
         // Insert the next to last row containing the discount amount
         newRow = figureSkatingGrid.insertRow(figureSkatingGrid.getRowCount());
@@ -370,6 +374,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         }
         
         // Update the membership checkbox status based on the Person logged in
+        /*
         if (loginSession.getPerson().isMember()) {
             memberCheckboxLabel.setText("Membership dues already paid. Discount applies.");
             memberCheckbox.setValue(false);
@@ -382,7 +387,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             memberCheckbox.setValue(false);
             memberCheckbox.setEnabled(true);
         }
-        
+        */
         recalculateAndDisplayBasicSkillsTotal();
         recalculateAndDisplayFSTotals();
     }
@@ -454,9 +459,11 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
                 
             // Otherwise gather information from the Figure Skating form if it is selected
             } else if (fsRadio.getValue()) {
+                /*
                 if (memberCheckbox.getValue() == true &! loginSession.getPerson().isMember()) {
                     createMembership = true;
                 }
+                */
                 // Loop through the checked classes, creating a RosterEntry for each
                 for (String selectedClassId : fsClassesToRegister) {
                     GWT.log("Need to register class: " + selectedClassId, null);
@@ -626,6 +633,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             recalculateAndDisplayFSTotals();
             bsPanel.setVisible(false);
             fsPanel.setVisible(true);
+        /*
         } else if (sender == memberCheckbox) {
             GWT.log("memberCheckbox clicked", null);
             double dues = 0;
@@ -638,8 +646,14 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             }
             String duesString = numfmt.format(dues);
             memberDues.setText(duesString);
-            recalculateAndDisplayFSTotals();        
+            recalculateAndDisplayFSTotals();  
+        */
         } else if (sender instanceof FSClassCheckBox) {
+            // Check if the membership status has changed for this person
+            Person currentUser = loginSession.getPerson();
+            currentUser.refreshPersonDetails();
+            
+            // Record which boxes were checked
             FSClassCheckBox sendercb = (FSClassCheckBox)sender;
             long classId = new Long(sendercb.getName()).longValue();
             double classCost = sessionClassList.getSkatingClass(classId).getCost();
@@ -671,10 +685,11 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
      * screen to reflect the totals.
      */
     private void recalculateAndDisplayFSTotals() {
-        boolean isMember = loginSession.getPerson().isMember() || memberCheckbox.getValue();
-        String status = loginSession.getPerson().getMembershipStatus();
+        Person currentUser = loginSession.getPerson();
+        boolean isMember = currentUser.isMember();
+        String status = currentUser.getMembershipStatus();
         if (status != null && status.equals("Pending")) {
-            GWT.log("Membership payment pending: " + loginSession.getPerson().getMembershipPaymentId(), null);
+            GWT.log("Membership payment pending: " + currentUser.getMembershipPaymentId(), null);
             isMember=false;
         }
         double discount = calculateFSDiscount(fsClassesToRegister.size(), isMember);
@@ -696,12 +711,14 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
         double multiclassDiscount = 0;        
         // TODO: determine how to externalize this algorithm for discounting
         if (isMember) {
-            if (numclasses == 3) {
-                multiclassDiscount = 10;
+            if (numclasses == 2) {
+                multiclassDiscount = 5;
+            } else if (numclasses == 3) {
+                multiclassDiscount = 15;
             } else if (numclasses == 4) {
                 multiclassDiscount = 25;
             } else if (numclasses >= 5) {
-                multiclassDiscount = 50;
+                multiclassDiscount = 35;
             }
         }
         
