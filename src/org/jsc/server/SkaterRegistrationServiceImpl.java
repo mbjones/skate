@@ -63,10 +63,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * updated.
      * @param person the Person to be created or updated in the database
      * @return the Person that was created or updated, or null on error
-     * @throws DuplicateRecordException if the username already exists
      */
-    public Person createAccount(LoginSession loginSession, Person person)
-            throws SQLRecordException {
+    public Person createAccount(LoginSession loginSession, Person person) {
+
         long pid = 0;
 
         StringBuffer sql = new StringBuffer();
@@ -222,7 +221,6 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             
         } catch (SQLException ex) {
             System.err.println("SQLException: " + ex.getMessage());
-            throw new SQLRecordException(ex);
         }
 
         Person newPerson = lookupPerson(pid);
