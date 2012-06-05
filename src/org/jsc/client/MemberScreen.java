@@ -31,7 +31,8 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
 
     private static final String PAYPAL_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">You must make your payment using PayPal by clicking on the button below.  <b>Your membership is <em>not complete</em></b> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
     private static final String MMB_EXPLANATION = "Club membership provides many benefits, including reduced prices when registering for multiple figure skating classes, membership in the US Figure Skating Association (includes a subscription to 'Skating' magazine), and the ability to participate as a club member in testing and competitions.";
-
+    private static final String PENDING = "Pending";
+    
     private static final String STEP_1 = "Step 1: Select membership options";
     private static final String STEP_2 = "Step 2: Process payment";
     
@@ -183,17 +184,19 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         total = 0;
                 
         // Update the membership checkbox status based on the Person logged in
-        if (loginSession.getPerson().isMember()) {
+        if (loginSession.getPerson().isMember() &! loginSession.getPerson().getMembershipStatus().equals(PENDING) ) {
             memberCheckboxLabel.setText("Membership dues already paid. Discount applies.");
             memberCheckbox.setValue(false);
             memberCheckbox.setEnabled(false);
             double dues = 0;
             String duesString = numfmt.format(dues);
             memberDues.setText(duesString);
+            registerButton.setEnabled(false);
         } else {
             memberCheckboxLabel.setText("Pay membership dues");
             memberCheckbox.setValue(false);
             memberCheckbox.setEnabled(true);
+            registerButton.setEnabled(true  );
         }
         
         recalculateAndDisplayFSTotals();
@@ -330,6 +333,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     public void onValueChange(ValueChangeEvent<Boolean> event) {
         Widget sender = (Widget) event.getSource();
         memberPanel.setVisible(true);
+        updateRegistrationScreenDetails();
 
         /*
         if (sender == bsRadio) {
