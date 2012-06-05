@@ -15,7 +15,6 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
@@ -69,7 +68,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
     private double totalFSCost;
     private Label totalCostLabel;
     private double total;
-    private Label memberCheckboxLabel;
+//    private Label memberCheckboxLabel;
     private HashSet<String> fsClassesToRegister;
     private Label fsDiscountLabel;
     private Label discountDateLabel;
