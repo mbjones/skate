@@ -111,7 +111,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         
         // Create the panel, its labels, and the contained grid for layout
         memberPanel = new VerticalPanel();
-        Label mmbTitle = new Label("Membership");
+        Label mmbTitle = new Label(" ");
         mmbTitle.addStyleName("jsc-fieldlabel-left");
         memberPanel.add(mmbTitle);
         Label mmbDescription = new Label(MMB_EXPLANATION);
@@ -211,23 +211,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
                             loginSession.getPerson().setMembershipStatus(results.getMembershipStatus());
                         }
                         
-                        double discount = 0;
-                        discount = 0;
-                        StringBuffer ppCart = createPayPalForm(results, null, discount);
-                        
-                        registerButton.setVisible(false);
-//                        ArrayList<Long> entriesFailed = results.getEntriesNotCreated();
-//                        if (entriesFailed.size() > 0) {
-//                            setMessage("You were already registered for " + entriesFailed.size() +
-//                                    " classes, which were excluded.");
-//                        }
-                        stepLabel.setText(STEP_2);
-                        memberPanel.setVisible(false);
-                        
-                        ppPaymentPanel.clear();
-                        ppPaymentPanel.add(new HTMLPanel(PAYPAL_EXPLANATION));
-                        ppPaymentPanel.add(new HTMLPanel(ppCart.toString()));
-                        ppPaymentPanel.setVisible(true);
+                        createAndShowPaypalForm(results);
                     }
                 }
             };
@@ -260,7 +244,21 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
      * @param results the results of the registration step listing registration items
      * @return a StringBuffer containing the HTML form to be displayed
      */
-    protected static StringBuffer createPayPalForm(RegistrationResults results, ClassListModel sessionClassList, double discount) {
+    protected StringBuffer createPayPalForm(RegistrationResults results, ClassListModel sessionClassList, double discount) {
+        
+        long paymentId;
+        String membershipType;
+        long membershipId;
+        if (results == null) {
+            paymentId = loginSession.getPerson().getMembershipPaymentId();
+            membershipType = loginSession.getPerson().getMembershipType();
+            membershipId = loginSession.getPerson().getMembershipId();
+        } else {
+            paymentId = results.getPaymentId();
+            membershipType = results.getMembershipType();
+            membershipId = results.getMembershipId();
+        }
+        
         StringBuffer ppCart = new StringBuffer();
         ppCart.append("<form id=\"wizard\" action=\""+ ClientConstants.getString("CLIENT_PAYPAL_URL") + "\" method=\"post\">");
         ppCart.append("<input type=\"hidden\" name=\"cmd\" value=\"_cart\">");
@@ -271,13 +269,12 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         ppCart.append("<input type=\"hidden\" name=\"no_shipping\" value=\"1\">");
         ppCart.append("<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ ClientConstants.getString("CLIENT_PAYPAL_HEADER_IMAGE") + "\">");
         ppCart.append("<input type=\"hidden\" name=\"item_name\" value=\""+ "Registration Invoice" + "\">");
-        ppCart.append("<input type=\"hidden\" name=\"invoice\" value=\""+ results.getPaymentId() + "\">");
+        ppCart.append("<input type=\"hidden\" name=\"invoice\" value=\""+ paymentId + "\">");
         
         int i = 0;
         // Handle membership payment by creating form items as needed
-        if (results.isMembershipCreated()) {
+        if (results == null || results.isMembershipCreated()) {
             double dues = 0;
-            String membershipType = results.getMembershipType();
             if (membershipType.equals(AppConstants.MEMBER_SINGLE)) {
                 dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
             } else if (membershipType.equals(AppConstants.MEMBER_FAMILY)) {
@@ -286,7 +283,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             i++;
             String season = SessionSkatingClass.calculateSeason();
             ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"Membership dues for " + season + " season (" + membershipType + ")\">");
-            ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\"" + results.getMembershipId() +"\">");
+            ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\"" + membershipId +"\">");
             ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + dues + "\">");
         }
         ppCart.append("<input type=\"hidden\" name=\"discount_amount_cart\" value=\"" + discount + "\">");
@@ -331,44 +328,69 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         GWT.log("Called: updateMembershipScreenDetails()");
         boolean isMember = loginSession.getPerson().isMember();
         String membershipStatus = loginSession.getPerson().getMembershipStatus();
+        boolean isPending = membershipStatus.equals(PENDING);
+        String membershipType = loginSession.getPerson().getMembershipType();
         if (sender==null) {
             sender = singleMemberRadio;
         }
-        
-        memberPanel.setVisible(true);
-        ppPaymentPanel.setVisible(false);
-        stepLabel.setText(STEP_1);
-        registerButton.setVisible(true);
+                
+//        memberPanel.setVisible(true);
+//        ppPaymentPanel.setVisible(false);
+//        stepLabel.setText(STEP_1);
+//        registerButton.setVisible(true);
         
         totalCost = 0;
         double dues = 0;
     
-        // Update the membership radio buttons based on the Person logged in
-        if (isMember &! membershipStatus.equals(PENDING) ) {
-            memberPaidLabel.setText("Membership dues already paid. Discount applies.");
+        // All paid up: isMember &! isPending
+        // Disable membership controls, show as paid
+        if (isMember &! isPending ) {
+            stepLabel.setText("Membership dues paid");
+            memberPanel.setVisible(true);
+            ppPaymentPanel.setVisible(false);
+            memberPaidLabel.setText(membershipType + " membership dues already paid. Discounts will be applied to class registrations.");
             singleMemberRadio.setEnabled(false);
             familyMemberRadio.setEnabled(false);
             registerButton.setEnabled(false);
+           
+        // Membership payment incomplete: isMember && isPending
+        // Show the Paypal form
+        } else if (isMember && isPending) {
+            memberPanel.setVisible(false);
+            memberPaidLabel.setText(" ");
+            singleMemberRadio.setValue(false);
+            familyMemberRadio.setValue(false);
+//            registerButton.setEnabled(true);
+            createAndShowPaypalForm(null);
+
+        // Not started at all: !isMember and all other cases
+        // Show the signup form
         } else {
+            memberPanel.setVisible(true);
+            ppPaymentPanel.setVisible(false);
+            stepLabel.setText(STEP_1);
             memberPaidLabel.setText(" ");
             singleMemberRadio.setValue(true);
             familyMemberRadio.setValue(false);
+            singleMemberRadio.setEnabled(true);
+            familyMemberRadio.setEnabled(true);
             registerButton.setEnabled(true);
         }
 
+        // Now determine how to set radio buttons and totals
         if (sender == singleMemberRadio) {
             GWT.log("singleMemberRadio clicked");
             singleMemberRadio.setValue(true);
             familyMemberRadio.setValue(false);
 
             //singleMemberRadio.getValue() == true &! 
-            if (!isMember || membershipStatus.equals(PENDING)) {
+            if (!isMember || isPending) {
                 GWT.log("Person is not member");
                 dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
                 totalCost = dues;
             } else {
                 GWT.log("Person is member");
-                GWT.log("isMember: " + loginSession.getPerson().isMember());
+                GWT.log("isMember: " + isMember);
                 dues = 0;
                 totalCost = 0;
             }
@@ -378,18 +400,31 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             familyMemberRadio.setValue(true);
 
             //familyMemberRadio.getValue() == true &! 
-            if (!isMember || membershipStatus.equals(PENDING)) {
+            if (!isMember || isPending) {
                 GWT.log("Person is not member");
                 dues = AppConstants.MEMBERSHIP_FAMILY_PRICE;
                 totalCost = dues;
             } else {
                 GWT.log("Person is member");
-                GWT.log("isMember: " + loginSession.getPerson().isMember());
+                GWT.log("isMember: " + isMember);
                 dues = 0;
                 totalCost = 0;
             }
         }
         memberDues.setText(numfmt.format(dues));
         totalCostLabel.setText(numfmt.format(totalCost));
+    }
+
+    private void createAndShowPaypalForm(RegistrationResults results) {
+        double discount = 0;
+        StringBuffer ppCart = createPayPalForm(results, null, discount);
+        registerButton.setVisible(false);
+        stepLabel.setText(STEP_2);
+        memberPanel.setVisible(false);
+        
+        ppPaymentPanel.clear();
+        ppPaymentPanel.add(new HTMLPanel(PAYPAL_EXPLANATION));
+        ppPaymentPanel.add(new HTMLPanel(ppCart.toString()));
+        ppPaymentPanel.setVisible(true);
     }
 }
