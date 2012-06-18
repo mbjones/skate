@@ -13,12 +13,12 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -45,14 +45,13 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     private Grid memberGrid;
     private Button registerButton;
     private SkaterRegistrationServiceAsync regService;
-    private CheckBox memberCheckbox;
     private Label memberDues;
-    private double totalFSCost;
+    private double totalCost;
     private Label totalCostLabel;
-    private double total;
-    private Label memberCheckboxLabel;
-    private Label fsDiscountLabel;
+    private Label memberPaidLabel;
     private NumberFormat numfmt;
+    private RadioButton singleMemberRadio;
+    private RadioButton familyMemberRadio;
     
     /**
      * Construct the Member view and controller used to display a form for
@@ -63,7 +62,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     public MemberScreen(LoginSession loginSession, HandlerManager eventBus) {
         super(loginSession, eventBus);
         numfmt = NumberFormat.getFormat("$#,##0.00");
-        totalFSCost = 0;
+        totalCost = 0;
         layoutScreen();
         this.setContentPanel(screen);
         regService = GWT.create(SkaterRegistrationService.class);        
@@ -95,15 +94,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         stepLabel = new Label(STEP_1);
         stepLabel.addStyleName("jsc-step");
         outerVerticalPanel.add(stepLabel);
-        
-//        bsRadio = new RadioButton("BSorFSGroup", "Basic Skills Classes");
-//        bsRadio.addValueChangeHandler(this);
-//        bsRadio.setValue(true);
-//        fsRadio = new RadioButton("BSorFSGroup", "Figure Skating Classes (only by permission of the Figure Skating Coordinator)");
-//        fsRadio.addValueChangeHandler(this);
-//        outerVerticalPanel.add(bsRadio);
-//        outerVerticalPanel.add(fsRadio);
-        
+                
         outerHorizPanel = new HorizontalPanel();
         outerHorizPanel.add(memberPanel);
         outerHorizPanel.add(ppPaymentPanel);
@@ -127,39 +118,47 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         mmbDescription.addStyleName("jsc-text");
         memberPanel.add(mmbDescription);
         memberGrid = new Grid(0, 6);
-        
-        // Insert the first row containing the membership fields
-        int newRow = memberGrid.insertRow(memberGrid.getRowCount());
-        memberCheckbox = new CheckBox();
-        memberCheckboxLabel = new Label("Pay membership dues");
-        memberDues = new Label();
-        double zero = 0;
-        memberDues.setText(numfmt.format(zero));
-        memberCheckbox.setValue(false, false);
-        memberCheckbox.addValueChangeHandler(this);
-        memberGrid.setWidget(newRow, 2, memberCheckbox);
-        memberGrid.setWidget(newRow, 3, memberCheckboxLabel);
-        memberGrid.setWidget(newRow, 4, new Label("Dues"));
-        memberGrid.setWidget(newRow, 5, memberDues);
         HTMLTable.CellFormatter fmt = memberGrid.getCellFormatter();
+
+        // Insert the first row containing an indicator of membership or not.        
+        int newRow = memberGrid.insertRow(memberGrid.getRowCount());
+        memberPaidLabel = new Label(" ");
+        memberGrid.setWidget(newRow, 3, memberPaidLabel);
         fmt.addStyleName(newRow, 2,  "jsc-fieldlabel");
         fmt.addStyleName(newRow, 3,  "jsc-field");
         fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
         fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
         
-        // Insert the next to last row containing the discount amount
+        // Row containing the Single/Family radio buttons and price amount
+        singleMemberRadio = new RadioButton("MemberTypeGroup", "Single Membership");
+        singleMemberRadio.addValueChangeHandler(this);
+        singleMemberRadio.setValue(true);
+        familyMemberRadio = new RadioButton("MemberTypeGroup", "Family Membership");
+        familyMemberRadio.addValueChangeHandler(this);
+        memberDues = new Label();
+        memberDues.setText(numfmt.format(AppConstants.MEMBERSHIP_SINGLE_PRICE));
+        totalCost = AppConstants.MEMBERSHIP_SINGLE_PRICE;
         newRow = memberGrid.insertRow(memberGrid.getRowCount());
-        fsDiscountLabel = new Label();
-        fsDiscountLabel.setText(numfmt.format(zero));
-        memberGrid.setWidget(newRow, 4, new Label("Discount"));
-        memberGrid.setWidget(newRow, 5, fsDiscountLabel);
+        memberGrid.setWidget(newRow, 2, singleMemberRadio);
+        memberGrid.setWidget(newRow, 3, familyMemberRadio);
+        memberGrid.setWidget(newRow, 4, new Label("Dues"));
+        memberGrid.setWidget(newRow, 5, memberDues);
+        fmt.addStyleName(newRow, 2,  "jsc-field");
+        fmt.addStyleName(newRow, 3,  "jsc-field");
+        fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
+        fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
+
+        // Insert a spacer row before the row for totals
+        newRow = memberGrid.insertRow(memberGrid.getRowCount());
+        memberGrid.setWidget(newRow, 4, new Label(" "));
+        memberGrid.setWidget(newRow, 5, new Label(" "));
         fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
         fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
         
         // Insert the last row containing the payment total
         newRow = memberGrid.insertRow(memberGrid.getRowCount());
         totalCostLabel = new Label();
-        totalCostLabel.setText(numfmt.format(zero));
+        totalCostLabel.setText(numfmt.format(totalCost));
         memberGrid.setWidget(newRow, 4, new Label("Total"));
         memberGrid.setWidget(newRow, 5, totalCostLabel);
         fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
@@ -170,41 +169,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     }
     
     /**
-     * Remove the current list of classes from the box and replace with the 
-     * classes that are currently present in sessionClassList. Reset the 
-     * registration form to the initial state of the application.
-     */
-    protected void updateRegistrationScreenDetails() {
-        // Reset the form fields to begin registration
-        ppPaymentPanel.setVisible(false);
-        stepLabel.setText(STEP_1);
-        registerButton.setVisible(true);
-        
-        totalFSCost = 0;
-        total = 0;
-                
-        // Update the membership checkbox status based on the Person logged in
-        if (loginSession.getPerson().isMember() &! loginSession.getPerson().getMembershipStatus().equals(PENDING) ) {
-            memberCheckboxLabel.setText("Membership dues already paid. Discount applies.");
-            memberCheckbox.setValue(false);
-            memberCheckbox.setEnabled(false);
-            double dues = 0;
-            String duesString = numfmt.format(dues);
-            memberDues.setText(duesString);
-            registerButton.setEnabled(false);
-        } else {
-            memberCheckboxLabel.setText("Pay membership dues");
-            memberCheckbox.setValue(false);
-            memberCheckbox.setEnabled(true);
-            registerButton.setEnabled(true  );
-        }
-        
-        recalculateAndDisplayFSTotals();
-    }
-
-    /**
-     * Register for a class by creating a RosterEntry object from the form input
-     * and pass it to the remote registration service.
+     * Register but only send a membership entry to be paid.
      */
     private void register() {
         GWT.log("Registering for a class...", null);
@@ -214,7 +179,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             ArrayList<RosterEntry> entryList = new ArrayList<RosterEntry>();
             
             boolean createMembership = false;
-            if (memberCheckbox.getValue() == true &! loginSession.getPerson().isMember()) {
+            if ((singleMemberRadio.getValue() == true || familyMemberRadio.getValue() == true) &! loginSession.getPerson().isMember()) {
                 createMembership = true;
             }
                         
@@ -326,61 +291,101 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     }
     
     /**
-     * Listen for change events when the radio buttons on the registration form
+     * Listen for change events when the radio buttons on the membership form
      * are selected and deselected.
      */
     @Override
     public void onValueChange(ValueChangeEvent<Boolean> event) {
+        GWT.log("Called: onValueChange()");
         Widget sender = (Widget) event.getSource();
         memberPanel.setVisible(true);
-        updateRegistrationScreenDetails();
+        updateMembershipScreenDetails();
+        double dues = 0;
 
-        /*
-        if (sender == bsRadio) {
-            GWT.log("bsRadio clicked", null);
-            recalculateAndDisplayBasicSkillsTotal();
-            bsPanel.setVisible(true);
-            fsPanel.setVisible(false);
-        } else if (sender == fsRadio) {
-            GWT.log("fsRadio clicked", null);
-            recalculateAndDisplayFSTotals();
-            bsPanel.setVisible(false);
-            fsPanel.setVisible(true);
-        } else
-        */
-        if (sender == memberCheckbox) {
-            GWT.log("memberCheckbox clicked", null);
-            double dues = 0;
-            if (memberCheckbox.getValue() == true &! loginSession.getPerson().isMember()) {
+        if (sender == singleMemberRadio) {
+            GWT.log("singleMemberRadio clicked");
+            singleMemberRadio.setValue(true);
+            familyMemberRadio.setValue(false);
+
+            //singleMemberRadio.getValue() == true &! 
+            if (!loginSession.getPerson().isMember()) {
+                GWT.log("Person is not member");
                 dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
-                totalFSCost += AppConstants.MEMBERSHIP_SINGLE_PRICE;
+                totalCost = dues;
             } else {
+                GWT.log("Person is member");
+                GWT.log("isMember: " + loginSession.getPerson().isMember());
                 dues = 0;
-                totalFSCost -= AppConstants.MEMBERSHIP_SINGLE_PRICE;
+                totalCost = 0;
             }
-            String duesString = numfmt.format(dues);
-            memberDues.setText(duesString);
-            recalculateAndDisplayFSTotals();        
-        } 
-        recalculateAndDisplayFSTotals();
+        } else if (sender == familyMemberRadio) {
+            GWT.log("familyMemberRadio clicked");
+            singleMemberRadio.setValue(false);
+            familyMemberRadio.setValue(true);
+
+            //familyMemberRadio.getValue() == true &! 
+            if (!loginSession.getPerson().isMember()) {
+                GWT.log("Person is not member");
+                dues = AppConstants.MEMBERSHIP_FAMILY_PRICE;
+                totalCost = dues;
+            } else {
+                GWT.log("Person is member");
+                GWT.log("isMember: " + loginSession.getPerson().isMember());
+                dues = 0;
+                totalCost = 0;
+            }
+        }
+        memberDues.setText(numfmt.format(dues));
+        totalCostLabel.setText(numfmt.format(totalCost));
+    }
+
+    /**
+     * Check the current membership status, and based on that set the
+     * form as either membership paid or enable the user to sign up
+     * for a single or family membership. 
+     */
+    protected void updateMembershipScreenDetails() {
+        // Reset the form fields to begin registration
+        GWT.log("Called: updateMembershipScreenDetails()");
+        ppPaymentPanel.setVisible(false);
+        stepLabel.setText(STEP_1);
+        registerButton.setVisible(true);
+        
+        totalCost = 0;
+        double dues = 0;
+    
+        // Update the membership checkbox status based on the Person logged in
+        if (loginSession.getPerson().isMember() &! loginSession.getPerson().getMembershipStatus().equals(PENDING) ) {
+            memberPaidLabel.setText("Membership dues already paid. Discount applies.");
+//            singleMemberRadio.setValue(false);
+            singleMemberRadio.setEnabled(false);
+//            familyMemberRadio.setValue(false);
+            familyMemberRadio.setEnabled(false);
+    
+            registerButton.setEnabled(false);
+        } else {
+            memberPaidLabel.setText(" ");
+            singleMemberRadio.setValue(true);
+//            singleMemberRadio.setEnabled(true);
+            familyMemberRadio.setValue(false);
+//            familyMemberRadio.setEnabled(true);
+            registerButton.setEnabled(true);
+        }
+        
+        if (singleMemberRadio.getValue() == true) {
+            dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
+        } else if (familyMemberRadio.getValue() == true) {
+            dues = AppConstants.MEMBERSHIP_FAMILY_PRICE;
+        }
+        totalCost = dues;
+        memberDues.setText(numfmt.format(dues));
+        totalCostLabel.setText(numfmt.format(totalCost));
     }
 
     @Override
     public void onChange(ChangeEvent event) {
+        GWT.log("Called: onChange()");
         Widget sender = (Widget) event.getSource();
-        //recalculateAndDisplayBasicSkillsTotal();
-        updateRegistrationScreenDetails();
-    }
-
-    /**
-     * Recalculate the total amount of the registration charges, and update the
-     * screen to reflect the totals.
-     */
-    private void recalculateAndDisplayFSTotals() {
-        boolean isMember = loginSession.getPerson().isMember() || memberCheckbox.getValue();
-        double discount = 0; 
-        fsDiscountLabel.setText(numfmt.format(discount));
-        total = totalFSCost - discount;
-        totalCostLabel.setText(numfmt.format(total));
+        updateMembershipScreenDetails();
     }
 }
