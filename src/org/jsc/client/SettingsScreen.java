@@ -30,6 +30,8 @@ public class SettingsScreen extends BaseScreen {
 
     private static final String NEW_INSTRUCTIONS = "Please fill in the form below with all required fields.  After clicking 'Create Account', you will be able to sign in with your new username and password.";
     private static final String UPDATE_INSTRUCTIONS = "You may update your account settings, including changing your password.  Any fields left unchanged (or blank in the case of the password fields) will remain unchanged when you Save.";
+    private static final String PENDING = "Pending";
+
     private HorizontalPanel screen;
     private Label instructions;
     
@@ -268,7 +270,9 @@ public class SettingsScreen extends BaseScreen {
             usernameField.setText(person.getUsername());
             password1Field.setText("");
             password2Field.setText("");
-            membershipLabel.setText(Boolean.toString(person.isMember()));
+            membershipLabel.setText(
+                    Boolean.toString(person.isMember() &! person.getMembershipStatus().equals(PENDING)) 
+                    + " (" + person.getMembershipStatus() + ")" );
             maxLevelLabel.setText(person.getMaxLevel());
 
         } else {
