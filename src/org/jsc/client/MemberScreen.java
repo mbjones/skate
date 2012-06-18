@@ -309,9 +309,52 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     public void onValueChange(ValueChangeEvent<Boolean> event) {
         GWT.log("Called: onValueChange()");
         Widget sender = (Widget) event.getSource();
+        updateMembershipScreenDetails(sender);
+        
+    }
+
+
+    @Override
+    public void onChange(ChangeEvent event) {
+        GWT.log("Called: onChange()");
+        Widget sender = (Widget) event.getSource();
+        updateMembershipScreenDetails(sender);
+    }
+    
+    /**
+     * Check the current membership status, and based on that set the
+     * form as either membership paid or enable the user to sign up
+     * for a single or family membership. 
+     */
+    protected void updateMembershipScreenDetails(Widget sender) {
+        // Reset the form fields to begin registration
+        GWT.log("Called: updateMembershipScreenDetails()");
+        boolean isMember = loginSession.getPerson().isMember();
+        String membershipStatus = loginSession.getPerson().getMembershipStatus();
+        if (sender==null) {
+            sender = singleMemberRadio;
+        }
+        
         memberPanel.setVisible(true);
-        updateMembershipScreenDetails();
+        ppPaymentPanel.setVisible(false);
+        stepLabel.setText(STEP_1);
+        registerButton.setVisible(true);
+        
+        totalCost = 0;
         double dues = 0;
+    
+        // Update the membership radio buttons based on the Person logged in
+        if (isMember &! membershipStatus.equals(PENDING) ) {
+            memberPaidLabel.setText("Membership dues already paid. Discount applies.");
+            singleMemberRadio.setEnabled(false);
+            familyMemberRadio.setEnabled(false);
+            registerButton.setEnabled(false);
+        } else {
+            memberPaidLabel.setText(" ");
+            singleMemberRadio.setValue(true);
+            familyMemberRadio.setValue(false);
+            registerButton.setEnabled(true);
+        }
 
         if (sender == singleMemberRadio) {
             GWT.log("singleMemberRadio clicked");
@@ -319,7 +362,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             familyMemberRadio.setValue(false);
 
             //singleMemberRadio.getValue() == true &! 
-            if (!loginSession.getPerson().isMember()) {
+            if (!isMember || membershipStatus.equals(PENDING)) {
                 GWT.log("Person is not member");
                 dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
                 totalCost = dues;
@@ -335,7 +378,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             familyMemberRadio.setValue(true);
 
             //familyMemberRadio.getValue() == true &! 
-            if (!loginSession.getPerson().isMember()) {
+            if (!isMember || membershipStatus.equals(PENDING)) {
                 GWT.log("Person is not member");
                 dues = AppConstants.MEMBERSHIP_FAMILY_PRICE;
                 totalCost = dues;
@@ -348,50 +391,5 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         }
         memberDues.setText(numfmt.format(dues));
         totalCostLabel.setText(numfmt.format(totalCost));
-    }
-
-    /**
-     * Check the current membership status, and based on that set the
-     * form as either membership paid or enable the user to sign up
-     * for a single or family membership. 
-     */
-    protected void updateMembershipScreenDetails() {
-        // Reset the form fields to begin registration
-        GWT.log("Called: updateMembershipScreenDetails()");
-        ppPaymentPanel.setVisible(false);
-        stepLabel.setText(STEP_1);
-        registerButton.setVisible(true);
-        
-        totalCost = 0;
-        double dues = 0;
-    
-        // Update the membership checkbox status based on the Person logged in
-        if (loginSession.getPerson().isMember() &! loginSession.getPerson().getMembershipStatus().equals(PENDING) ) {
-            memberPaidLabel.setText("Membership dues already paid. Discount applies.");
-            singleMemberRadio.setEnabled(false);
-            familyMemberRadio.setEnabled(false);
-            registerButton.setEnabled(false);
-        } else {
-            memberPaidLabel.setText(" ");
-            singleMemberRadio.setValue(true);
-            familyMemberRadio.setValue(false);
-            registerButton.setEnabled(true);
-        }
-        
-        if (singleMemberRadio.getValue() == true) {
-            dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
-        } else if (familyMemberRadio.getValue() == true) {
-            dues = AppConstants.MEMBERSHIP_FAMILY_PRICE;
-        }
-        totalCost = dues;
-        memberDues.setText(numfmt.format(dues));
-        totalCostLabel.setText(numfmt.format(totalCost));
-    }
-
-    @Override
-    public void onChange(ChangeEvent event) {
-        GWT.log("Called: onChange()");
-        Widget sender = (Widget) event.getSource();
-        updateMembershipScreenDetails();
     }
 }
