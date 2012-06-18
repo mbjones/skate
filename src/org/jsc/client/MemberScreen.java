@@ -212,16 +212,15 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
                         }
                         
                         double discount = 0;
-                        boolean isMember = results.isMembershipCreated() || loginSession.getPerson().isMember();
                         discount = 0;
                         StringBuffer ppCart = createPayPalForm(results, null, discount);
                         
                         registerButton.setVisible(false);
-                        ArrayList<Long> entriesFailed = results.getEntriesNotCreated();
-                        if (entriesFailed.size() > 0) {
-                            setMessage("You were already registered for " + entriesFailed.size() +
-                                    " classes, which were excluded.");
-                        }
+//                        ArrayList<Long> entriesFailed = results.getEntriesNotCreated();
+//                        if (entriesFailed.size() > 0) {
+//                            setMessage("You were already registered for " + entriesFailed.size() +
+//                                    " classes, which were excluded.");
+//                        }
                         stepLabel.setText(STEP_2);
                         memberPanel.setVisible(false);
                         
@@ -236,7 +235,15 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             // Make the call to the registration service.
             if (createMembership) {
                 GWT.log("Sending membership request.", null);
-                regService.register(loginSession, loginSession.getPerson(), entryList, createMembership, callback);
+                MembershipInfo memInfo = new MembershipInfo();
+                if (singleMemberRadio.getValue() == true) {
+                    memInfo.setMembershipType(AppConstants.MEMBER_SINGLE);
+                } else if (familyMemberRadio.getValue() == true) {
+                    memInfo.setMembershipType(AppConstants.MEMBER_FAMILY);
+                }
+                Long firstMemberID = loginSession.getPerson().getMembershipId();
+                memInfo.addMemberID(firstMemberID);
+                regService.register(loginSession, loginSession.getPerson(), entryList, createMembership, memInfo, callback);
             } else {
                 setMessage("You must select a membership option before clicking 'Continue'.");
             }
@@ -254,7 +261,6 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
      * @return a StringBuffer containing the HTML form to be displayed
      */
     protected static StringBuffer createPayPalForm(RegistrationResults results, ClassListModel sessionClassList, double discount) {
-        ArrayList<RosterEntry> newEntryList = results.getEntriesCreated();
         StringBuffer ppCart = new StringBuffer();
         ppCart.append("<form id=\"wizard\" action=\""+ ClientConstants.getString("CLIENT_PAYPAL_URL") + "\" method=\"post\">");
         ppCart.append("<input type=\"hidden\" name=\"cmd\" value=\"_cart\">");
@@ -266,17 +272,22 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         ppCart.append("<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ ClientConstants.getString("CLIENT_PAYPAL_HEADER_IMAGE") + "\">");
         ppCart.append("<input type=\"hidden\" name=\"item_name\" value=\""+ "Registration Invoice" + "\">");
         ppCart.append("<input type=\"hidden\" name=\"invoice\" value=\""+ results.getPaymentId() + "\">");
-
         
         int i = 0;
         // Handle membership payment by creating form items as needed
         if (results.isMembershipCreated()) {
-            double dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
+            double dues = 0;
+            String membershipType = results.getMembershipType();
+            if (membershipType.equals(AppConstants.MEMBER_SINGLE)) {
+                dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
+            } else if (membershipType.equals(AppConstants.MEMBER_FAMILY)) {
+                dues = AppConstants.MEMBERSHIP_FAMILY_PRICE;
+            }
             i++;
             String season = SessionSkatingClass.calculateSeason();
-            ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"Membership dues for " + season + " season\">");
+            ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"Membership dues for " + season + " season (" + membershipType + ")\">");
             ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\"" + results.getMembershipId() +"\">");
-            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + AppConstants.MEMBERSHIP_SINGLE_PRICE + "\">");
+            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + dues + "\">");
         }
         ppCart.append("<input type=\"hidden\" name=\"discount_amount_cart\" value=\"" + discount + "\">");
         
@@ -357,18 +368,13 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         // Update the membership checkbox status based on the Person logged in
         if (loginSession.getPerson().isMember() &! loginSession.getPerson().getMembershipStatus().equals(PENDING) ) {
             memberPaidLabel.setText("Membership dues already paid. Discount applies.");
-//            singleMemberRadio.setValue(false);
             singleMemberRadio.setEnabled(false);
-//            familyMemberRadio.setValue(false);
             familyMemberRadio.setEnabled(false);
-    
             registerButton.setEnabled(false);
         } else {
             memberPaidLabel.setText(" ");
             singleMemberRadio.setValue(true);
-//            singleMemberRadio.setEnabled(true);
             familyMemberRadio.setValue(false);
-//            familyMemberRadio.setEnabled(true);
             registerButton.setEnabled(true);
         }
         

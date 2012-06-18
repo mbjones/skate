@@ -42,6 +42,7 @@ public class Person implements Serializable {
     private long mid;
     private String membershipStatus;
     private long membershipPaymentId;
+    private String membershipType;
     private String maxLevel;
     private boolean awaitingRefresh;
     
@@ -488,6 +489,20 @@ public class Person implements Serializable {
      */
     public void setMembershipPaymentId(long membershipPaymentId) {
         this.membershipPaymentId = membershipPaymentId;
+    }
+
+    /**
+     * @return the membershipType
+     */
+    public String getMembershipType() {
+        return membershipType;
+    }
+
+    /**
+     * @param membershipType the membershipType to set
+     */
+    public void setMembershipType(String membershipType) {
+        this.membershipType = membershipType;
     }
 
     /**

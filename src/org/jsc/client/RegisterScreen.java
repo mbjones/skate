@@ -553,8 +553,14 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
 
             // Make the call to the registration service.
             if (entryList.size() > 0 || createMembership) {
+                MembershipInfo memInfo = null;
+                if (createMembership) {
+                    memInfo = new MembershipInfo();
+                    memInfo.setMembershipType(AppConstants.MEMBER_SINGLE);
+                    memInfo.addMemberID(loginSession.getPerson().getMembershipId());
+                }
                 GWT.log("Sending request to register " + entryList.size() + " classes.", null);
-                regService.register(loginSession, loginSession.getPerson(), entryList, createMembership, callback);
+                regService.register(loginSession, loginSession.getPerson(), entryList, createMembership, memInfo, callback);
             } else {
                 setMessage("You must select a class before clicking 'Continue'.");
             }

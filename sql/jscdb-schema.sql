@@ -153,6 +153,7 @@ CREATE TABLE membership (
     paymentid INT8,          -- the id of the payment for this membership
     season VARCHAR(20),      -- the name of the season (e.g., '2008-2009')
     payment_amount FLOAT8,   -- the amount paid for this single membership, excluding discounts
+    membertype VARCHAR(15),     -- the type of the membership, SINGLE or FAMILY
 	date_updated TIMESTAMP default CURRENT_TIMESTAMP, -- the date the record was last updated
    CONSTRAINT membership_pk PRIMARY KEY (mid),
    CONSTRAINT membership_uk UNIQUE (pid,season),
@@ -161,9 +162,10 @@ CREATE TABLE membership (
 
 -- memberstatus -- a view of membership reflecting payment status
 CREATE OR REPLACE VIEW memberstatus AS
- SELECT m.mid, m.pid, m.paymentid, m.season, p.paypal_status
-   FROM membership m, payment p
-  WHERE m.paymentid = p.paymentid;
+ SELECT m.mid, m.pid, m.paymentid, m.season, py.paypal_status, m.membertype, p.surname, p.givenname
+   FROM membership m, payment py, people p
+  WHERE m.paymentid = py.paymentid
+    AND m.pid = p.pid;
   
 -- peoplelevel -- a view of people showing highest level passed 
 CREATE OR REPLACE VIEW peoplelevel AS

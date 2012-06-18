@@ -12,6 +12,10 @@ public class AppConstants {
     public static final double MEMBERSHIP_DISCOUNT = 0.00;
     public static final int SEASON_CUTOFF_MONTH = 5;
     
+    // Various Constants
+    public static final String MEMBER_SINGLE = "SINGLE";
+    public static final String MEMBER_FAMILY = "FAMILY";
+
     // Various display strings
     public static final String COPYRIGHT = "Copyright 2009-2012 Matthew B. Jones. All rights reserved.";
     public static final String CLUB_NAME = "Juneau Skating Club";

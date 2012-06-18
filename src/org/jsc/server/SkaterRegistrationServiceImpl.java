@@ -22,10 +22,10 @@ import javax.servlet.http.HttpSession;
 import org.jsc.client.AppConstants;
 import org.jsc.client.ClientConstants;
 import org.jsc.client.LoginSession;
+import org.jsc.client.MembershipInfo;
 import org.jsc.client.Person;
 import org.jsc.client.RegistrationResults;
 import org.jsc.client.RosterEntry;
-import org.jsc.client.SQLRecordException;
 import org.jsc.client.SessionSkatingClass;
 import org.jsc.client.SkaterRegistrationService;
 import org.mindrot.BCrypt;
@@ -455,11 +455,12 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * @param person to be used to authenticate the connection
      * @param newEntryList list of RosterEntry objects containing the details of the class and person to be registered
      * @param createMembership boolean, set to true if the membership for the user should be created for this season
+     * @param memInfo fields describing the membership type to be created and list of members to be added
      * @return an array of the completed RosterEntry instances from the database
      */
     public RegistrationResults register(LoginSession loginSession,
             Person person, ArrayList<RosterEntry> newEntryList,
-            boolean createMembership) {
+            boolean createMembership, MembershipInfo memInfo) {
 
         RegistrationResults results = new RegistrationResults();
 
@@ -521,12 +522,23 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             results.setMembershipAttempted(true);
             // Create the SQL INSERT statement
             StringBuffer sql = new StringBuffer();
-            sql.append("insert into membership (pid, paymentid, season, payment_amount) VALUES ('");
+            sql.append("insert into membership (pid, paymentid, season, payment_amount, membertype) VALUES ('");
+            if (person.getPid() != memInfo.getMemberIDList().get(0)) {
+                System.out.println("Problem here: Logged in PID does not match memInfo first PID.");
+            }
             sql.append(person.getPid()).append("','");
             sql.append(paymentId).append("','");
             sql.append(SessionSkatingClass.calculateSeason());
             sql.append("',");
-            sql.append(AppConstants.MEMBERSHIP_SINGLE_PRICE);
+            if (memInfo.getMembershipType().equals(AppConstants.MEMBER_FAMILY)) {
+                sql.append(AppConstants.MEMBERSHIP_FAMILY_PRICE);
+            } else {
+                sql.append(AppConstants.MEMBERSHIP_SINGLE_PRICE);
+            }
+            sql.append(",'");
+            sql.append(memInfo.getMembershipType());
+            sql.append("'");
+
             sql.append(")");
             System.out.println(sql.toString());
 
@@ -540,7 +552,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 // Now look up the membershipId that was generated
                 String season = SessionSkatingClass.calculateSeason();
                 StringBuffer msql = new StringBuffer();
-                msql.append("select mid, pid, paymentid, season, paypal_status from memberstatus where ");
+                msql.append("select mid, pid, paymentid, season, paypal_status, membertype from memberstatus where ");
                 msql.append("pid = '").append(person.getPid()).append("'");
                 msql.append(" AND ");
                 msql.append("season LIKE '").append(season).append("'");
@@ -553,6 +565,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                     results.setMembershipCreated(true);
                     results.setPaymentId(paymentId);
                     results.setMembershipStatus(rs.getString(5));
+                    results.setMembershipType(rs.getString(6));
                 }
                 stmt.close();
                 con.close();
@@ -1327,7 +1340,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             // If so, set their membership flag
             String season = SessionSkatingClass.calculateSeason();
             StringBuffer msql = new StringBuffer();
-            msql.append("select mid, pid, paymentid, season, paypal_status from memberstatus where ");
+            msql.append("select mid, pid, paymentid, season, paypal_status, membertype from memberstatus where ");
             msql.append("pid = '").append(pid).append("'");
             msql.append(" AND ");
             msql.append("season LIKE '").append(season).append("'");
@@ -1340,11 +1353,13 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 person.setMembershipId(rs.getLong(1));
                 person.setMembershipPaymentId(rs.getLong(3));
                 person.setMembershipStatus(rs.getString(5));
+                person.setMembershipType(rs.getString(6));
             } else {
                 person.setMember(false);
                 person.setMembershipId(0);
                 person.setMembershipPaymentId(0);
                 person.setMembershipStatus("Unpaid");
+                person.setMembershipType("");
             }
             stmt.close();
 
