@@ -29,8 +29,9 @@ public class PaypalIPNServlet extends HttpServlet {
     private static final String JDBC_USER = ServerConstants.getString("JDBC_USER"); //$NON-NLS-1$
     private static final String JDBC_PASS = ServerConstants.getString("JDBC_PASS"); //$NON-NLS-1$
     private static final String JDBC_DRIVER = ServerConstants.getString("JDBC_DRIVER"); //$NON-NLS-1$
-    
-    private static final String PAYPAL_URL = "https://www.paypal.com/cgi-bin/webscr";
+    private static final String PAYPAL_URL = ServerConstants.getString("PAYPAL_URL"); //$NON-NLS-1$
+
+//    private static final String PAYPAL_URL = "https://www.paypal.com/cgi-bin/webscr";
 //    private static final String PAYPAL_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr";
     
     public void init() {
