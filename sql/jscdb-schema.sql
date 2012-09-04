@@ -185,3 +185,10 @@ CREATE TABLE downloads (
 	date_updated TIMESTAMP default CURRENT_TIMESTAMP, -- the date the record was last updated
    CONSTRAINT downloads_pk PRIMARY KEY (randomkey)
 );
+
+-- version -- add a table reflecting the current applicaiton version
+CREATE table version (
+	vid INT8,              -- the unique version id (pk)
+	version VARCHAR(30),   -- the version of the application instaled
+	CONSTRAINT version_pk PRIMARY KEY (vid)
+);
