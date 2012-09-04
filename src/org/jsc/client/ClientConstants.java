@@ -8,11 +8,11 @@ public class ClientConstants {
     private static final String CLIENT_PAYPAL_URL="https://www.paypal.com/cgi-bin/webscr";
 //    private static final String CLIENT_PAYPAL_URL="https://www.sandbox.paypal.com/cgi-bin/webscr";
     private static final String CLIENT_MERCHANT_ID="4STDKBE3NBV64";
-//    private static final String CLIENT_MERCHANT_ID="48H3N28JSP2VN";
+//    private static final String CLIENT_MERCHANT_ID="246MKT3VZCHWJ";
     private static final String CLIENT_PAYPAL_CANCEL_URL="http://reg.juneauskatingclub.org";
-//    private static final String CLIENT_PAYPAL_CANCEL_URL="http://127.0.0.1:8888/SkaterData.html?gwt.codesvr=127.0.0.1:9997";
+//    private static final String CLIENT_PAYPAL_CANCEL_URL="http://apps.juneauskatingclub.org";
     private static final String CLIENT_PAYPAL_RETURN_URL="http://reg.juneauskatingclub.org";
-//    private static final String CLIENT_PAYPAL_RETURN_URL="http://127.0.0.1:8888/SkaterData.html?gwt.codesvr=127.0.0.1:9997";
+//    private static final String CLIENT_PAYPAL_RETURN_URL="http://apps.juneauskatingclub.org";
     private static final String CLIENT_PAYPAL_HEADER_IMAGE="http://juneauskatingclub.org/sites/all/themes/jsc/images/salamander1/jsc-header-bkg-paypal.png";
 
 //    private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle
