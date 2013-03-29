@@ -2,7 +2,7 @@ package org.jsc.client;
 
 public class AppConstants {
     // Version of the application
-    public static final String VERSION = "1.5.0";
+    public static final String VERSION = "1.5.1";
     
     // Policy constants
     public static final long MILLISECS_PER_DAY = 24*60*60*1000;
@@ -17,7 +17,7 @@ public class AppConstants {
     public static final String MEMBER_FAMILY = "FAMILY";
 
     // Various display strings
-    public static final String COPYRIGHT = "Copyright 2009-2012 Matthew B. Jones. All rights reserved.";
+    public static final String COPYRIGHT = "Copyright 2009-2013 Matthew B. Jones. All rights reserved.";
     public static final String CLUB_NAME = "Juneau Skating Club";
     public static final String CLUB_URL = "http://juneauskatingclub.org";
     public static final String CLUB_EMAIL = "registrar@juneauskatingclub.org";
