@@ -734,7 +734,9 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             membershipDiscount = numclasses*AppConstants.MEMBERSHIP_DISCOUNT;
         }
         
-        return multiclassDiscount + membershipDiscount;
+        // temporarily disable FS discounts by setting them to 0
+        //return multiclassDiscount + membershipDiscount;
+        return 0;
     }
     
     /**
