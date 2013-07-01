@@ -530,7 +530,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             sql.append(paymentId).append("','");
             sql.append(SessionSkatingClass.calculateSeason());
             sql.append("',");
-            if (memInfo.getMembershipType().equals(AppConstants.MEMBER_FAMILY)) {
+            if (memInfo.getMembershipType().equals(AppConstants.JSC_FAMILY)) {
                 sql.append(AppConstants.MEMBERSHIP_FAMILY_PRICE);
             } else {
                 sql.append(AppConstants.MEMBERSHIP_SINGLE_PRICE);

@@ -121,6 +121,13 @@ table.jsc-toolbar {
 	opacity: 1.0;
 }
 
+.jsc-sectionlabel {
+	text-align: left;
+	font-weight: bold;
+	font-size: 14pt;
+	opacity: 1.0;
+}
+
 .jsc-fieldlabel-left {
 	text-align: left;
 	font-weight: bold;

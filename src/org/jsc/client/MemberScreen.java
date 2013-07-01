@@ -13,6 +13,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable;
@@ -27,10 +28,10 @@ import com.google.gwt.user.client.ui.Widget;
  * needed for membership, and then redirects the user to PayPal for payment.
  * @author Matt Jones
  */
-public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boolean>, ChangeHandler {
+public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boolean>, ChangeHandler, ClickHandler {
 
     private static final String PAYPAL_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">You must make your payment using PayPal by clicking on the button below.  <b>Your membership is <em>not complete</em></b> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
-    private static final String MMB_EXPLANATION = "Club membership provides many benefits, including reduced prices when registering for multiple figure skating classes, membership in the US Figure Skating Association (includes a subscription to 'Skating' magazine), and the ability to participate as a club member in testing and competitions.";
+    private static final String MMB_EXPLANATION = "JSC Club membership provides many benefits, including a voice in the governance of the Juneau Skating Club.  Membership in the US Figure Skating Association includes a subscription to 'Skating' magazine, and the ability to participate as a club member in testing and competitions.";
     private static final String PENDING = "Pending";
     
     private static final String STEP_1 = "Step 1: Select membership options";
@@ -52,6 +53,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     private NumberFormat numfmt;
     private RadioButton singleMemberRadio;
     private RadioButton familyMemberRadio;
+    private String zero;
     
     /**
      * Construct the Member view and controller used to display a form for
@@ -62,6 +64,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     public MemberScreen(LoginSession loginSession, HandlerManager eventBus) {
         super(loginSession, eventBus);
         numfmt = NumberFormat.getFormat("$#,##0.00");
+        zero = numfmt.format(0.00);
         totalCost = 0;
         layoutScreen();
         this.setContentPanel(screen);
@@ -108,7 +111,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
      * Create the widgets needed to populate the figure skating registration panel.
      */
     private void layoutMemberPanel() {
-        
+                 
         // Create the panel, its labels, and the contained grid for layout
         memberPanel = new VerticalPanel();
         Label mmbTitle = new Label(" ");
@@ -117,7 +120,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         Label mmbDescription = new Label(MMB_EXPLANATION);
         mmbDescription.addStyleName("jsc-text");
         memberPanel.add(mmbDescription);
-        memberGrid = new Grid(0, 6);
+        memberGrid = new Grid(0, 14);
         HTMLTable.CellFormatter fmt = memberGrid.getCellFormatter();
 
         // Insert the first row containing an indicator of membership or not.        
@@ -129,15 +132,28 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
         fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
         
+        // Insert a row as a section for JSC membership checkboxes        
+        newRow = memberGrid.insertRow(memberGrid.getRowCount());
+        Label jscSection = new Label("JSC Memberships");
+        memberGrid.setWidget(newRow, 2, jscSection);
+        fmt.addStyleName(newRow, 2,  "jsc-sectionlabel");
+        
+        createMembershipRow("jsc_single", "JSC Individual Member", 20.00, fmt);
+        createMembershipRow("jsc_fam1", "JSC Additional Family Member #1", 10.00, fmt);
+        createMembershipRow("jsc_fam2", "JSC Additional Family Member #2", 10.00, fmt);
+        createMembershipRow("jsc_fam3", "JSC Additional Family Member #3", 10.00, fmt);
+
         // Row containing the Single/Family radio buttons and price amount
         singleMemberRadio = new RadioButton("MemberTypeGroup", "Single Membership");
+        familyMemberRadio = new RadioButton("MemberTypeGroup", "Family Membership");
+        
         singleMemberRadio.addValueChangeHandler(this);
         singleMemberRadio.setValue(true);
-        familyMemberRadio = new RadioButton("MemberTypeGroup", "Family Membership");
         familyMemberRadio.addValueChangeHandler(this);
         memberDues = new Label();
         memberDues.setText(numfmt.format(AppConstants.MEMBERSHIP_SINGLE_PRICE));
         totalCost = AppConstants.MEMBERSHIP_SINGLE_PRICE;
+        /*
         newRow = memberGrid.insertRow(memberGrid.getRowCount());
         memberGrid.setWidget(newRow, 2, singleMemberRadio);
         memberGrid.setWidget(newRow, 3, familyMemberRadio);
@@ -147,8 +163,28 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         fmt.addStyleName(newRow, 3,  "jsc-field");
         fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
         fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
-
-        // Insert a spacer row before the row for totals
+        */
+        
+        // Insert a spacer row
+        newRow = memberGrid.insertRow(memberGrid.getRowCount());
+        memberGrid.setWidget(newRow, 4, new Label(" "));
+        memberGrid.setWidget(newRow, 5, new Label(" "));
+        fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
+        fmt.addStyleName(newRow, 5,  "jsc-currencyfield");
+        
+        // Insert a row as a section for USFSA membership checkboxes        
+        newRow = memberGrid.insertRow(memberGrid.getRowCount());
+        Label usfsaSection = new Label("USFSA Memberships");
+        memberGrid.setWidget(newRow, 2, usfsaSection);
+        fmt.addStyleName(newRow, 2,  "jsc-sectionlabel");
+        
+        createMembershipRow("usfsa_single", "USFSA Individual Member", 50, fmt);
+        createMembershipRow("usfsa_fam1", "USFSA Additional Family Member #1", 20.00, fmt);
+        createMembershipRow("usfsa_fam2", "USFSA Additional Family Member #2", 20.00, fmt);
+        createMembershipRow("usfsa_fam3", "USFSA Additional Family Member #3", 20.00, fmt);
+        createMembershipRow("usfsa_latefee", "USFSA Late Fee", 8.00, fmt);
+        
+        // Insert a spacer row
         newRow = memberGrid.insertRow(memberGrid.getRowCount());
         memberGrid.setWidget(newRow, 4, new Label(" "));
         memberGrid.setWidget(newRow, 5, new Label(" "));
@@ -166,6 +202,30 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         
         memberPanel.add(memberGrid);
         memberPanel.setVisible(true);
+    }
+    
+    private void createMembershipRow(String cbName, String cbText, double cbCost, HTMLTable.CellFormatter fmt) {
+        
+        CheckBox cb = new CheckBox(cbText);
+        cb.setName(cbName);
+        cb.setValue(false);
+        
+        // Hook up a handler to find out when it's clicked.
+        cb.addClickHandler(this);
+
+        Label costLabel = new Label();
+        costLabel.setText(zero);
+        costLabel.setTitle(numfmt.format(cbCost));
+        
+        int newRow = memberGrid.insertRow(memberGrid.getRowCount());
+        memberGrid.setWidget(newRow, 2, cb);
+        //memberGrid.setWidget(newRow, 3, cbLabel);
+        //memberGrid.setWidget(newRow, 4, new Label("Dues"));
+        memberGrid.setWidget(newRow, 5, costLabel);
+        fmt.addStyleName(newRow, 2,  "jsc-field");
+        fmt.addStyleName(newRow, 3,  "jsc-field");
+        fmt.addStyleName(newRow, 4,  "jsc-fieldlabel");
+        fmt.addStyleName(newRow, 5,  "jsc-currencyfield");    
     }
     
     /**
@@ -221,9 +281,9 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
                 GWT.log("Sending membership request.", null);
                 MembershipInfo memInfo = new MembershipInfo();
                 if (singleMemberRadio.getValue() == true) {
-                    memInfo.setMembershipType(AppConstants.MEMBER_SINGLE);
+                    memInfo.setMembershipType(AppConstants.JSC_SINGLE);
                 } else if (familyMemberRadio.getValue() == true) {
-                    memInfo.setMembershipType(AppConstants.MEMBER_FAMILY);
+                    memInfo.setMembershipType(AppConstants.JSC_FAMILY);
                 }
                 Long firstMemberID = loginSession.getPerson().getMembershipId();
                 memInfo.addMemberID(firstMemberID);
@@ -275,9 +335,9 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         // Handle membership payment by creating form items as needed
         if (results == null || results.isMembershipCreated()) {
             double dues = 0;
-            if (membershipType.equals(AppConstants.MEMBER_SINGLE)) {
+            if (membershipType.equals(AppConstants.JSC_SINGLE)) {
                 dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
-            } else if (membershipType.equals(AppConstants.MEMBER_FAMILY)) {
+            } else if (membershipType.equals(AppConstants.JSC_FAMILY)) {
                 dues = AppConstants.MEMBERSHIP_FAMILY_PRICE;
             }
             i++;
@@ -306,10 +366,27 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     public void onValueChange(ValueChangeEvent<Boolean> event) {
         GWT.log("Called: onValueChange()");
         Widget sender = (Widget) event.getSource();
-        updateMembershipScreenDetails(sender);
-        
+        updateMembershipScreenDetails(sender);        
     }
 
+    @Override
+    public void onClick(ClickEvent event) {
+        boolean checked = ((CheckBox) event.getSource()).getValue();
+        int row = memberGrid.getCellForEvent(event).getRowIndex();
+        Widget sender = (Widget) event.getSource();
+        GWT.log("ClickEvent caught: " + row + " (" + checked + ")" );
+        
+        // Find the associated cost label in that row and display it
+        Label costLabel = (Label)memberGrid.getWidget(row, 5);
+        if (checked) {
+            costLabel.setText(costLabel.getTitle());
+        } else {
+            costLabel.setText(zero);
+        }
+        
+        // Update the form total
+        totalCost += 5;
+    }
 
     @Override
     public void onChange(ChangeEvent event) {
@@ -330,15 +407,11 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         String membershipStatus = loginSession.getPerson().getMembershipStatus();
         boolean isPending = membershipStatus.equals(PENDING);
         String membershipType = loginSession.getPerson().getMembershipType();
+        
         if (sender==null) {
             sender = singleMemberRadio;
         }
                 
-//        memberPanel.setVisible(true);
-//        ppPaymentPanel.setVisible(false);
-//        stepLabel.setText(STEP_1);
-//        registerButton.setVisible(true);
-        
         totalCost = 0;
         double dues = 0;
     

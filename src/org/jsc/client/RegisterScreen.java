@@ -556,7 +556,7 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
                 MembershipInfo memInfo = null;
                 if (createMembership) {
                     memInfo = new MembershipInfo();
-                    memInfo.setMembershipType(AppConstants.MEMBER_SINGLE);
+                    memInfo.setMembershipType(AppConstants.JSC_SINGLE);
                     memInfo.addMemberID(loginSession.getPerson().getMembershipId());
                 }
                 GWT.log("Sending request to register " + entryList.size() + " classes.", null);
