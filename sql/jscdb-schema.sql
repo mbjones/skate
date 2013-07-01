@@ -153,10 +153,10 @@ CREATE TABLE membership (
     paymentid INT8,          -- the id of the payment for this membership
     season VARCHAR(20),      -- the name of the season (e.g., '2008-2009')
     payment_amount FLOAT8,   -- the amount paid for this single membership, excluding discounts
-    membertype VARCHAR(15),     -- the type of the membership, SINGLE or FAMILY
+    membertype VARCHAR(15),     -- the type of the membership, SINGLE, FAMILY, USFSA, USFSA_FAMILY
 	date_updated TIMESTAMP default CURRENT_TIMESTAMP, -- the date the record was last updated
    CONSTRAINT membership_pk PRIMARY KEY (mid),
-   CONSTRAINT membership_uk UNIQUE (pid,season),
+   CONSTRAINT membership_uk UNIQUE (pid,season,membertype),
    CONSTRAINT membership_payment_fk FOREIGN KEY (paymentid) REFERENCES payment
 );
 
