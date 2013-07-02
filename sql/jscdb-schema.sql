@@ -145,6 +145,16 @@ CREATE OR REPLACE VIEW rosterpeople AS
     AND r.classid = sc.classid
   ORDER BY r.section, r.classid, p.surname, p.givenname;
 
+-- membershiptype -- table to store the membershiptypes to be used in registration
+CREATE TABLE membershiptype (
+    typeName VARCHAR(20),       -- the unique name of the type (e.g., 'jsc_single')
+    membertype VARCHAR(15),     -- the type of the membership, SINGLE, FAMILY, USFSA, USFSA_FAMILY
+    description VARCHAR(20),    -- the label describing this membership class
+    cost FLOAT8,                -- the cost for this membership type
+	date_updated TIMESTAMP default CURRENT_TIMESTAMP, -- the date the record was last updated
+   CONSTRAINT membershiptype_pk PRIMARY KEY (typeName)
+);
+
 -- membership -- table to store the memberships of students each season
 CREATE SEQUENCE membership_id_seq START 50000;
 CREATE TABLE membership (
