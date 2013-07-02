@@ -31,7 +31,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boolean>, ChangeHandler, ClickHandler {
 
     private static final String PAYPAL_EXPLANATION = "<div id=\"explainstep\"><p class=\"jsc-text\">You must make your payment using PayPal by clicking on the button below.  <b>Your membership is <em>not complete</em></b> until after you have completed payment.</p><p class=\"jsc-text\">When you click \"Pay Now\" below, you will be taken to the PayPal site to make payment.  PayPal will allow you to pay by credit card or using your bank account, among other options.  Once the payment has been made, you will be returned to this site and your registration will be complete.</p></div>";
-    private static final String MMB_EXPLANATION = "JSC Club membership provides many benefits, including a voice in the governance of the Juneau Skating Club.  Membership in the US Figure Skating Association includes a subscription to 'Skating' magazine, and the ability to participate as a club member in testing and competitions.";
+    private static final String MMB_EXPLANATION = "JSC Club Membership provides many benefits, including a voice in the governance of the JSC and is required if you are skating on \"Club Ice\"  or are taking any figure skating class and have passed Basic Skills 4 or higher. USFS Membership includes a subscription to \"Skating\" magazine, and the ability to participate in USFSA testing and competitions. USFSA charges a late fee if you register subsequent to the initial filing date. You will be informed if a late fee is required to be paid.";
     private static final String PENDING = "Pending";
     
     private static final String STEP_1 = "Step 1: Select membership options";
