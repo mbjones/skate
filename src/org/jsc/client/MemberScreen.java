@@ -54,6 +54,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     private RadioButton singleMemberRadio;
     private RadioButton familyMemberRadio;
     private String zero;
+    private ArrayList<MembershipType> mtList;
     
     /**
      * Construct the Member view and controller used to display a form for
@@ -63,23 +64,57 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
      */
     public MemberScreen(LoginSession loginSession, HandlerManager eventBus) {
         super(loginSession, eventBus);
+        regService = GWT.create(SkaterRegistrationService.class);        
+
         numfmt = NumberFormat.getFormat("$#,##0.00");
         zero = numfmt.format(0.00);
         totalCost = 0;
-        layoutScreen();
-        this.setContentPanel(screen);
-        regService = GWT.create(SkaterRegistrationService.class);        
+        layout();
     }
     
+    private void layout() {
+        GWT.log("Layout the Membership screen...", null);
+        
+        if (loginSession.isAuthenticated()) {
+                        
+            // Initialize the service proxy.
+            if (regService == null) {
+                regService = GWT.create(SkaterRegistrationService.class);
+            }
+    
+            // Set up the callback object.
+            AsyncCallback<ArrayList<MembershipType>> callback = new AsyncCallback<ArrayList<MembershipType>>() {
+    
+                public void onFailure(Throwable caught) {
+                    // TODO: Do something with errors.
+                    GWT.log("Failed to get the MembershipType list.", caught);
+                }
+    
+                public void onSuccess(ArrayList<MembershipType> mtList) {
+                    layoutScreen(mtList);
+                }
+            };
+    
+            // Make the call to the registration service.
+            regService.getMembershipTypes(loginSession, callback);
+    
+        } else {
+            GWT.log("Error: Can not create a membership without first signing in.", null);
+        }
+    }
+
     /**
      * Lay out the user interface widgets on the screen.
      */
-    private void layoutScreen() {
+    private void layoutScreen(ArrayList<MembershipType> mtList) {
+        this.mtList = mtList;
+        
         this.setScreenTitle("Membership");
         this.setStyleName("jsc-onepanel-screen");
         
         screen = new HorizontalPanel();
-                        
+        this.setContentPanel(screen);
+   
         layoutMemberPanel();
         
         ppPaymentPanel = new VerticalPanel();
@@ -111,7 +146,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
      * Create the widgets needed to populate the figure skating registration panel.
      */
     private void layoutMemberPanel() {
-                 
+        
         // Create the panel, its labels, and the contained grid for layout
         memberPanel = new VerticalPanel();
         Label mmbTitle = new Label(" ");
@@ -138,11 +173,14 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         memberGrid.setWidget(newRow, 2, jscSection);
         fmt.addStyleName(newRow, 2,  "jsc-sectionlabel");
         
-        createMembershipRow("jsc_single", "JSC Individual Member", 20.00, fmt);
-        createMembershipRow("jsc_fam1", "JSC Additional Family Member #1", 10.00, fmt);
-        createMembershipRow("jsc_fam2", "JSC Additional Family Member #2", 10.00, fmt);
-        createMembershipRow("jsc_fam3", "JSC Additional Family Member #3", 10.00, fmt);
-
+        // Now add all of the JSC membership types
+        for (MembershipType mt : mtList) {
+            if (mt.getTypeName().startsWith("jsc_")) {
+                createMembershipRow(mt.getTypeName(), mt.getDescription(), mt.getCost(), fmt);
+                GWT.log("Added " + mt.getTypeName());
+            }
+        }
+        
         // Row containing the Single/Family radio buttons and price amount
         singleMemberRadio = new RadioButton("MemberTypeGroup", "Single Membership");
         familyMemberRadio = new RadioButton("MemberTypeGroup", "Family Membership");
@@ -152,7 +190,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         familyMemberRadio.addValueChangeHandler(this);
         memberDues = new Label();
         memberDues.setText(numfmt.format(AppConstants.MEMBERSHIP_SINGLE_PRICE));
-        totalCost = AppConstants.MEMBERSHIP_SINGLE_PRICE;
+        //totalCost = AppConstants.MEMBERSHIP_SINGLE_PRICE;
         /*
         newRow = memberGrid.insertRow(memberGrid.getRowCount());
         memberGrid.setWidget(newRow, 2, singleMemberRadio);
@@ -178,12 +216,14 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         memberGrid.setWidget(newRow, 2, usfsaSection);
         fmt.addStyleName(newRow, 2,  "jsc-sectionlabel");
         
-        createMembershipRow("usfsa_single", "USFSA Individual Member", 50, fmt);
-        createMembershipRow("usfsa_fam1", "USFSA Additional Family Member #1", 20.00, fmt);
-        createMembershipRow("usfsa_fam2", "USFSA Additional Family Member #2", 20.00, fmt);
-        createMembershipRow("usfsa_fam3", "USFSA Additional Family Member #3", 20.00, fmt);
-        createMembershipRow("usfsa_latefee", "USFSA Late Fee", 8.00, fmt);
-        
+        // Now add all of the USFSA membership types
+        for (MembershipType mt : mtList) {
+            if (mt.getTypeName().startsWith("usfsa_")) {
+                createMembershipRow(mt.getTypeName(), mt.getDescription(), mt.getCost(), fmt);
+                GWT.log("Added " + mt.getTypeName());
+            }
+        }
+
         // Insert a spacer row
         newRow = memberGrid.insertRow(memberGrid.getRowCount());
         memberGrid.setWidget(newRow, 4, new Label(" "));
@@ -366,33 +406,47 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     public void onValueChange(ValueChangeEvent<Boolean> event) {
         GWT.log("Called: onValueChange()");
         Widget sender = (Widget) event.getSource();
-        updateMembershipScreenDetails(sender);        
+        //updateMembershipScreenDetails(sender);        
     }
 
     @Override
     public void onClick(ClickEvent event) {
-        boolean checked = ((CheckBox) event.getSource()).getValue();
+        // Find out which widget sent the event, and which row it was in
         int row = memberGrid.getCellForEvent(event).getRowIndex();
         Widget sender = (Widget) event.getSource();
-        GWT.log("ClickEvent caught: " + row + " (" + checked + ")" );
+
+        // Lookup the price of this entry that was clicked
+        double mtCost = 0.0;
+        String mtName = ((CheckBox) sender).getName();
+        for (MembershipType mt : mtList) {
+            if (mt.getTypeName().equals(mtName)) {
+                mtCost = mt.getCost();
+                GWT.log("Found: " + mt + " with cost: " + mtCost);
+            }
+        }
         
-        // Find the associated cost label in that row and display it
+        // Find the associated cost label in that row and display it,
+        // or set the label to zero if unchecking the box
+        boolean checked = ((CheckBox) sender).getValue();
+        GWT.log("ClickEvent caught: " + row + " (" + checked + ")" );
         Label costLabel = (Label)memberGrid.getWidget(row, 5);
         if (checked) {
             costLabel.setText(costLabel.getTitle());
+            totalCost += mtCost;
         } else {
             costLabel.setText(zero);
+            totalCost -= mtCost;
         }
         
-        // Update the form total
-        totalCost += 5;
+        // Update the displayed total
+        totalCostLabel.setText(numfmt.format(totalCost));
     }
 
     @Override
     public void onChange(ChangeEvent event) {
         GWT.log("Called: onChange()");
         Widget sender = (Widget) event.getSource();
-        updateMembershipScreenDetails(sender);
+        //updateMembershipScreenDetails(sender);
     }
     
     /**
@@ -412,7 +466,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             sender = singleMemberRadio;
         }
                 
-        totalCost = 0;
+        //totalCost = 0;
         double dues = 0;
     
         // All paid up: isMember &! isPending
@@ -460,12 +514,12 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             if (!isMember || isPending) {
                 GWT.log("Person is not member");
                 dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
-                totalCost = dues;
+                //totalCost = dues;
             } else {
                 GWT.log("Person is member");
                 GWT.log("isMember: " + isMember);
                 dues = 0;
-                totalCost = 0;
+                //totalCost = 0;
             }
         } else if (sender == familyMemberRadio) {
             GWT.log("familyMemberRadio clicked");
@@ -476,12 +530,12 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             if (!isMember || isPending) {
                 GWT.log("Person is not member");
                 dues = AppConstants.MEMBERSHIP_FAMILY_PRICE;
-                totalCost = dues;
+                //totalCost = dues;
             } else {
                 GWT.log("Person is member");
                 GWT.log("isMember: " + isMember);
                 dues = 0;
-                totalCost = 0;
+                //totalCost = 0;
             }
         }
         memberDues.setText(numfmt.format(dues));

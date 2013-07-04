@@ -29,4 +29,5 @@ public interface SkaterRegistrationService extends RemoteService {
     boolean duplicateSessionClassList(LoginSession loginSession, String oldSeason, String oldSession, String newSeason, String newSession);
     boolean saveSkatingClass(LoginSession loginSession, long currentClassId, ArrayList<String> newClassValues, int operation);
     long downloadRoster(LoginSession loginSession, long classId);
+    ArrayList<MembershipType> getMembershipTypes(LoginSession loginSession);
 }

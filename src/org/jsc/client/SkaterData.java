@@ -203,7 +203,7 @@ public class SkaterData implements EntryPoint, ValueChangeHandler<String> {
             content.setScreen(confirm);
             clearMessage();
         } else if (historyToken.equals("member")) {
-            member.updateMembershipScreenDetails(null);
+            //member.updateMembershipScreenDetails(null);
             content.setScreen(member);
             clearMessage();
         } else if (historyToken.equals("cancel")) {

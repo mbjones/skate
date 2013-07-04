@@ -23,6 +23,7 @@ import org.jsc.client.AppConstants;
 import org.jsc.client.ClientConstants;
 import org.jsc.client.LoginSession;
 import org.jsc.client.MembershipInfo;
+import org.jsc.client.MembershipType;
 import org.jsc.client.Person;
 import org.jsc.client.RegistrationResults;
 import org.jsc.client.RosterEntry;
@@ -1197,6 +1198,44 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         }
 
         return key;
+    }
+
+    /**
+     * Query the database to get the list of membership types that have been defined, 
+     * and return them as an ArrayList of the class MembershipType.
+     * @param loginSession the authenticated session
+     * @return ArrayList of MembershipType
+     */
+    public ArrayList<MembershipType> getMembershipTypes(LoginSession loginSession) {
+        ArrayList<MembershipType> mtList = new ArrayList<MembershipType>();
+
+        // Check authentication credentials
+        boolean isAuthentic = isSessionValid(loginSession);
+        if (!isAuthentic) {
+            return null;
+        }
+
+        // Query the database to get the list of membership types
+        StringBuffer sql = new StringBuffer();
+        sql.append("select typeName, membertype, description, cost from membershiptype ");
+        System.out.println(sql.toString());
+
+        try {
+            Connection con = getConnection();
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql.toString());
+            while (rs.next()) {
+                MembershipType mt = new MembershipType(rs.getString(1), rs.getString(2), rs.getString(3), rs.getDouble(4));
+                mtList.add(mt);
+            }
+            stmt.close();
+            con.close();
+
+        } catch (SQLException ex) {
+            System.err.println("SQLException: " + ex.getMessage());
+        }
+
+        return mtList;
     }
 
     /**
