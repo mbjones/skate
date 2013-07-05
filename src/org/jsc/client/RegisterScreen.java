@@ -444,7 +444,6 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             // This is the array of roster entries that should be created in the db
             ArrayList<RosterEntry> entryList = new ArrayList<RosterEntry>();
             
-            boolean createMembership = false;
             // Gather information from the Basic Skills form if it is selected
             if (bsRadio.getValue()) {
                 String selectedClassId = classField.getValue(classField.getSelectedIndex());
@@ -552,15 +551,9 @@ public class RegisterScreen extends BaseScreen implements ValueChangeHandler<Boo
             };
 
             // Make the call to the registration service.
-            if (entryList.size() > 0 || createMembership) {
-                MembershipInfo memInfo = null;
-                if (createMembership) {
-                    memInfo = new MembershipInfo();
-                    memInfo.setMembershipType(AppConstants.JSC_SINGLE);
-                    memInfo.addMemberID(loginSession.getPerson().getMembershipId());
-                }
+            if (entryList.size() > 0) {
                 GWT.log("Sending request to register " + entryList.size() + " classes.", null);
-                regService.register(loginSession, loginSession.getPerson(), entryList, createMembership, memInfo, callback);
+                regService.register(loginSession, loginSession.getPerson(), entryList, false, null, callback);
             } else {
                 setMessage("You must select a class before clicking 'Continue'.");
             }

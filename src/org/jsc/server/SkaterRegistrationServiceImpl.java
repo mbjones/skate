@@ -479,105 +479,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             return null;
         }
 
-        // Create an entry in the payments table to represent the transaction,
-        // setting the paypal_status field to incomplete. This field is later
-        // updated using the paypal IPN service when the transaction completes        
-        long paymentId = 0;
-        try {
-            Connection con = getConnection();
-
-            // Look up the paymentId to be used for this insert
-            StringBuffer idsql = new StringBuffer();
-            idsql.append("SELECT NEXTVAL(\'\"payment_id_seq\"\')");
-            System.out.println(idsql.toString());
-            Statement stmt = con.createStatement();
-            stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(idsql.toString());
-            if (rs.next()) {
-                // This is the next id in the payment id sequence
-                paymentId = rs.getLong(1);
-            }
-            stmt.close();
-
-            // Execute the INSERT to create the new payment table entry
-            StringBuffer psql = new StringBuffer();
-            psql.append("insert into payment (paymentId, paypal_status) VALUES ("
-                    + paymentId + ", 'Pending')");
-            System.out.println(psql.toString());
-
-            stmt = con.createStatement();
-            stmt.executeUpdate(psql.toString());
-            stmt.close();
-            con.close();
-            results.setPaymentId(paymentId);
-
-        } catch (SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage());
-            results.setMembershipCreated(false);
-            results.setMembershipErrorMessage("SQLException: "
-                    + ex.getMessage());
-        }
-
-        // Check if a membership entry should be created, and do so
-        if (createMembership) {
-            results.setMembershipAttempted(true);
-            // Create the SQL INSERT statement
-            StringBuffer sql = new StringBuffer();
-            sql.append("insert into membership (pid, paymentid, season, payment_amount, membertype) VALUES ('");
-            if (person.getPid() != memInfo.getMemberIDList().get(0)) {
-                System.out.println("Problem here: Logged in PID does not match memInfo first PID.");
-            }
-            sql.append(person.getPid()).append("','");
-            sql.append(paymentId).append("','");
-            sql.append(SessionSkatingClass.calculateSeason());
-            sql.append("',");
-            if (memInfo.getMembershipType().equals(AppConstants.JSC_FAMILY)) {
-                sql.append(AppConstants.MEMBERSHIP_FAMILY_PRICE);
-            } else {
-                sql.append(AppConstants.MEMBERSHIP_SINGLE_PRICE);
-            }
-            sql.append(",'");
-            sql.append(memInfo.getMembershipType());
-            sql.append("'");
-
-            sql.append(")");
-            System.out.println(sql.toString());
-
-            // Execute the INSERT to create the new membership table entry
-            try {
-                Connection con = getConnection();
-                Statement stmt = con.createStatement();
-                stmt.executeUpdate(sql.toString());
-                stmt.close();
-
-                // Now look up the membershipId that was generated
-                String season = SessionSkatingClass.calculateSeason();
-                StringBuffer msql = new StringBuffer();
-                msql.append("select mid, pid, paymentid, season, paypal_status, membertype from memberstatus where ");
-                msql.append("pid = '").append(person.getPid()).append("'");
-                msql.append(" AND ");
-                msql.append("season LIKE '").append(season).append("'");
-                System.out.println(msql.toString());
-                stmt = con.createStatement();
-                ResultSet rs = stmt.executeQuery(msql.toString());
-                if (rs.next()) {
-                    // if we found a matching record, the record was created
-                    results.setMembershipId(rs.getLong(1));
-                    results.setMembershipCreated(true);
-                    results.setPaymentId(paymentId);
-                    results.setMembershipStatus(rs.getString(5));
-                    results.setMembershipType(rs.getString(6));
-                }
-                stmt.close();
-                con.close();
-
-            } catch (SQLException ex) {
-                System.err.println("SQLException: " + ex.getMessage());
-                results.setMembershipCreated(false);
-                results.setMembershipErrorMessage("SQLException: "
-                        + ex.getMessage());
-            }
-        }
+        long paymentId = createPaymentEntry(results);
 
         // Loop through each of the entries we've been passed, and for each one
         // insert it in the database, look up its rosterid to create a new
@@ -631,6 +533,125 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         results.setEntriesNotCreated(entriesFailed);
 
         return results;
+    }
+
+    /**
+     * Create one or more memberships in the membership table by iterating across
+     * the requests founf in the MembershipInfo parameter.
+     * @param person to be used to authenticate the connection
+     * @param memInfo fields describing the membership type to be created and list of members to be added
+     * @return an array of the completed RosterEntry instances from the database
+     */
+    public RegistrationResults createMemberships(LoginSession loginSession,
+            Person person, MembershipInfo memInfo) {
+
+        RegistrationResults results = new RegistrationResults();
+
+        ArrayList<RosterEntry> entriesCreated = new ArrayList<RosterEntry>();
+        ArrayList<Long> entriesFailed = new ArrayList<Long>();
+
+        // Check credentials
+        if (person != null) {
+            // Verify that the user is valid before allowing an insert
+            boolean isAuthentic = isSessionValid(loginSession);
+            if (!isAuthentic) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+
+        long paymentId = createPaymentEntry(results);
+
+        // Check if one or more membership entries should be created, and do so
+        if (memInfo.size() > 0) {
+            results.setMembershipAttempted(true);
+            // Create the SQL INSERT statement
+            String sql = "insert into membership (pid, paymentid, season, payment_amount, membertype) VALUES (?, ?, ?, ?, ?);";
+
+            // Execute the INSERT to create the new membership table entry
+            try {
+                String season = SessionSkatingClass.calculateSeason();
+                
+                Connection con = getConnection();
+                PreparedStatement pstmt = con.prepareStatement(sql);
+                pstmt.setLong(1, person.getPid());
+                pstmt.setLong(2, paymentId);
+                pstmt.setString(3, season);
+                pstmt.setDouble(4, 0.00);
+                pstmt.setString(5, AppConstants.JSC_SINGLE); // TODO: loop over all memInfo requests, using memInfo.getMembershipType()
+                pstmt.executeUpdate();
+                pstmt.close();
+
+                // Now look up the membershipId that was generated
+                String msql = "select mid, pid, paymentid, season, paypal_status, membertype from memberstatus where pid = ? AND season LIKE ?";
+                System.out.println(msql.toString());
+                pstmt = con.prepareStatement(msql);
+                pstmt.setLong(1, person.getPid());
+                pstmt.setString(2, season);
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    // if we found a matching record, the record was created
+                    results.setMembershipId(rs.getLong(1));
+                    results.setMembershipCreated(true);
+                    results.setPaymentId(paymentId);
+                    results.setMembershipStatus(rs.getString(5));
+                    results.setMembershipType(rs.getString(6));
+                }
+                pstmt.close();
+                con.close();
+
+            } catch (SQLException ex) {
+                System.err.println("SQLException: " + ex.getMessage());
+                results.setMembershipCreated(false);
+                results.setMembershipErrorMessage("SQLException: "
+                        + ex.getMessage());
+            }
+        }
+
+        return results;
+    }
+
+    private long createPaymentEntry(RegistrationResults results) {
+        // Create an entry in the payments table to represent the transaction,
+        // setting the paypal_status field to incomplete. This field is later
+        // updated using the paypal IPN service when the transaction completes        
+        long paymentId = 0;
+        try {
+            Connection con = getConnection();
+
+            // Look up the paymentId to be used for this insert
+            StringBuffer idsql = new StringBuffer();
+            idsql.append("SELECT NEXTVAL(\'\"payment_id_seq\"\')");
+            System.out.println(idsql.toString());
+            Statement stmt = con.createStatement();
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(idsql.toString());
+            if (rs.next()) {
+                // This is the next id in the payment id sequence
+                paymentId = rs.getLong(1);
+            }
+            stmt.close();
+
+            // Execute the INSERT to create the new payment table entry
+            StringBuffer psql = new StringBuffer();
+            psql.append("insert into payment (paymentId, paypal_status) VALUES ("
+                    + paymentId + ", 'Pending')");
+            System.out.println(psql.toString());
+
+            stmt = con.createStatement();
+            stmt.executeUpdate(psql.toString());
+            stmt.close();
+            con.close();
+            results.setPaymentId(paymentId);
+
+        } catch (SQLException ex) {
+            System.err.println("SQLException: " + ex.getMessage());
+            results.setMembershipCreated(false);
+            results.setMembershipErrorMessage("SQLException: "
+                    + ex.getMessage());
+        }
+        return paymentId;
     }
 
     /**

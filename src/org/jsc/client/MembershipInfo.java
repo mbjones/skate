@@ -1,49 +1,51 @@
 package org.jsc.client;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
- * A serializable class that describes the information needed to create a
- * membership in the database.
+ * A serializable class that describes the information needed to create one or
+ * more memberships in the database.  The requests are indexed by the id of the
+ * person, so only one request can be made for a given person.
  * @author Matt Jones
  */
 public class MembershipInfo implements Serializable {
-    private String membershipType;
-    private ArrayList<Long> memberIDList;
+    private HashMap<Long, MembershipType> membershipRequests;
     
     /** 
      * Construct a registration results object to be populated with accessors.
      */
     public MembershipInfo() {
-        memberIDList = new ArrayList<Long>();
+        membershipRequests = new HashMap<Long, MembershipType>();
     }
 
     /**
-     * @return the membershipType
+     * @return the membershipRequests
      */
-    public String getMembershipType() {
-        return membershipType;
+    public HashMap<Long, MembershipType> getMembershipRequests() {
+        return membershipRequests;
     }
 
     /**
-     * @param membershipType the membershipType to set
+     * @param pid the identifier of the person for the membership
+     * @param mt the type of membership to add
      */
-    public void setMembershipType(String membershipType) {
-        this.membershipType = membershipType;
+    public void add(Long pid, MembershipType mt) {
+        this.membershipRequests.put(pid, mt);
     }
-
+    
     /**
-     * @return the memberIDList
+     * @param pid the identifier of the person for the membership
+     * @param mt the type of membership to add
      */
-    public ArrayList<Long> getMemberIDList() {
-        return memberIDList;
+    public void remove(Long pid) {
+        this.membershipRequests.remove(pid);
     }
-
+    
     /**
-     * @param memberIDList the memberIDList to set
+     * @return the number of memberships requested in this object
      */
-    public void addMemberID(Long memberID) {
-        this.memberIDList.add(memberID);
+    public int size() {
+        return membershipRequests.size();
     }
 }

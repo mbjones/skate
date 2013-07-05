@@ -1,6 +1,7 @@
 package org.jsc.client;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -55,6 +56,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     private RadioButton familyMemberRadio;
     private String zero;
     private ArrayList<MembershipType> mtList;
+    private MembershipInfo membershipRequests;
     
     /**
      * Construct the Member view and controller used to display a form for
@@ -68,6 +70,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
 
         numfmt = NumberFormat.getFormat("$#,##0.00");
         zero = numfmt.format(0.00);
+        membershipRequests = new MembershipInfo();
         totalCost = 0;
         layout();
     }
@@ -272,14 +275,12 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
      * Register but only send a membership entry to be paid.
      */
     private void register() {
-        GWT.log("Registering for a class...", null);
+        GWT.log("Creating memberships...");
         
         if (loginSession.isAuthenticated()) {
-            // This is the array of roster entries that should be created in the db
-            ArrayList<RosterEntry> entryList = new ArrayList<RosterEntry>();
             
             boolean createMembership = false;
-            if ((singleMemberRadio.getValue() == true || familyMemberRadio.getValue() == true) &! loginSession.getPerson().isMember()) {
+            if (membershipRequests.size() > 0) {
                 createMembership = true;
             }
                         
@@ -293,7 +294,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
 
                 public void onFailure(Throwable caught) {
                     // TODO: Do something with errors.
-                    GWT.log("Failed to register the RosterEntry array.", caught);
+                    GWT.log("Failed to create memberships.", caught);
                 }
 
                 public void onSuccess(RegistrationResults results) {
@@ -302,7 +303,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
                     
                     if ((newEntryList == null || newEntryList.size() == 0) && !results.isMembershipAttempted()) {
                         // Failure on the remote end.
-                        setMessage("Error registering... Have you are already registered for these classes? Check 'My Classes'.");
+                        setMessage("Error creating memberships... Please contact the Registrar.");
                         return;
                     } else {
                         if (results.isMembershipCreated()) {
@@ -310,7 +311,6 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
                             loginSession.getPerson().setMembershipId(results.getMembershipId());
                             loginSession.getPerson().setMembershipStatus(results.getMembershipStatus());
                         }
-                        
                         createAndShowPaypalForm(results);
                     }
                 }
@@ -318,16 +318,8 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
 
             // Make the call to the registration service.
             if (createMembership) {
-                GWT.log("Sending membership request.", null);
-                MembershipInfo memInfo = new MembershipInfo();
-                if (singleMemberRadio.getValue() == true) {
-                    memInfo.setMembershipType(AppConstants.JSC_SINGLE);
-                } else if (familyMemberRadio.getValue() == true) {
-                    memInfo.setMembershipType(AppConstants.JSC_FAMILY);
-                }
-                Long firstMemberID = loginSession.getPerson().getMembershipId();
-                memInfo.addMemberID(firstMemberID);
-                regService.register(loginSession, loginSession.getPerson(), entryList, createMembership, memInfo, callback);
+                GWT.log("Sending membership request.");
+                regService.createMemberships(loginSession, loginSession.getPerson(), membershipRequests, callback);
             } else {
                 setMessage("You must select a membership option before clicking 'Continue'.");
             }
@@ -411,6 +403,9 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
 
     @Override
     public void onClick(ClickEvent event) {
+        
+        Long pid = loginSession.getPerson().getPid();
+
         // Find out which widget sent the event, and which row it was in
         int row = memberGrid.getCellForEvent(event).getRowIndex();
         Widget sender = (Widget) event.getSource();
@@ -418,9 +413,11 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         // Lookup the price of this entry that was clicked
         double mtCost = 0.0;
         String mtName = ((CheckBox) sender).getName();
+        MembershipType current = null;
         for (MembershipType mt : mtList) {
             if (mt.getTypeName().equals(mtName)) {
                 mtCost = mt.getCost();
+                current = mt;
                 GWT.log("Found: " + mt + " with cost: " + mtCost);
             }
         }
@@ -433,9 +430,11 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         if (checked) {
             costLabel.setText(costLabel.getTitle());
             totalCost += mtCost;
+            membershipRequests.add(pid, current);
         } else {
             costLabel.setText(zero);
             totalCost -= mtCost;
+            membershipRequests.remove(pid);
         }
         
         // Update the displayed total
