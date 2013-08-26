@@ -2,3 +2,7 @@
 /.settings
 /gwt-unitCache
 /.classpath
+/war/skaterdata
+/war/WEB-INF/deploy
+/war/WEB-INF/classes
+/src/org/jsc/server/jscdb-server-backup.properties
