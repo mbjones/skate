@@ -2,6 +2,8 @@ package org.jsc.client;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * A serializable class that describes the information needed to create one or
@@ -47,5 +49,9 @@ public class MembershipInfo implements Serializable {
      */
     public int size() {
         return membershipRequests.size();
+    }
+    
+    public Set<Entry<Long, MembershipType>> entrySet() {
+        return membershipRequests.entrySet();
     }
 }

@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import org.jsc.client.AppConstants;
 import org.jsc.client.ClientConstants;
 import org.jsc.client.LoginSession;
 import org.jsc.client.MembershipInfo;
+import org.jsc.client.MembershipResult;
 import org.jsc.client.MembershipType;
 import org.jsc.client.Person;
 import org.jsc.client.RegistrationResults;
@@ -479,7 +481,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             return null;
         }
 
-        long paymentId = createPaymentEntry(results);
+        long paymentId = createPaymentEntry();
 
         // Loop through each of the entries we've been passed, and for each one
         // insert it in the database, look up its rosterid to create a new
@@ -542,14 +544,9 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * @param memInfo fields describing the membership type to be created and list of members to be added
      * @return an array of the completed RosterEntry instances from the database
      */
-    public RegistrationResults createMemberships(LoginSession loginSession,
+    public ArrayList<MembershipResult> createMemberships(LoginSession loginSession,
             Person person, MembershipInfo memInfo) {
-
-        RegistrationResults results = new RegistrationResults();
-
-        ArrayList<RosterEntry> entriesCreated = new ArrayList<RosterEntry>();
-        ArrayList<Long> entriesFailed = new ArrayList<Long>();
-
+        
         // Check credentials
         if (person != null) {
             // Verify that the user is valid before allowing an insert
@@ -561,11 +558,12 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             return null;
         }
 
-        long paymentId = createPaymentEntry(results);
+        ArrayList<MembershipResult> results = new ArrayList<MembershipResult>();
+        
+        long paymentId = createPaymentEntry();
 
         // Check if one or more membership entries should be created, and do so
         if (memInfo.size() > 0) {
-            results.setMembershipAttempted(true);
             // Create the SQL INSERT statement
             String sql = "insert into membership (pid, paymentid, season, payment_amount, membertype) VALUES (?, ?, ?, ?, ?);";
 
@@ -575,51 +573,58 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 
                 Connection con = getConnection();
                 PreparedStatement pstmt = con.prepareStatement(sql);
-                pstmt.setLong(1, person.getPid());
-                pstmt.setLong(2, paymentId);
-                pstmt.setString(3, season);
-                pstmt.setDouble(4, 0.00);
-                pstmt.setString(5, AppConstants.JSC_SINGLE); // TODO: loop over all memInfo requests, using memInfo.getMembershipType()
-                pstmt.executeUpdate();
-                pstmt.close();
-
-                // Now look up the membershipId that was generated
-                String msql = "select mid, pid, paymentid, season, paypal_status, membertype from memberstatus where pid = ? AND season LIKE ?";
-                System.out.println(msql.toString());
-                pstmt = con.prepareStatement(msql);
-                pstmt.setLong(1, person.getPid());
-                pstmt.setString(2, season);
-                ResultSet rs = pstmt.executeQuery();
-                if (rs.next()) {
-                    // if we found a matching record, the record was created
-                    results.setMembershipId(rs.getLong(1));
-                    results.setMembershipCreated(true);
-                    results.setPaymentId(paymentId);
-                    results.setMembershipStatus(rs.getString(5));
-                    results.setMembershipType(rs.getString(6));
+                
+                for (Entry<Long, MembershipType> entry:memInfo.entrySet() ){
+                    MembershipResult mr = new MembershipResult();
+                    mr.setMembershipAttempted(true);
+                    Long pid = entry.getKey();
+                    MembershipType mt = entry.getValue();
+                
+                    pstmt.setLong(1, pid);
+                    pstmt.setLong(2, paymentId);
+                    pstmt.setString(3, season);
+                    pstmt.setDouble(4, mt.getCost());
+                    pstmt.setString(5, mt.getMembershipType());
+                    pstmt.executeUpdate();
+                    pstmt.close();
+    
+                    // Now look up the membershipId that was generated
+                    String msql = "select mid, pid, paymentid, season, paypal_status, membertype from memberstatus where pid = ? AND season LIKE ?";
+                    System.out.println(msql.toString());
+                    pstmt = con.prepareStatement(msql);
+                    pstmt.setLong(1, person.getPid());
+                    pstmt.setString(2, season);
+                    ResultSet rs = pstmt.executeQuery();
+                    if (rs.next()) {
+                        // if we found a matching record, the record was created
+                        mr.setMembershipId(rs.getLong(1));
+                        mr.setMembershipCreated(true);
+                        mr.setPaymentId(paymentId);
+                        mr.setMembershipStatus(rs.getString(5));
+                        mr.setMembershipType(rs.getString(6));
+                    }
+                    results.add(mr);
                 }
                 pstmt.close();
                 con.close();
 
             } catch (SQLException ex) {
                 System.err.println("SQLException: " + ex.getMessage());
-                results.setMembershipCreated(false);
-                results.setMembershipErrorMessage("SQLException: "
-                        + ex.getMessage());
             }
         }
 
         return results;
     }
 
-    private long createPaymentEntry(RegistrationResults results) {
+    private long createPaymentEntry() {
         // Create an entry in the payments table to represent the transaction,
         // setting the paypal_status field to incomplete. This field is later
         // updated using the paypal IPN service when the transaction completes        
         long paymentId = 0;
-        try {
-            Connection con = getConnection();
 
+        Connection con = getConnection();
+
+        try {
             // Look up the paymentId to be used for this insert
             StringBuffer idsql = new StringBuffer();
             idsql.append("SELECT NEXTVAL(\'\"payment_id_seq\"\')");
@@ -643,14 +648,10 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             stmt.executeUpdate(psql.toString());
             stmt.close();
             con.close();
-            results.setPaymentId(paymentId);
-
-        } catch (SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage());
-            results.setMembershipCreated(false);
-            results.setMembershipErrorMessage("SQLException: "
-                    + ex.getMessage());
+        } catch (SQLException e) {
+            System.err.println("SQLException: " + e.getMessage());
         }
+        
         return paymentId;
     }
 

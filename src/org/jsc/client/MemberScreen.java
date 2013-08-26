@@ -1,7 +1,6 @@
 package org.jsc.client;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -247,6 +246,13 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         memberPanel.setVisible(true);
     }
     
+    /**
+     * Create a membership row in the grid listing the options for membership.
+     * @param cbName the name of the checkbox widget
+     * @param cbText the text to display for the Membership description
+     * @param cbCost the cost of the membership item
+     * @param fmt an HTML formatter to be applied to the cost value for display
+     */
     private void createMembershipRow(String cbName, String cbText, double cbCost, HTMLTable.CellFormatter fmt) {
         
         CheckBox cb = new CheckBox(cbText);
@@ -290,26 +296,26 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             }
 
             // Set up the callback object.
-            AsyncCallback<RegistrationResults> callback = new AsyncCallback<RegistrationResults>() {
+            AsyncCallback<ArrayList<MembershipResult>> callback = new AsyncCallback<ArrayList<MembershipResult>>() {
 
                 public void onFailure(Throwable caught) {
                     // TODO: Do something with errors.
                     GWT.log("Failed to create memberships.", caught);
                 }
 
-                public void onSuccess(RegistrationResults results) {
-                    
-                    ArrayList<RosterEntry> newEntryList = results.getEntriesCreated();
-                    
-                    if ((newEntryList == null || newEntryList.size() == 0) && !results.isMembershipAttempted()) {
+                public void onSuccess(ArrayList<MembershipResult> results) {
+                                        
+                    if (!(results.size() > 0)) {
                         // Failure on the remote end.
                         setMessage("Error creating memberships... Please contact the Registrar.");
                         return;
                     } else {
-                        if (results.isMembershipCreated()) {
-                            loginSession.getPerson().setMember(true);
-                            loginSession.getPerson().setMembershipId(results.getMembershipId());
-                            loginSession.getPerson().setMembershipStatus(results.getMembershipStatus());
+                        for (MembershipResult mr : results) {
+                            if (mr.isMembershipCreated()) {
+                                loginSession.getPerson().setMember(true);
+                                loginSession.getPerson().setMembershipId(mr.getMembershipId());
+                                loginSession.getPerson().setMembershipStatus(mr.getMembershipStatus());
+                            }
                         }
                         createAndShowPaypalForm(results);
                     }
@@ -333,22 +339,16 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
      * Create the paypal form by iterating across the registration roster entries and
      * membership information and serializing an appropriate HTML form to request payment
      * for the items.
-     * @param results the results of the registration step listing registration items
+     * @param results the results of the registration step that created the memberships
      * @return a StringBuffer containing the HTML form to be displayed
      */
-    protected StringBuffer createPayPalForm(RegistrationResults results, ClassListModel sessionClassList, double discount) {
+    protected StringBuffer createPayPalForm(ArrayList<MembershipResult> results) {
         
         long paymentId;
         String membershipType;
         long membershipId;
         if (results == null) {
-            paymentId = loginSession.getPerson().getMembershipPaymentId();
-            membershipType = loginSession.getPerson().getMembershipType();
-            membershipId = loginSession.getPerson().getMembershipId();
-        } else {
-            paymentId = results.getPaymentId();
-            membershipType = results.getMembershipType();
-            membershipId = results.getMembershipId();
+            GWT.log("No MembershipResult passed into createPaypalForm.");
         }
         
         StringBuffer ppCart = new StringBuffer();
@@ -361,25 +361,32 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         ppCart.append("<input type=\"hidden\" name=\"no_shipping\" value=\"1\">");
         ppCart.append("<input type=\"hidden\" name=\"cpp_header_image\" value=\""+ ClientConstants.getString("CLIENT_PAYPAL_HEADER_IMAGE") + "\">");
         ppCart.append("<input type=\"hidden\" name=\"item_name\" value=\""+ "Registration Invoice" + "\">");
-        ppCart.append("<input type=\"hidden\" name=\"invoice\" value=\""+ paymentId + "\">");
         
         int i = 0;
-        // Handle membership payment by creating form items as needed
-        if (results == null || results.isMembershipCreated()) {
-            double dues = 0;
-            if (membershipType.equals(AppConstants.JSC_SINGLE)) {
-                dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
-            } else if (membershipType.equals(AppConstants.JSC_FAMILY)) {
-                dues = AppConstants.MEMBERSHIP_FAMILY_PRICE;
+        for (MembershipResult memberResult : results) {
+            // Handle membership payment by creating form items as needed
+            if (memberResult.isMembershipCreated()) {
+
+                i++;
+                paymentId = memberResult.getPaymentId();
+                if (i == 1) {
+                    ppCart.append("<input type=\"hidden\" name=\"invoice\" value=\""+ paymentId + "\">");
+                }
+                membershipId = memberResult.getMembershipId();
+                membershipType = memberResult.getMembershipType();
+                String season = SessionSkatingClass.calculateSeason();
+                ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"Membership dues for " + season + " season (" + membershipType + ")\">");
+                ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\"" + membershipId +"\">");
+                double dues = 0;
+                if (membershipType.equals(AppConstants.JSC_SINGLE)) {
+                    dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
+                } else if (membershipType.equals(AppConstants.JSC_FAMILY)) {
+                    dues = AppConstants.MEMBERSHIP_FAMILY_PRICE;
+                }
+                ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + dues + "\">");
             }
-            i++;
-            String season = SessionSkatingClass.calculateSeason();
-            ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"Membership dues for " + season + " season (" + membershipType + ")\">");
-            ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\"" + membershipId +"\">");
-            ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + dues + "\">");
         }
-        ppCart.append("<input type=\"hidden\" name=\"discount_amount_cart\" value=\"" + discount + "\">");
-        
+                
         ppCart.append("<input type=\"hidden\" name=\"return\" value=\"" + ClientConstants.getString("CLIENT_PAYPAL_RETURN_URL") + "\">");
         ppCart.append("<input type=\"hidden\" name=\"cancel_return\" value=\"" + ClientConstants.getString("CLIENT_PAYPAL_CANCEL_URL") + "\">");
         ppCart.append("<input type=\"submit\" name=\"Pay Now\" value=\"Complete Payment Now\">");
@@ -418,7 +425,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             if (mt.getTypeName().equals(mtName)) {
                 mtCost = mt.getCost();
                 current = mt;
-                GWT.log("Found: " + mt + " with cost: " + mtCost);
+                GWT.log("Found: " + mtName + " with cost: " + mtCost);
             }
         }
         
@@ -541,9 +548,9 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         totalCostLabel.setText(numfmt.format(totalCost));
     }
 
-    private void createAndShowPaypalForm(RegistrationResults results) {
+    private void createAndShowPaypalForm(ArrayList<MembershipResult> results) {
         double discount = 0;
-        StringBuffer ppCart = createPayPalForm(results, null, discount);
+        StringBuffer ppCart = createPayPalForm(results);
         registerButton.setVisible(false);
         stepLabel.setText(STEP_2);
         memberPanel.setVisible(false);
