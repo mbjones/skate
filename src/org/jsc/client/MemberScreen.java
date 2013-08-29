@@ -55,7 +55,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
     private RadioButton familyMemberRadio;
     private String zero;
     private ArrayList<MembershipType> mtList;
-    private MembershipInfo membershipRequests;
+    private MembershipRequests membershipRequests;
     
     /**
      * Construct the Member view and controller used to display a form for
@@ -69,7 +69,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
 
         numfmt = NumberFormat.getFormat("$#,##0.00");
         zero = numfmt.format(0.00);
-        membershipRequests = new MembershipInfo();
+        membershipRequests = new MembershipRequests();
         totalCost = 0;
         layout();
     }

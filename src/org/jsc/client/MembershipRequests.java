@@ -11,13 +11,13 @@ import java.util.Set;
  * person, so only one request can be made for a given person.
  * @author Matt Jones
  */
-public class MembershipInfo implements Serializable {
+public class MembershipRequests implements Serializable {
     private HashMap<Long, MembershipType> membershipRequests;
     
     /** 
      * Construct a registration results object to be populated with accessors.
      */
-    public MembershipInfo() {
+    public MembershipRequests() {
         membershipRequests = new HashMap<Long, MembershipType>();
     }
 

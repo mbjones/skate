@@ -22,7 +22,7 @@ import javax.servlet.http.HttpSession;
 
 import org.jsc.client.ClientConstants;
 import org.jsc.client.LoginSession;
-import org.jsc.client.MembershipInfo;
+import org.jsc.client.MembershipRequests;
 import org.jsc.client.MembershipResult;
 import org.jsc.client.MembershipType;
 import org.jsc.client.Person;
@@ -462,7 +462,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      */
     public RegistrationResults register(LoginSession loginSession,
             Person person, ArrayList<RosterEntry> newEntryList,
-            boolean createMembership, MembershipInfo memInfo) {
+            boolean createMembership, MembershipRequests memInfo) {
 
         RegistrationResults results = new RegistrationResults();
 
@@ -544,7 +544,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
      * @return an array of the completed RosterEntry instances from the database
      */
     public ArrayList<MembershipResult> createMemberships(LoginSession loginSession,
-            Person person, MembershipInfo memInfo) {
+            Person person, MembershipRequests memInfo) {
         
         // Check credentials
         if (person != null) {
