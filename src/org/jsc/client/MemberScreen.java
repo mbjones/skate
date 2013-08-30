@@ -441,7 +441,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
         } else {
             costLabel.setText(zero);
             totalCost -= mtCost;
-            membershipRequests.remove(pid);
+            membershipRequests.remove(pid, current);
         }
         
         // Update the displayed total

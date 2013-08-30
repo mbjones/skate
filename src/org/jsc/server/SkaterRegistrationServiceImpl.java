@@ -538,7 +538,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
 
     /**
      * Create one or more memberships in the membership table by iterating across
-     * the requests founf in the MembershipInfo parameter.
+     * the requests found in the MembershipInfo parameter.
      * @param person to be used to authenticate the connection
      * @param memInfo fields describing the membership type to be created and list of members to be added
      * @return an array of the completed RosterEntry instances from the database
@@ -565,60 +565,67 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         if (memInfo.size() > 0) {
             // Create the SQL INSERT statement
             String sql = "insert into membership (pid, paymentid, season, payment_amount, membertype) VALUES (?, ?, ?, ?, ?);";
+            String msql = "select mid, pid, paymentid, season, paypal_status, membertype from memberstatus where pid = ? AND season LIKE ?";
 
-            // Execute the INSERT to create the new membership table entry
+            // Execute INSERT to create the new membership table entries
             try {
                 String season = SessionSkatingClass.calculateSeason();
                 
                 Connection con = getConnection();
-                PreparedStatement pstmt = con.prepareStatement(sql);
+                PreparedStatement pstmt1 = con.prepareStatement(sql);
+                PreparedStatement pstmt2 = con.prepareStatement(msql);
                 
-                for (Entry<Long, MembershipType> entry:memInfo.entrySet() ){
-                    MembershipResult mr = new MembershipResult();
-                    mr.setMembershipAttempted(true);
-                    Long pid = entry.getKey();
-                    MembershipType mt = entry.getValue();
-                
-                    pstmt.setLong(1, pid);
-                    pstmt.setLong(2, paymentId);
-                    pstmt.setString(3, season);
-                    pstmt.setDouble(4, mt.getCost());
-                    pstmt.setString(5, mt.getMembershipType());
-                    pstmt.executeUpdate();
-                    pstmt.close();
-    
-                    // Now look up the membershipId that was generated
-                    String msql = "select mid, pid, paymentid, season, paypal_status, membertype from memberstatus where pid = ? AND season LIKE ?";
-                    System.out.println(msql.toString());
-                    pstmt = con.prepareStatement(msql);
-                    pstmt.setLong(1, person.getPid());
-                    pstmt.setString(2, season);
-                    ResultSet rs = pstmt.executeQuery();
-                    if (rs.next()) {
-                        // if we found a matching record, the record was created
-                        mr.setMembershipId(rs.getLong(1));
-                        mr.setMembershipCreated(true);
-                        mr.setPaymentId(paymentId);
-                        mr.setMembershipStatus(rs.getString(5));
-                        mr.setMembershipType(rs.getString(6));
+                for (Entry<Long, ArrayList<MembershipType>> entry : memInfo.entrySet() ) {
+                    
+                    ArrayList<MembershipType> mtList = entry.getValue();
+                    
+                    for (MembershipType mt : mtList) {   
+                        MembershipResult mr = new MembershipResult();
+                        mr.setMembershipAttempted(true);
+                        Long pid = entry.getKey();
+
+                        pstmt1.setLong(1, pid);
+                        pstmt1.setLong(2, paymentId);
+                        pstmt1.setString(3, season);
+                        pstmt1.setDouble(4, mt.getCost());
+                        pstmt1.setString(5, mt.getMembershipType());
+                        pstmt1.executeUpdate();
+
+                        // Now look up the membershipId that was generated
+                        System.out.println(msql.toString());
+                        pstmt2 = con.prepareStatement(msql);
+                        pstmt2.setLong(1, person.getPid());
+                        pstmt2.setString(2, season);
+                        ResultSet rs = pstmt2.executeQuery();
+                        while (rs.next()) {
+                            // if we found a matching record, the record was created
+                            mr.setMembershipId(rs.getLong(1));
+                            mr.setMembershipCreated(true);
+                            mr.setPaymentId(paymentId);
+                            mr.setMembershipStatus(rs.getString(5));
+                            mr.setMembershipType(rs.getString(6));
+                            results.add(mr);
+                        }
                     }
-                    results.add(mr);
                 }
-                pstmt.close();
+                pstmt1.close();
+                pstmt2.close();
                 con.close();
 
             } catch (SQLException ex) {
                 System.err.println("SQLException: " + ex.getMessage());
+                ex.printStackTrace(System.err);
             }
         }
-
         return results;
     }
 
+    /** 
+     * Create an entry in the payments table to represent the transaction,
+     * setting the paypal_status field to incomplete. This field is later
+     * updated using the paypal IPN service when the transaction completes
+     */
     private long createPaymentEntry() {
-        // Create an entry in the payments table to represent the transaction,
-        // setting the paypal_status field to incomplete. This field is later
-        // updated using the paypal IPN service when the transaction completes        
         long paymentId = 0;
 
         Connection con = getConnection();

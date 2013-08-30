@@ -155,6 +155,17 @@ CREATE TABLE membershiptype (
    CONSTRAINT membershiptype_pk PRIMARY KEY (typeName)
 );
 
+-- Populate base membership types
+INSERT INTO membershiptype (typeName, membertype, description, cost) VALUES ('jsc_single', 'SINGLE', 'JSC Individual Member', 20.00);
+INSERT INTO membershiptype (typeName, membertype, description, cost) VALUES ('jsc_fam1', 'FAMILY1', 'JSC Additional Family Member #1', 10.00);
+INSERT INTO membershiptype (typeName, membertype, description, cost) VALUES ('jsc_fam2', 'FAMILY2', 'JSC Additional Family Member #2', 10.00);
+INSERT INTO membershiptype (typeName, membertype, description, cost) VALUES ('jsc_fam3', 'FAMILY3', 'JSC Additional Family Member #3', 10.00);
+INSERT INTO membershiptype (typeName, membertype, description, cost) VALUES ('usfsa_single', 'USFSA', 'USFSA Individual Member', 50.00);
+INSERT INTO membershiptype (typeName, membertype, description, cost) VALUES ('usfsa_fam1', 'USFSA_FAMILY1', 'USFSA Additional Family Member #1', 20.00);
+INSERT INTO membershiptype (typeName, membertype, description, cost) VALUES ('usfsa_fam2', 'USFSA_FAMILY2', 'USFSA Additional Family Member #2', 20.00);
+INSERT INTO membershiptype (typeName, membertype, description, cost) VALUES ('usfsa_fam3', 'USFSA_FAMILY3', 'USFSA Additional Family Member #3', 20.00);
+INSERT INTO membershiptype (typeName, membertype, description, cost) VALUES ('usfsa_latefee', 'USFSA_LATEFEE', 'USFSA Late Fee', 8.00);
+
 -- membership -- table to store the memberships of students each season
 CREATE SEQUENCE membership_id_seq START 50000;
 CREATE TABLE membership (

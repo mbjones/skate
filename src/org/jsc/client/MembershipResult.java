@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Matt Jones
  */
 public class MembershipResult implements Serializable {
-    
+    private static final long serialVersionUID = 1L;
     private boolean membershipAttempted;
     private boolean membershipCreated;
     private String membershipErrorMessage;
