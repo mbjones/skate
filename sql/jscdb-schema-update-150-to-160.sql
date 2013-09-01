@@ -23,6 +23,14 @@ INSERT INTO membershiptype (typeName, membertype, description, cost) VALUES ('us
 INSERT INTO membershiptype (typeName, membertype, description, cost) VALUES ('usfsa_fam2', 'USFSA_FAMILY2', 'USFSA Additional Family Member #2', 20.00);
 INSERT INTO membershiptype (typeName, membertype, description, cost) VALUES ('usfsa_fam3', 'USFSA_FAMILY3', 'USFSA Additional Family Member #3', 20.00);
 INSERT INTO membershiptype (typeName, membertype, description, cost) VALUES ('usfsa_latefee', 'USFSA_LATEFEE', 'USFSA Late Fee', 8.00);
-        
+
+-- memberstatus -- a view of membership reflecting payment status
+DROP VIEW memberstatus;
+CREATE OR REPLACE VIEW memberstatus AS
+ SELECT m.mid, m.pid, m.paymentid, m.season, py.paypal_status, m.payment_amount, m.membertype, p.surname, p.givenname
+   FROM membership m, payment py, people p
+  WHERE m.paymentid = py.paymentid
+    AND m.pid = p.pid;
+    
 -- version -- add a table reflecting the current applicaiton version
 UPDATE version set version='1.6.0' WHERE vid=1;

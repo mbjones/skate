@@ -183,7 +183,7 @@ CREATE TABLE membership (
 
 -- memberstatus -- a view of membership reflecting payment status
 CREATE OR REPLACE VIEW memberstatus AS
- SELECT m.mid, m.pid, m.paymentid, m.season, py.paypal_status, m.membertype, p.surname, p.givenname
+ SELECT m.mid, m.pid, m.paymentid, m.season, py.paypal_status, m.payment_amount, m.membertype, p.surname, p.givenname
    FROM membership m, payment py, people p
   WHERE m.paymentid = py.paymentid
     AND m.pid = p.pid;

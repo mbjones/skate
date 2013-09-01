@@ -351,6 +351,8 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
             GWT.log("No MembershipResult passed into createPaypalForm.");
         }
         
+        GWT.log("Building ppCart for " + results.size() + " memberships...");
+        
         StringBuffer ppCart = new StringBuffer();
         ppCart.append("<form id=\"wizard\" action=\""+ ClientConstants.getString("CLIENT_PAYPAL_URL") + "\" method=\"post\">");
         ppCart.append("<input type=\"hidden\" name=\"cmd\" value=\"_cart\">");
