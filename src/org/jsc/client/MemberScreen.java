@@ -379,13 +379,7 @@ public class MemberScreen extends BaseScreen implements ValueChangeHandler<Boole
                 String season = SessionSkatingClass.calculateSeason();
                 ppCart.append("<input type=\"hidden\" name=\"item_name_" + i + "\" value=\"Membership dues for " + season + " season (" + membershipType + ")\">");
                 ppCart.append("<input type=\"hidden\" name=\"item_number_" + i + "\" value=\"" + membershipId +"\">");
-                double dues = 0;
-                if (membershipType.equals(AppConstants.JSC_SINGLE)) {
-                    dues = AppConstants.MEMBERSHIP_SINGLE_PRICE;
-                } else if (membershipType.equals(AppConstants.JSC_FAMILY)) {
-                    dues = AppConstants.MEMBERSHIP_FAMILY_PRICE;
-                }
-                ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + dues + "\">");
+                ppCart.append("<input type=\"hidden\" name=\"amount_" + i + "\" value=\"" + memberResult.getCost() + "\">");
             }
         }
                 

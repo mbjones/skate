@@ -566,7 +566,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         if (memInfo.size() > 0) {
             // Create the SQL INSERT statement
             String sql = "insert into membership (pid, paymentid, season, payment_amount, membertype) VALUES (?, ?, ?, ?, ?);";
-            String msql = "select mid, pid, paymentid, season, paypal_status, membertype from memberstatus where pid = ? AND season LIKE ? AND membertype LIKE ?";
+            String msql = "select mid, pid, paymentid, season, paypal_status, membertype, payment_amount from memberstatus where pid = ? AND season LIKE ? AND membertype LIKE ?";
 
             // Execute INSERT to create the new membership table entries
             try {
@@ -606,6 +606,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                             mr.setPaymentId(paymentId);
                             mr.setMembershipStatus(rs.getString(5));
                             mr.setMembershipType(rs.getString(6));
+                            mr.setCost(rs.getDouble(7));
                             results.add(mr);
                         }
                     }

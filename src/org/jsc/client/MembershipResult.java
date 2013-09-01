@@ -14,6 +14,7 @@ public class MembershipResult implements Serializable {
     private String membershipErrorMessage;
     private long membershipId;
     private long paymentId;
+    private double cost;
     private String membershipStatus;
     private String membershipType;
     
@@ -56,6 +57,13 @@ public class MembershipResult implements Serializable {
      */
     public long getPaymentId() {
         return paymentId;
+    }
+
+    /**
+     * @return the cost
+     */
+    public double getCost() {
+        return cost;
     }
 
     /**
@@ -107,6 +115,13 @@ public class MembershipResult implements Serializable {
         this.paymentId = paymentId;
     }
 
+    /**
+     * @param cost the cost to set
+     */
+    public void setCost(double cost) {
+        this.cost = cost;
+    }
+    
     /**
      * @param membershipStatus the membershipStatus to set
      */
