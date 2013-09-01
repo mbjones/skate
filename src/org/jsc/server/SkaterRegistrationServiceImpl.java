@@ -562,10 +562,11 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         long paymentId = createPaymentEntry();
 
         // Check if one or more membership entries should be created, and do so
+        System.out.println("Processing membership requests: " + memInfo.size());
         if (memInfo.size() > 0) {
             // Create the SQL INSERT statement
             String sql = "insert into membership (pid, paymentid, season, payment_amount, membertype) VALUES (?, ?, ?, ?, ?);";
-            String msql = "select mid, pid, paymentid, season, paypal_status, membertype from memberstatus where pid = ? AND season LIKE ?";
+            String msql = "select mid, pid, paymentid, season, paypal_status, membertype from memberstatus where pid = ? AND season LIKE ? AND membertype LIKE ?";
 
             // Execute INSERT to create the new membership table entries
             try {
@@ -596,6 +597,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                         pstmt2 = con.prepareStatement(msql);
                         pstmt2.setLong(1, person.getPid());
                         pstmt2.setString(2, season);
+                        pstmt2.setString(3, mt.getMembershipType());
                         ResultSet rs = pstmt2.executeQuery();
                         while (rs.next()) {
                             // if we found a matching record, the record was created
