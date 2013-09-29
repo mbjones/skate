@@ -514,10 +514,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
                 Statement stmt = con.createStatement();
                 StringBuffer rsql = new StringBuffer();
                 rsql.append(ROSTER_QUERY);
-                rsql.append(" WHERE classid = '").append(entry.getClassid())
-                        .append("'");
-                rsql.append(" AND ");
-                rsql.append("pid = '").append(entry.getPid()).append("'");
+                rsql.append(" WHERE rosterid = '").append(newRosterId).append("'");
                 System.out.println(rsql.toString());
 
                 ResultSet rs = stmt.executeQuery(rsql.toString());
