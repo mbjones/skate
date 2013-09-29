@@ -481,6 +481,7 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
         }
 
         long paymentId = createPaymentEntry();
+        results.setPaymentId(paymentId);
 
         // Loop through each of the entries we've been passed, and for each one
         // insert it in the database, look up its rosterid to create a new
@@ -496,12 +497,17 @@ public class SkaterRegistrationServiceImpl extends RemoteServiceServlet
             // Execute the INSERT to create the new roster table entry
             try {
                 Connection con = getConnection();
-                PreparedStatement pstmt = con.prepareStatement(sql);
+                PreparedStatement pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 pstmt.setLong(1, entry.getClassid());
                 pstmt.setLong(2, entry.getPid());
                 pstmt.setLong(3, paymentId);
                 pstmt.setDouble(4, entry.getPayment_amount());
                 pstmt.executeUpdate();
+                ResultSet rsId = pstmt.getGeneratedKeys();
+                long newRosterId = 0;
+                if (rsId.next()) {
+                    newRosterId = rsId.getLong(1);
+                }
                 pstmt.close();
 
                 // query the roster table to find the rosterid that was created
