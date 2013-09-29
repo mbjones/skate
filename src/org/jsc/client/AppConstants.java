@@ -2,7 +2,7 @@ package org.jsc.client;
 
 public class AppConstants {
     // Version of the application
-    public static final String VERSION = "1.6.0";
+    public static final String VERSION = "1.6.1";
     
     // Policy constants
     public static final long MILLISECS_PER_DAY = 24*60*60*1000;
