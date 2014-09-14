@@ -26,7 +26,7 @@ public class MailManager {
     public MailManager() {
         Properties sessionProps = new Properties();
         sessionProps.put("mail.smtp.host", ServerConstants.getString("SMTP_SERVER"));
-        sessionProps.put("mail.smtp.auth", true);
+        sessionProps.put("mail.smtp.auth", (new Boolean(ServerConstants.getString("SMTP_AUTH")).booleanValue()));
 
         session = Session.getInstance(sessionProps);
     }
